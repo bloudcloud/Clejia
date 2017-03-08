@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   minWidth="800"
+			   minHeight="600"
+			   width = "1200"
+			   height = "800"
+			   xmlns:local="*"
+			   backgroundAlpha="0" backgroundColor="0x888888"
+			   addedToStage="application1_creationCompleteHandler(event)" xmlns:core="core.*">
+	<core:CApplication3D id="capplication" width="80%" height="100%" mouseChildren="true"/>
+	<fx:Script>
+		<![CDATA[
+			import L3DLibrary.L3DLibraryWebService;
+			import L3DLibrary.L3DRootNode;
+			
+			import Login.L3DLogin;
+			
+			private var login:L3DLogin = new L3DLogin(); 
+			
+			protected function application1_creationCompleteHandler(event:Event):void {
+				
+				this.systemManager.stage.stageWidth=Capabilities.screenResolutionX;
+				this.systemManager.stage.stageHeight=Capabilities.screenResolutionY - 36;
+				L3DRootNode.instance.addEventListener(Event.COMPLETE, completeHandler);
+				L3DLibraryWebService.SetupWebService();
+				dv.AddItem = capplication.getMaterialInfo;
+			}
+			
+			private function completeHandler(e:Event):void {
+				login.addEventListener(L3DLogin.LOGINCOMPLETE,loginComplete);
+				login.Login("aaa","aaaaaa");
+			}
+			
+			private function loginComplete(e:Event):void{
+				dv.findLejiaValue1 = "产品";
+				dv.findLejiaValue2 = "模型";
+				dv.findChengjiaName = "厨房";
+				dv.SetupPage();
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%"
+			  height="100%"
+			  horizontalAlign="right"
+			  verticalAlign="middle">
+		<local:DecorationView id="dv"/>
+	</s:VGroup>
+</s:Application>
