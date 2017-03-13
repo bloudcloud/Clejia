@@ -1,0 +1,25 @@
+Scene3D.Resource.SetMouseType(0);
+			Command3D.CurrentCommand = Command3D.None;
+			Access3D.CanShowEditBar = false;	
+			Scene3D.CurrentFurniture.ShowBoundBox = false;					
+			Scene3D.CurrentFurniture = null;
+			Access3D.HideAllEditBars();
+				}
+			}
+				}
+			}
+
+
+for(var i:int = Main.m_A3D.m_RenderScene.numChildren - 1; i>=0; i--)
+			{									
+				if( Main.m_A3D.m_RenderScene.getChildAt(i).name == "wall_in" ) 
+				{
+					var mesh:Mesh  =  Main.m_A3D.m_RenderScene.getChildAt(i) as Mesh;
+					if(mesh == null || !mesh.visible || mesh is L3DMesh)
+					{
+						continue;
+					}
+					
+					Wall3D.BuildWallPolyClip(mesh);
+				}
+			}

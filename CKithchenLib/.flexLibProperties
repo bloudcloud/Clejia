@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="interfaces.ICKithenModule"/>
+    <classEntry path="main.CKithenApplication"/>
+    <classEntry path="interfaces.ICKitchenApplication"/>
+    <classEntry path="model.CabinetModel"/>
+    <classEntry path="interfaces.ICFurnitureVO"/>
+    <classEntry path="interfaces.ICFurnitureModel"/>
+    <classEntry path="main.FurnitureInputData"/>
+    <classEntry path="main.FurnitureOutputData"/>
+    <classEntry path="view.CTableBoardView"/>
+    <classEntry path="model.vo.TableBoardVO"/>
+    <classEntry path="model.vo.ShelterVO"/>
+    <classEntry path="view.CBuildFurnitureSet"/>
+    <classEntry path="view.CShelterView"/>
+    <classEntry path="interfaces.IFurnitureProperty"/>
+    <classEntry path="view.CBox"/>
+    <classEntry path="interfaces.IFurnitureSet"/>
+    <classEntry path="model.HangingCabinetModel"/>
+    <classEntry path="model.BaseChainFurnitureModel"/>
+    <classEntry path="model.vo.BaseChainFurnitureVO"/>
+    <classEntry path="interfaces.ICChainFurnitureVO"/>
+    <classEntry path="model.vo.HangingCabinetVO"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
