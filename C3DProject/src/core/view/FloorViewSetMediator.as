@@ -2,9 +2,9 @@ package core.view
 {
 	import a3d.support.Scene3D;
 	
-	import cloud.rl2.BaseMediator;
-	
 	import core.model.GlobalModel;
+	
+	import rl2.mvcs.view.BaseMediator;
 	
 	/**
 	 *  地面可视对象集合中介类
@@ -29,7 +29,7 @@ package core.view
 		override public function initialize():void
 		{
 			super.initialize();
-			floorSet.createFloor(global.isThin,global.roomWidth,global.roomLength,global.roomHeight);
+			floorSet.createFloor(global.isThin,global.roomWidth,global.roomLength,global.floorHeight);
 		}
 	}
 }

@@ -10,16 +10,15 @@ package a3d.support
 	import alternativa.engine3d.objects.WireFrame;
 	import alternativa.engine3d.primitives.Box;
 	
-	import cloud.core.mvcs.view.IRenderAble;
+	import cloud.geometry.threed.Ray;
 	
 	import flash.display.DisplayObjectContainer;
-	import flash.display.Scene;
 	import flash.display.Stage;
 	import flash.display.Stage3D;
 	import flash.events.Event;
 	import flash.geom.Vector3D;
 	
-	import geometry.threed.Ray;
+	import rl2.mvcs.view.IRenderAble;
 	
 	use namespace alternativa3d;
 	

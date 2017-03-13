@@ -32,7 +32,7 @@ package modules.kitchen.view
 			_currentMesh.ShowBoundBox=true;
 		}
 		/**
-		 * 创建一个橱柜 
+		 * 创建一个单柜
 		 * @param mesh
 		 * 
 		 */		
@@ -46,6 +46,23 @@ package modules.kitchen.view
 		 * 
 		 */		
 		public function deleteCabinet():void
+		{
+			removeFurnitureView(_currentMesh);
+		}
+		/**
+		 * 创建一个吊柜 
+		 * @param mesh
+		 * 
+		 */		
+		public function createHangingCabinet(mesh:L3DMesh):void
+		{
+			addFurnitureView(mesh);
+		}
+		/**
+		 * 删除当前吊柜 
+		 * 
+		 */		
+		public function deleteHangingCabinet():void
 		{
 			removeFurnitureView(_currentMesh);
 		}

@@ -17,6 +17,8 @@
 			
 			import Login.L3DLogin;
 			
+			import utils.DatasEvent;
+			
 			private var login:L3DLogin = new L3DLogin(); 
 			
 			protected function application1_creationCompleteHandler(event:Event):void {
@@ -38,6 +40,18 @@
 				dv.findLejiaValue2 = "模型";
 				dv.findChengjiaName = "厨房";
 				dv.SetupPage();
+				
+				createTableBoard.left=20;
+				createTableBoard.bottom=20;
+				createTableBoard.visible=true;
+				createShelter.left=createTableBoard.width+20;
+				createShelter.bottom=20;
+				createShelter.visible=true;
+			}
+			
+			private function createHandler(evt:MouseEvent):void
+			{
+				capplication.dispatchEvent(new DatasEvent((evt.target as Button).id));
 			}
 		]]>
 	</fx:Script>
@@ -47,4 +61,8 @@
 			  verticalAlign="middle">
 		<local:DecorationView id="dv"/>
 	</s:VGroup>
+	<s:Button id="createTableBoard" label="台面" visible="false"
+			  click="createHandler(event)"/>
+	<s:Button id="createShelter" label="挡板" visible="false"
+			  click="createHandler(event)"/>
 </s:Application>

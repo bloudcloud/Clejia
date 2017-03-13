@@ -2,9 +2,11 @@ package core.view
 {
 	import a3d.support.Scene3D;
 	
-	import cloud.rl2.BaseMediator;
-	
 	import core.model.GlobalModel;
+	
+	import model.CabinetModel;
+	
+	import rl2.mvcs.view.BaseMediator;
 	
 	/**
 	 * 墙体可视对象集合中介类
@@ -16,6 +18,8 @@ package core.view
 		public var global:GlobalModel;
 		[Inject]
 		public var scene:Scene3D;
+		[Inject]
+		public var cabinetModel:CabinetModel;
 		
 		public function get wallSet():WallViewSet
 		{
@@ -30,7 +34,11 @@ package core.view
 		override public function initialize():void
 		{
 			super.initialize();
-			wallSet.createWall(global.isThin,global.roomWidth,global.roomLength,global.roomHeight);
+			wallSet.createWall(global.isThin,global.roomWidth,global.roomLength,global.floorHeight);
+			cabinetModel.leftUpWallPos.copyFrom(wallSet.leftUpPos);
+			cabinetModel.rightUpWallPos.copyFrom(wallSet.rightUpPos);
+			cabinetModel.leftDownWallPos.copyFrom(wallSet.leftDownPos);
+			cabinetModel.rightDownWallPos.copyFrom(wallSet.rightDownPos);
 		}
 	}
 }

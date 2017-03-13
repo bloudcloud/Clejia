@@ -15,6 +15,7 @@
       <libraryPathEntry kind="3" linkType="1" path="/CWorldLib/bin/CWorldLib.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="/L3DBuild/bin/L3DBuild.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="/L3DLibrary/bin/L3DLibrary.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/CRL2Lib/bin/CRL2Lib.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>

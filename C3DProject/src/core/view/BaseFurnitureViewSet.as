@@ -4,10 +4,10 @@ package core.view
 	import alternativa.engine3d.core.Resource;
 	import alternativa.engine3d.objects.Mesh;
 	
-	import cloud.core.mvcs.view.IRenderAble;
-	
 	import flash.display.Stage3D;
 	import flash.geom.Vector3D;
+	
+	import rl2.mvcs.view.IRenderAble;
 	
 	/**
 	 *  基础家具视图类

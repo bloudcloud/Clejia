@@ -18,6 +18,12 @@ package core.test
 		public function ButtonPanel()
 		{
 			super();
+			
+//			addEventListener(Event.ADDED_TO_STAGE,onAddToStage);
+		}
+		
+		private function onAddToStage(evt:Event):void
+		{
 			createTableBoard=new Button();
 			createShelter=new Button();
 			
@@ -28,13 +34,6 @@ package core.test
 			
 			this.addChild(createTableBoard);
 			this.addChild(createShelter);
-//			addEventListener(Event.ADDED_TO_STAGE,onAddToStage);
-		}
-		
-		private function onAddToStage(evt:Event):void
-		{
-			
-			
 		}
 	}
 }

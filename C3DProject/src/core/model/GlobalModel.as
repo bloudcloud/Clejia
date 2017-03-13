@@ -8,9 +8,9 @@ package core.model
 	{
 		public var roomWidth:uint = 6000;
 		public var roomLength:uint = 6000;
-		public var roomHeight:uint = 10;
+		public var floorHeight:uint = 10;
 		
-		public var isThin:Boolean=true;
+		public var isThin:Boolean=false;
 		
 		public function GlobalModel()
 		{

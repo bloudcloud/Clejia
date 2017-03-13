@@ -40,7 +40,7 @@ package rl2.extension
 		
 		private function validateView(view:Object):Boolean
 		{
-			if(view is BaseFurnitureViewSet ){
+			if(view is Scene3D || view is BaseFurnitureViewSet ){
 				return true;
 			}else
 				return false;
@@ -66,12 +66,13 @@ package rl2.extension
 			
 			context.configure(KitchenModuleConfig);
 
+			addView(scene3d.view);
 			logger.info("KithenModule->init()");
 		}
 		
 		public function addView(entity:Object):void
 		{
-			if( validateView(entity))
+			if(validateView(entity))
 				mediatorMap.mediate(entity);
 //			else
 //				throw new Error("Not sure what to do with this view type..");

@@ -36,6 +36,8 @@ package core
 		private function initPanel():void
 		{
 			var panel:ButtonPanel=new ButtonPanel();
+			panel.x=100;
+			panel.y=500;
 //			panel.createTableBoard.addEventListener(MouseEvent.CLICK,onCreateTableBoard);
 //			panel.createShelter.addEventListener(MouseEvent.CLICK,onCreateShelter);
 			this.addChild(panel);
@@ -52,7 +54,7 @@ package core
 		{
 			removeEventListener(Event.ADDED_TO_STAGE,onAddToStage);
 			
-			initPanel();
+//			initPanel();
 			initScene3D();
 			
 //			this.addEventListener(EventType.CMD_CREATE_TABLE_BOARD,onTransformEvent);

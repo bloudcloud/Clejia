@@ -6,7 +6,7 @@ package core.service
 	 */
 	import flash.events.IEventDispatcher;
 	
-	import cloud.core.mvcs.service.IService;
+	import rl2.mvcs.service.IService;
 	
 	import robotlegs.bender.framework.api.ILogger;
 	

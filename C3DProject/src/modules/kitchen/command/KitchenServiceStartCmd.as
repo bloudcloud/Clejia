@@ -29,9 +29,6 @@ package modules.kitchen.command
 		{
 			command2DService.start();
 			
-			scene.addChild(new FloorViewSet());
-			scene.addChild(new WallViewSet());
-			scene.addChild(new CabinetViewSet());
 		}
 	}
 }

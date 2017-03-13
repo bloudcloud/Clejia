@@ -5,9 +5,11 @@ package core.view
 	import alternativa.engine3d.primitives.Box;
 	import alternativa.engine3d.primitives.Plane;
 	
-	import cloud.core.utils.CMathUtil;
+	import cloud.geometry.twod.MathUtil;
 	
 	import dic.KitchenGlobalDic;
+	
+	import flash.geom.Vector3D;
 
 	/**
 	 *  墙体可视对象集合类
@@ -18,6 +20,22 @@ package core.view
 		private var _fwall:Mesh;
 		private var _lwall:Mesh;
 		private var _rwall:Mesh;
+		/**
+		 * 顶部左上角位置 
+		 */		
+		public var leftUpPos:Vector3D=new Vector3D();
+		/**
+		 * 顶部左下角位置
+		 */		
+		public var leftDownPos:Vector3D=new Vector3D();
+		/**
+		 * 顶部右上角位置 
+		 */		
+		public var rightUpPos:Vector3D=new Vector3D();
+		/**
+		 * 顶部右下角位置 
+		 */		
+		public var rightDownPos:Vector3D=new Vector3D();
 		
 		public function WallViewSet()
 		{
@@ -40,9 +58,9 @@ package core.view
 				_lwall=new Box(width,length,height);
 				_rwall=new Box(width,length,height);
 			}
-			_fwall.rotationX=CMathUtil.DEGREES_TO_RADIANS*90;
-			_lwall.rotationY=CMathUtil.DEGREES_TO_RADIANS*90;
-			_rwall.rotationY=-CMathUtil.DEGREES_TO_RADIANS*90;
+			_fwall.rotationX=MathUtil.toRadians(90);
+			_lwall.rotationY=MathUtil.toRadians(90);
+			_rwall.rotationY=MathUtil.toRadians(-90);
 			_fwall.userData=KitchenGlobalDic.DIR_BACK;
 			_lwall.userData=KitchenGlobalDic.DIR_RIGHT;
 			_rwall.userData=KitchenGlobalDic.DIR_LEFT;
@@ -58,6 +76,11 @@ package core.view
 			addFurnitureView(_fwall);
 			addFurnitureView(_lwall);
 			addFurnitureView(_rwall);
+			
+			leftUpPos.setTo(-length>>1,width>>1,width>>1);
+			rightUpPos.setTo(length>>1,width>>1,width>>1);
+			leftDownPos.setTo(-length>>1,-width>>1,width>>1);
+			rightDownPos.setTo(length>>1,-width>>1,width>>1);
 		}
 
 	}

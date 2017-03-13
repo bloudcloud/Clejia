@@ -6,6 +6,8 @@ package modules.kitchen.service
 	
 	import core.service.BaseService;
 	
+	import dic.KitchenGlobalDic;
+	
 	import dict.EventTypeDict;
 	
 	import flash.events.Event;
@@ -40,10 +42,13 @@ package modules.kitchen.service
 		}
 		private function onLoadComplete(evt:Event):void
 		{
-			switch(_loader.mesh.family)
+			switch(_loader.mesh.catalog)
 			{
-				case "单柜":
+				case KitchenGlobalDic.MESHTYPE_CABINET:
 					dispatcher.dispatchEvent(new DatasEvent(EventTypeDict.CMD_CREATE_CABINET,_loader.mesh));
+					break;
+				case KitchenGlobalDic.MESHTYPE_HANGING_CABINET:
+					dispatcher.dispatchEvent(new DatasEvent(EventTypeDict.CMD_CREATE_HANGING_CABINET,_loader.mesh));
 					break;
 				default:
 					throw new Error(String("未知类型，无法识别！"+_loader.mesh.family));
