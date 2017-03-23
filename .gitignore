@@ -1,13 +1,10 @@
 /bin-debug
 /bin-release
 /html-template
-/libs
 /bin
 /git-stats
 /.metadata
-/.settings
 /.svn
-/assets
 
 */bin-debug
 */bin-release
