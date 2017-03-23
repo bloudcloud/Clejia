@@ -32,7 +32,7 @@
 			
 			private function completeHandler(e:Event):void {
 				login.addEventListener(L3DLogin.LOGINCOMPLETE,loginComplete);
-				login.Login("aaa","aaaaaa");
+				login.Login("ZHS","000000");
 			}
 			
 			private function loginComplete(e:Event):void{

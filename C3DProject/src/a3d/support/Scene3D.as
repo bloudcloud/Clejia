@@ -10,7 +10,7 @@ package a3d.support
 	import alternativa.engine3d.objects.WireFrame;
 	import alternativa.engine3d.primitives.Box;
 	
-	import cloud.geometry.threed.Ray;
+	import cloud.core.utils.Ray3D;
 	
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Stage;
@@ -33,7 +33,7 @@ package a3d.support
 			return _stage3D;
 		}
 
-		private var _mouseRay:Ray;
+		private var _mouseRay:Ray3D;
 		private var _zFactor:Number;
 		private var camera:Camera3D;
 		
@@ -50,7 +50,7 @@ package a3d.support
 			_container = container;
 			_stage=stage;
 			_stage3D=stage.stage3Ds[0];
-			_mouseRay = new Ray();
+			_mouseRay = new Ray3D();
 			
 			releaseContext3DOnClose = _stage3D!=null ? false:true;
 			
@@ -180,7 +180,7 @@ package a3d.support
 		 * @param viewY
 		 * 
 		 */		
-		public function calculateMouseRay(ray:Ray,viewX:Number,viewY:Number):void
+		public function calculateMouseRay(ray:Ray3D,viewX:Number,viewY:Number):void
 		{
 			camera.calculateRay(ray.originPos,ray.direction,viewX,viewY);
 		}

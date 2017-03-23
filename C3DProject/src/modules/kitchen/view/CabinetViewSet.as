@@ -1,11 +1,12 @@
 package modules.kitchen.view
 {
-	import alternativa.engine3d.core.events.MouseEvent3D;
+	import flash.geom.Vector3D;
+	
 	import alternativa.engine3d.objects.Mesh;
 	
-	import core.view.BaseFurnitureViewSet;
+	import cloud.core.utils.MathUtil;
 	
-	import flash.geom.Vector3D;
+	import core.view.BaseFurnitureViewSet;
 	
 	/**
 	 *  单柜可视对象集合类
@@ -15,6 +16,10 @@ package modules.kitchen.view
 	{
 		private var _currentMesh:L3DMesh;
 		
+		public function get meshes():Vector.<Mesh>
+		{
+			return _meshes;
+		}
 		public function CabinetViewSet()
 		{
 			super();
@@ -71,8 +76,9 @@ package modules.kitchen.view
 		 * @param pos
 		 * 
 		 */		
-		public function updateCurrentPos(pos:Vector3D):void
+		public function updateCurrent(direction:int,pos:Vector3D):void
 		{
+			_currentMesh.rotationZ=MathUtil.toRadians(direction);
 			_currentMesh.x=pos.x;
 			_currentMesh.y=pos.y;
 			_currentMesh.z=pos.z;
@@ -87,32 +93,55 @@ package modules.kitchen.view
 		 */		
 		public function fixPos(pos:Vector3D,roomLength:uint,roomWidth:uint,roomHeight:uint):void
 		{
-			var disX:uint = roomLength-_currentMesh.Length>>1;
-			var disY:uint = roomWidth-_currentMesh.Width>>1;
-			var disZ:uint = roomHeight-_currentMesh.Height>>1;
+			var disX:uint = (roomLength-_currentMesh.Length)*.5;
+			var disY:uint = (roomWidth-_currentMesh.Length)*.5;
+			var disZ:uint = roomHeight-_currentMesh.Height*.5;
 			if(pos.x>disX)
+			{
+				_currentMesh.rotationZ=MathUtil.toRadians(-90);
 				pos.x=disX;
+			}
 			else if(pos.x<-disX)
+			{
+				_currentMesh.rotationZ=MathUtil.toRadians(90);
 				pos.x=-disX;
+			}
 			if(pos.y>disY)
+			{
+				_currentMesh.rotationZ=MathUtil.toRadians(0);
 				pos.y=disY;
+			}
 			else if(pos.y<-disY)
+			{
+				_currentMesh.rotationZ=MathUtil.toRadians(180);
 				pos.y=-disY;
+			}
 			if(pos.z>disZ)
 				pos.z=disZ;
 			else if(pos.z<-disZ)
 				pos.z=-disZ;
 		}
+		public function get currentRotation():Number
+		{
+			return MathUtil.toDegrees(_currentMesh.rotationZ);
+		}
 		/**
-		 * 获取当前橱柜的唯一id 
+		 * 获取当前家具模型的唯一id 
 		 * @return String
 		 * 
 		 */		
-		public function getCurrentMeshID():String
+		public function get currentMeshID():String
 		{
-			if(_currentMesh)
-				return _currentMesh.UniqueID;
-			return null;
+			return _currentMesh?_currentMesh.UniqueID:null;
+		}
+		/**
+		 * 获取当前家具模型的类型 
+		 * @return 
+		 * 
+		 */		
+		public function get currentMeshType():int
+		{
+			return _currentMesh?_currentMesh.catalog:-1;
 		}
 	}
 }

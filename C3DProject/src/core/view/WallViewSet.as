@@ -1,15 +1,13 @@
 package core.view
 {
+	import flash.geom.Vector3D;
+	
 	import alternativa.engine3d.materials.FillMaterial;
 	import alternativa.engine3d.objects.Mesh;
 	import alternativa.engine3d.primitives.Box;
 	import alternativa.engine3d.primitives.Plane;
 	
-	import cloud.geometry.twod.MathUtil;
-	
-	import dic.KitchenGlobalDic;
-	
-	import flash.geom.Vector3D;
+	import cloud.core.utils.MathUtil;
 
 	/**
 	 *  墙体可视对象集合类
@@ -61,9 +59,9 @@ package core.view
 			_fwall.rotationX=MathUtil.toRadians(90);
 			_lwall.rotationY=MathUtil.toRadians(90);
 			_rwall.rotationY=MathUtil.toRadians(-90);
-			_fwall.userData=KitchenGlobalDic.DIR_BACK;
-			_lwall.userData=KitchenGlobalDic.DIR_RIGHT;
-			_rwall.userData=KitchenGlobalDic.DIR_LEFT;
+//			_fwall.userData=KitchenGlobalDic.DIR_BACK;
+//			_lwall.userData=KitchenGlobalDic.DIR_RIGHT;
+//			_rwall.userData=KitchenGlobalDic.DIR_LEFT;
 			_fwall.setMaterialToAllSurfaces(material);
 			_lwall.setMaterialToAllSurfaces(material);
 			_rwall.setMaterialToAllSurfaces(material);

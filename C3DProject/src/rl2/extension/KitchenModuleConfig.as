@@ -1,5 +1,8 @@
 package rl2.extension
 {
+	import flash.events.Event;
+	import flash.events.IEventDispatcher;
+	
 	import alternativa.engine3d.core.View;
 	
 	import core.view.FloorViewSet;
@@ -8,11 +11,10 @@ package rl2.extension
 	import core.view.WallViewSet;
 	import core.view.WallViewSetMediator;
 	
-	import flash.events.Event;
-	import flash.events.IEventDispatcher;
-	
 	import model.CabinetModel;
+	import model.CabinetModel2;
 	import model.HangingCabinetModel;
+	import model.KitchenPartModel;
 	
 	import modules.kitchen.command.KitchenServiceStartCmd;
 	import modules.kitchen.service.Command2DService;
@@ -47,7 +49,9 @@ package rl2.extension
 		{
 			//数据模型
 			context.injector.map(CabinetModel).asSingleton();
+			context.injector.map(CabinetModel2).asSingleton();
 			context.injector.map(HangingCabinetModel).asSingleton();
+			context.injector.map(KitchenPartModel).asSingleton();
 			//视图
 			mediatorMap.map(View).toMediator(Scene3DMediator);
 			mediatorMap.map(FloorViewSet).toMediator(FloorViewSetMediator);

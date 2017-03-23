@@ -6,11 +6,7 @@ package modules.kitchen.command
 	 */
 	import a3d.support.Scene3D;
 	
-	import core.view.FloorViewSet;
-	import core.view.WallViewSet;
-	
 	import modules.kitchen.service.Command2DService;
-	import modules.kitchen.view.CabinetViewSet;
 	
 	import robotlegs.bender.extensions.commandCenter.api.ICommand;
 	

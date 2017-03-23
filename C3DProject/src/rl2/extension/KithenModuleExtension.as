@@ -2,12 +2,10 @@ package rl2.extension
 {
 	import a3d.support.Scene3D;
 	
-	import l3dbuild.geometry.L3DLoadHelper;
-	
 	import robotlegs.bender.extensions.matching.instanceOfType;
 	import robotlegs.bender.framework.api.IContext;
 	import robotlegs.bender.framework.api.IExtension;
-	
+
 	/**
 	 *  
 	 * @author cloud

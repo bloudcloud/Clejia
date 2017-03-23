@@ -1,16 +1,14 @@
 package modules.kitchen.service
 {
+	import flash.events.Event;
+	
 	import L3DLibrary.L3DMaterialInformations;
 	
 	import a3d.support.Scene3D;
 	
 	import core.service.BaseService;
 	
-	import dic.KitchenGlobalDic;
-	
 	import dict.EventTypeDict;
-	
-	import flash.events.Event;
 	
 	import l3dbuild.geometry.L3DLoadHelper;
 	
@@ -42,19 +40,8 @@ package modules.kitchen.service
 		}
 		private function onLoadComplete(evt:Event):void
 		{
-			switch(_loader.mesh.catalog)
-			{
-				case KitchenGlobalDic.MESHTYPE_CABINET:
-					dispatcher.dispatchEvent(new DatasEvent(EventTypeDict.CMD_CREATE_CABINET,_loader.mesh));
-					break;
-				case KitchenGlobalDic.MESHTYPE_HANGING_CABINET:
-					dispatcher.dispatchEvent(new DatasEvent(EventTypeDict.CMD_CREATE_HANGING_CABINET,_loader.mesh));
-					break;
-				default:
-					throw new Error(String("未知类型，无法识别！"+_loader.mesh.family));
-					break;
-			}
-			
+			if(dispatcher.hasEventListener(EventTypeDict.CMD_CREATE_KICHENPART))
+				dispatcher.dispatchEvent(new DatasEvent(EventTypeDict.CMD_CREATE_KICHENPART,_loader.mesh));
 		}
 		override protected function addListener():void
 		{

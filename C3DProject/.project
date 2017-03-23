@@ -15,4 +15,10 @@
 		<nature>com.adobe.flexbuilder.project.flexnature</nature>
 		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>CLOUDLIBS</name>
+			<value>file:/F:/work/git/kitchen_lejia/selfLibs</value>
+		</variable>
+	</variableList>
 </projectDescription>

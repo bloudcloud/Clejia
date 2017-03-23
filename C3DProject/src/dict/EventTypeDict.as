@@ -14,7 +14,7 @@ package dict
 		public static const CMD_CREATE_TABLE_BOARD:String = "createTableBoard";
 		public static const CMD_CREATE_HANGING_CABINET:String = "createHangingCabinet";
 		public static const CMD_CREATE_SHELTER:String = "createShelter";	
-		
+		public static const CMD_CREATE_KICHENPART:String = "createKitchenPart";
 		public static const MOUSE_DOWN:String = "mouseDown";
 		public static const MOUSE_UP:String = "mouseUp";
 		public static const MOUSE_MOVE:String = "mouseMove";
