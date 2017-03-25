@@ -61,7 +61,7 @@ package a3d.support
 			
 			controller = new SimpleObjectController(stage, camera, 5000, 0.5,0.5);
 			controller.stopMouseLook();
-			controller.setObjectPosXYZ(0,-500,0);
+			controller.setObjectPosXYZ(-1000,-2000,1000);
 			controller.lookAtXYZ(0,0,0);
 			
 			container.addChild(view);

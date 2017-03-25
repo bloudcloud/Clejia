@@ -16,6 +16,7 @@ package core.view
 	public class WallViewSet extends BaseFurnitureViewSet
 	{
 		private var _fwall:Mesh;
+		private var _bwall:Mesh;
 		private var _lwall:Mesh;
 		private var _rwall:Mesh;
 		/**
@@ -49,31 +50,37 @@ package core.view
 				_fwall=new Plane(width,length,1,1,false);
 				_lwall=new Plane(width,length,1,1,false);
 				_rwall=new Plane(width,length,1,1,false);
+				_bwall=new Plane(width,length,1,1,false);
 			}
 			else
 			{
 				_fwall=new Box(width,length,height);
 				_lwall=new Box(width,length,height);
 				_rwall=new Box(width,length,height);
+				_bwall=new Box(width,length,height);
 			}
 			_fwall.rotationX=MathUtil.toRadians(90);
 			_lwall.rotationY=MathUtil.toRadians(90);
 			_rwall.rotationY=MathUtil.toRadians(-90);
+			_bwall.rotationX=MathUtil.toRadians(-90);
 //			_fwall.userData=KitchenGlobalDic.DIR_BACK;
 //			_lwall.userData=KitchenGlobalDic.DIR_RIGHT;
 //			_rwall.userData=KitchenGlobalDic.DIR_LEFT;
 			_fwall.setMaterialToAllSurfaces(material);
 			_lwall.setMaterialToAllSurfaces(material);
 			_rwall.setMaterialToAllSurfaces(material);
+			_bwall.setMaterialToAllSurfaces(material);
 //			_fwall.x=0;
 			_fwall.y=width>>1;
 			_lwall.x=-length>>1;
 //			_lwall.y=0;
 			_rwall.x=length>>1;
 //			_rwall.y=0;
+			_bwall.y=-width>>1;
 			addFurnitureView(_fwall);
 			addFurnitureView(_lwall);
 			addFurnitureView(_rwall);
+			addFurnitureView(_bwall);
 			
 			leftUpPos.setTo(-length>>1,width>>1,width>>1);
 			rightUpPos.setTo(length>>1,width>>1,width>>1);

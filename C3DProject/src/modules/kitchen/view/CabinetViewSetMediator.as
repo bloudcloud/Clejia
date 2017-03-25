@@ -8,7 +8,8 @@ package modules.kitchen.view
 	import alternativa.engine3d.core.events.MouseEvent3D;
 	import alternativa.engine3d.primitives.Plane;
 	
-	import cloud.core.interfaces.IC3DObjectData;
+	import cloud.core.interfaces.ICData;
+	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.utils.Geometry3DUtil;
 	import cloud.core.utils.MathUtil;
 	import cloud.core.utils.Vector3DUtil;
@@ -17,16 +18,12 @@ package modules.kitchen.view
 	
 	import dict.EventTypeDict;
 	
-	import model.BaseFurnitureSetModel;
-	import model.CabinetModel;
-	import model.CabinetModel2;
-	import model.HangingCabinetModel;
-	import model.KitchenGlobalModel;
-	import model.KitchenPartModel;
-	import model.vo.ShelterVO;
-	import model.vo.TableBoardVO;
+	import interfaces.ICFurnitureModel;
 	
-	import ns.cloud_kitchen;
+	import model.CabinetModel;
+	import model.KitchenGlobalModel;
+	
+	import ns.cloudLib;
 	
 	import rl2.mvcs.view.BaseMediator;
 	
@@ -36,7 +33,7 @@ package modules.kitchen.view
 	import view.CShelterView;
 	import view.CTableBoardView;
 	
-	use namespace cloud_kitchen;
+	use namespace cloudLib;
 	/**
 	 *  单柜可视对象集合中介类
 	 * @author cloud
@@ -47,12 +44,6 @@ package modules.kitchen.view
 		public var globalModel:GlobalModel;
 		[Inject]
 		public var cabinetModel:CabinetModel;
-		[Inject]
-		public var cabinetModel2:CabinetModel2;
-		[Inject]
-		public var hangingCabinetModel:HangingCabinetModel;
-		[Inject]
-		public var kitchenPartModel:KitchenPartModel;
 		[Inject]
 		public var scene:Scene3D;
 
@@ -72,16 +63,14 @@ package modules.kitchen.view
 			_intersectPos=new Vector3D();
 			_shelterPlanes=new Vector.<Plane>();
 		}
-		private function getModel():BaseFurnitureSetModel
+		private function getModel():ICFurnitureModel
 		{
 			switch(cabinetSet.currentMeshType)
 			{
 				case KitchenGlobalModel.instance.MESHTYPE_CABINET:
-					return cabinetModel;
 				case KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET:
-					return hangingCabinetModel;
 				case KitchenGlobalModel.instance.MESHTYPE_SINK:
-					return kitchenPartModel;
+					return cabinetModel;
 				default:
 					return null;
 			}
@@ -94,7 +83,7 @@ package modules.kitchen.view
 			scene.controller.disable();
 			var mesh:L3DMesh=evt.currentTarget as L3DMesh;
 			cabinetSet.setSelected(mesh);
-			cabinetModel2.excuteMouseDown(mesh.UniqueID,KitchenGlobalModel.instance.DIR_FRONT);
+			cabinetModel.excuteMouseDown(mesh.UniqueID,KitchenGlobalModel.instance.DIR_FRONT);
 		}
 		
 		private function onMouseMove(evt:MouseEvent):void
@@ -102,36 +91,37 @@ package modules.kitchen.view
 			scene.calculateMouseRay(Vector3DUtil.RAY_3D,evt.localX,evt.localY);
 			Geometry3DUtil.intersectPlaneByRay(Vector3DUtil.RAY_3D,Vector3DUtil.ZERO,Vector3DUtil.AXIS_Z,_intersectPos);
 			cabinetSet.fixPos(_intersectPos,globalModel.roomLength,globalModel.roomWidth,globalModel.floorHeight);
-//			if(getModel().excuteMove(cabinetSet.currentMeshID,KitchenGlobalModel.instance.DIR_FRONT,_intersectPos))
-//			{
-//				//发生吸附，停止移动
-//				onMouseUp(evt);
-//			}
-			var vos:Vector.<IC3DObjectData>=cabinetModel2.excuteMove(cabinetSet.currentRotation,_intersectPos)
+			var vos:Vector.<ICData>=cabinetModel.excuteMove(cabinetSet.currentRotation,_intersectPos)
 			if(vos)
 			{
 				updateMeshPosition(vos);
-				onMouseUp(evt);
+				scene.view.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
+				scene.view.removeEventListener(MouseEvent.MOUSE_UP,onMouseUp);
+				scene.controller.enable();
+				cabinetModel.excuteEnd();
+//				onMouseUp(evt);
 			}
 			else
 			{
 				cabinetSet.updateCurrent(cabinetSet.currentRotation,_intersectPos);
 			}
+			
 		}
 		private function onMouseUp(evt:MouseEvent):void
 		{
 			scene.view.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
 			scene.view.removeEventListener(MouseEvent.MOUSE_UP,onMouseUp);
 			scene.controller.enable();
-			var vos:Vector.<IC3DObjectData>=cabinetModel2.excuteMouseUp();
+			var vos:Vector.<ICData>=cabinetModel.excuteMouseUp();
 			if(vos)
 			{
 				updateMeshPosition(vos);
+				cabinetModel.excuteEnd();
 			}
 		}
-		private function updateMeshPosition(vos:Vector.<IC3DObjectData>):void
+		private function updateMeshPosition(vos:Vector.<ICData>):void
 		{
-			for each(var vo:IC3DObjectData in vos)
+			for each(var vo:ICObject3DData in vos)
 			{
 				for each(var mesh:L3DMesh in cabinetSet.meshes)
 				{
@@ -150,34 +140,14 @@ package modules.kitchen.view
 		 * @param evt
 		 * 
 		 */		
-		private function onCreateCabinet(evt:DatasEvent):void
+		private function onCreateKitchenFurniture(evt:DatasEvent):void
 		{
 			var mesh:L3DMesh = evt.data as L3DMesh;
 			mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
 			cabinetSet.createCabinet(mesh);
-			cabinetModel.createCabinetVO(mesh.UniqueID,mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
+			cabinetModel.createFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ),mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
 		}
-		private function onCreateHangingCabinet(evt:DatasEvent):void
-		{
-			var mesh:L3DMesh = evt.data as L3DMesh;
-			mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
-			cabinetSet.createHangingCabinet(mesh);
-			hangingCabinetModel.createHangingCabinet(mesh.UniqueID,mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
-		}
-		private function onCreateKitchenPart(evt:DatasEvent):void
-		{
-//			if(_tableBoard)
-//			{
-//				var mesh:L3DMesh = evt.data as L3DMesh;
-//				mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
-//				cabinetSet.addFurnitureView(mesh);
-//				kitchenPartModel.createKitchenPart(mesh.UniqueID,mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
-//			}
-			var mesh:L3DMesh=evt.data as L3DMesh;
-			mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
-			cabinetSet.addFurnitureView(mesh);
-			cabinetModel2.createFurnitureVo(mesh.UniqueID,KitchenGlobalModel.instance.DIR_FRONT,mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
-		}
+		
 		/**
 		 * 创建台面 
 		 * @param evt
@@ -185,37 +155,37 @@ package modules.kitchen.view
 		 */		
 		private function onCreateTableBoard(evt:DatasEvent):void
 		{
-			if(cabinetModel.datas.length==0) return;
-			if(_tableBoard)
-			{
-				deleteTableBoard();
-			}
-			else
-			{
-				createTableBoard();
-			}
+//			if(cabinetModel.datas.length==0) return;
+//			if(_tableBoard)
+//			{
+//				deleteTableBoard();
+//			}
+//			else
+//			{
+//				createTableBoard();
+//			}
 		}
 		private function deleteTableBoard():void
 		{
-			cabinetModel.deleteTableBoardVOs(_tableBoard.furnitureVos);
-			cabinetSet.removeFurnitureView(_tableBoard);
-			_tableBoard.dispose();
-			_tableBoard=null;
+//			cabinetModel.deleteTableBoardVOs(_tableBoard.furnitureVos);
+//			cabinetSet.removeFurnitureView(_tableBoard);
+//			_tableBoard.dispose();
+//			_tableBoard=null;
 		}
 		private function createTableBoard():void
 		{
-			_tableBoard=new CTableBoardView();
-			var vo:TableBoardVO=cabinetModel.createTableBoardVO(cabinetModel.length,cabinetModel.width,KitchenGlobalModel.instance.TABLEBOARD_HEIGHT,cabinetModel.combinePos);
-			_tableBoard.createTableBoardMesh(vo);
-			var mesh:CBox=_tableBoard.getChildAt(0) as CBox;
-			mesh.scaleX=10;
-			mesh.scaleY=10;
-			mesh.scaleZ=10;
-			cabinetSet.addFurnitureView(_tableBoard);
-			
-			var l3dmodel:L3DModel=new L3DModel();
-			l3dmodel.Import(_tableBoard,false,true);
-			var l3dmesh:L3DMesh=l3dmodel.Export(scene.stage3D);
+//			_tableBoard=new CTableBoardView();
+//			var vo:TableBoardVO=cabinetModel.createTableBoardVO(cabinetModel.length,cabinetModel.width,KitchenGlobalModel.instance.TABLEBOARD_HEIGHT,cabinetModel.combinePos);
+//			_tableBoard.createTableBoardMesh(vo);
+//			var mesh:CBox=_tableBoard.getChildAt(0) as CBox;
+//			mesh.scaleX=10;
+//			mesh.scaleY=10;
+//			mesh.scaleZ=10;
+//			cabinetSet.addFurnitureView(_tableBoard);
+//			
+//			var l3dmodel:L3DModel=new L3DModel();
+//			l3dmodel.Import(_tableBoard,false,true);
+//			var l3dmesh:L3DMesh=l3dmodel.Export(scene.stage3D);
 		}
 		/**
 		 * 创建挡板 
@@ -224,52 +194,52 @@ package modules.kitchen.view
 		 */		
 		private function onCreateShelter(evt:DatasEvent):void
 		{
-			if(cabinetModel.datas.length==0) return;
-			if(_shelter)
-			{
-				deleteShelter();
-			}
-			else
-			{
-				createShelter();
-			}
+//			if(cabinetModel.datas.length==0) return;
+//			if(_shelter)
+//			{
+//				deleteShelter();
+//			}
+//			else
+//			{
+//				createShelter();
+//			}
 		}
 		private function deleteShelter():void
 		{
-			cabinetModel.deleteShelterVOs(_shelter.furnitureVos);
-			cabinetSet.removeFurnitureView(_shelter);
-			_shelter.dispose();
-			_shelter=null;
+//			cabinetModel.deleteShelterVOs(_shelter.furnitureVos);
+//			cabinetSet.removeFurnitureView(_shelter);
+//			_shelter.dispose();
+//			_shelter=null;
 		}
 		private function createShelter():void
 		{
-			var vos:Vector.<ShelterVO>=cabinetModel.createShelterVOs();
-			_shelter=new CShelterView();
-			_shelter.createShelter(vos);
-			var child:CBox;
-			for(var i:int=0; i<_shelter.numChildren; i++)
-			{
-				child=_shelter.getChildAt(i) as CBox;
-				child.scaleX=10;
-				child.scaleY=10;
-				child.scaleZ=10;
-			}
-			cabinetSet.addFurnitureView(_shelter);
+//			var vos:Vector.<ShelterVO>=cabinetModel.createShelterVOs();
+//			_shelter=new CShelterView();
+//			_shelter.createShelter(vos);
+//			var child:CBox;
+//			for(var i:int=0; i<_shelter.numChildren; i++)
+//			{
+//				child=_shelter.getChildAt(i) as CBox;
+//				child.scaleX=10;
+//				child.scaleY=10;
+//				child.scaleZ=10;
+//			}
+//			cabinetSet.addFurnitureView(_shelter);
 		}
 
 		override protected function addListener():void
 		{
-			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_CABINET,onCreateCabinet);
-			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_HANGING_CABINET,onCreateHangingCabinet);
-			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_KICHENPART,onCreateKitchenPart);
+			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_CABINET,onCreateKitchenFurniture);
+			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_HANGING_CABINET,onCreateKitchenFurniture);
+			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_KICHENPART,onCreateKitchenFurniture);
 			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_TABLE_BOARD,onCreateTableBoard);
 			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_SHELTER,onCreateShelter);
 		}
 		override protected function removeListener():void
 		{
-			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_CABINET,onCreateCabinet);
-			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_HANGING_CABINET,onCreateHangingCabinet);
-			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_KICHENPART,onCreateKitchenPart);
+			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_CABINET,onCreateKitchenFurniture);
+			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_HANGING_CABINET,onCreateKitchenFurniture);
+			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_KICHENPART,onCreateKitchenFurniture);
 			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_TABLE_BOARD,onCreateTableBoard);
 			dispatcher.removeEventListener(EventTypeDict.CMD_CREATE_SHELTER,onCreateShelter);
 		}

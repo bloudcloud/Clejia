@@ -45,7 +45,7 @@ package core
 		private function initScene3D():void
 		{
 			scene=new Scene3D(this,stage);
-			scene.controller.setObjectPosXYZ(0,-2500,1000);
+			scene.controller.setObjectPosXYZ(-3000,-3000,4000);
 			scene.controller.lookAtXYZ(0,0,0);
 			scene.ground.visible=false;
 		}
