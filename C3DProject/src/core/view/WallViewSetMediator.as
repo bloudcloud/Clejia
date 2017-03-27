@@ -39,10 +39,6 @@ package core.view
 		{
 			super.initialize();
 			wallSet.createWall(global.isThin,global.roomWidth,global.roomLength,global.floorHeight);
-//			cabinetModel.topLeftWallPos.copyFrom(wallSet.leftUpPos);
-//			cabinetModel.rightUpWallPos.copyFrom(wallSet.rightUpPos);
-//			cabinetModel.leftDownWallPos.copyFrom(wallSet.leftDownPos);
-//			cabinetModel.bottomRigthWallPos.copyFrom(wallSet.rightDownPos);
 			KitchenGlobalModel.instance.leftTopWallPos=wallSet.leftUpPos;
 			KitchenGlobalModel.instance.rightTopWallPos=wallSet.rightUpPos;
 			KitchenGlobalModel.instance.leftBottomWallPos=wallSet.leftDownPos;

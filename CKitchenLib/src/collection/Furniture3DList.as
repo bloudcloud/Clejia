@@ -22,10 +22,6 @@ package collection
 		private var _invalidFix:Boolean;
 		private var _invalidPosition:Boolean;
 		private var _canSorption:Boolean;
-//		private var _direction:int;
-//		private var _length:Number=0;
-//		private var _width:Number=0;
-//		private var _height:Number=0;
 		private var _lastWidth:Number=0;
 		private var _lastHeight:Number=0;
 		//一段节点的长度
@@ -93,57 +89,40 @@ package collection
 			listVo.direction=direction;
 		}
 		/**
-		 * map回调函数，计算一段链表中的节点总长度，返回值为true就中断遍历 
+		 * map回调函数，计算一段链表中的节点总长度
 		 * @param node	当前的节点
-		 * @param isNext	遍历顺序是否向下
-		 * @return Boolean
 		 * 
 		 */		
-		private function doCalculateLength(node:FurnitureNode,isNext:Boolean):Boolean
+		private function doCalculateLength(nodeData:ICData):void
 		{
-			_tmpLength+=node.furnitureVo.length;
-			return false;
+			_tmpLength+=(nodeData as CFurnitureVO).length;
 		}
 		private function doUpdateNodeSize(vo:CFurnitureVO):void
 		{
 			listVo.length+=vo.length;
 			if(_lastWidth<vo.width) 
 			{
-//				_invalidFix=true;
 				_lastWidth=vo.width;
 			}
 			if(_lastHeight<vo.height) _lastHeight=vo.height;
 		}
-		private function doFixPosition(vo:CFurnitureVO):void
+		/**
+		 * 修正某一家具节点数据 
+		 * @param vo
+		 * 
+		 */		
+		private function doFixNodePosition(vo:ICData):void
 		{
-			if(KitchenGlobalModel.instance.fixPostion(vo,this) && _changedVos.indexOf(vo)<0)
-				_changedVos.push(vo);
+			KitchenGlobalModel.instance.fixPostion(vo,this);
 		}
-		private function doUpdatePosition(node:FurnitureNode,isNext:Boolean):Boolean
-		{
-			var otherNode:FurnitureNode=isNext ? node.prev as FurnitureNode : node.next as FurnitureNode;
-			
-			if(node==null)
-			{
-				//节点为空，中断更新
-				return true;
-			}
-			else if(otherNode==null)
-			{
-				KitchenGlobalModel.instance.setRootPosition(node.furnitureVo,this,isNext);
-				_changedVos.push(node.furnitureVo);
-			}
-			else if(KitchenGlobalModel.instance.doUpdatePosByDistance(node.furnitureVo,otherNode.furnitureVo,isNext))
-			{
-				_changedVos.push(node.furnitureVo);
-			}
-			else if(KitchenGlobalModel.instance.fixPostion(node.furnitureVo,this) && _changedVos.indexOf(node.furnitureVo)<0)
-			{
-				_changedVos.push(node.furnitureVo);
-			}
-			return false;
-		}
-		private function canSorptionByDistance(sourceVo:CFurnitureVO,targetVo:CFurnitureVO):Boolean
+		/**
+		 *  通过节点之间的距离判断是否能够执行吸附
+		 * @param sourceVo		源节点
+		 * @param targetVo		目标节点
+		 * @return Boolean
+		 * 
+		 */		
+		private function judgeSorptionByDistance(sourceVo:CFurnitureVO,targetVo:CFurnitureVO):Boolean
 		{
 			var distance:Number;
 			var dis:Number;
@@ -161,7 +140,7 @@ package collection
 		 */						
 		private function doJudgeSorption(source:CFurnitureVO,node:FurnitureNode,isNext:Boolean):FurnitureNode
 		{
-			if(canSorptionByDistance(source,node.furnitureVo))
+			if(judgeSorptionByDistance(source,node.furnitureVo))
 			{
 				if(_canSorption)
 				{
@@ -195,37 +174,63 @@ package collection
 				listVo.height=_lastHeight;
 			}
 		}
+		private function judgeNeedReverse(node:IDoubleNode,isNext:Boolean):Boolean
+		{
+			_tmpLength=0;
+			mapFromNode(node,doCalculateLength,isNext);
+			return KitchenGlobalModel.instance.isNeedReverse(node.nodeData,_tmpLength,this,isNext);
+		}
 		/**
 		 * 更新位置 
 		 * 
 		 */		
-		protected function updateNodePosition(isNext:Boolean):void
+		protected function updateNodePosition(node:IDoubleNode,isNext:Boolean):void
 		{
 			_invalidPosition=false;
+			
+			var negativeNode:IDoubleNode;
+			var positiveNode:IDoubleNode;
+			
 			var isNeedReverse:Boolean;
-			var otherNode:FurnitureNode;
-			if(_currentNode!=null)
+			if(node!=null)
 			{
-				otherNode=isNext?_currentNode.prev as FurnitureNode:_currentNode.next as FurnitureNode;
-				if(otherNode!=null)
+				if(isNext)
 				{
-					mapNode(otherNode,doCalculateLength,isNext);
-					//在当前添加顺序下不能添加节点数据时（家具在该位置放不下），需反向遍历，更新家具数据的坐标
-					isNeedReverse=KitchenGlobalModel.instance.isNeedReverse(otherNode.furnitureVo,_tmpLength,this,isNext);
-					if(!isNeedReverse)
-						//按照当前遍历顺序，刷新坐标
-						mapNode(_currentNode,doUpdatePosition,isNext);
-					else
-						//反向遍历，刷新坐标
-						mapNode(isNext?_endNode:_headNode,doUpdatePosition,!isNext);
+					negativeNode=node.prev;
+					positiveNode=node.next;
+				}
+				else
+				{
+					negativeNode=node.next;
+					positiveNode=node.prev;
+				}
+				if(negativeNode==null && positiveNode==null)
+				{
+					//链表只有一个节点，不处理位置更新
+					return;
+				}
+				if(negativeNode!=null && !judgeNeedReverse(negativeNode,isNext))
+				{
+					//按照当前遍历顺序，刷新坐标
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,this,isNext);
+				}
+				else if(positiveNode!=null && !judgeNeedReverse(positiveNode,!isNext))
+				{
+					//按照相反方向遍历，刷新坐标
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,this,!isNext);
+				}
+				else
+				{
+					//都需要反转，说明整条链从根节点开始，所有节点需要重排
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(isNext?endNode:headNode,this,!isNext,true);
 				}
 			}
 		}
-		cloudLib function updateNodeFixPosition(isNext:Boolean):void
+		protected function fixNodePosition(isNext:Boolean):void
 		{
 			//修正所有家具位置坐标
 			_invalidFix=false;
-			forEachNode(doFixPosition,isNext);
+			forEachNode(doFixNodePosition,isNext);
 		}
 		/**
 		 * 链表是否已满 
@@ -239,12 +244,7 @@ package collection
 		}
 		private var updatePosNum:uint;
 		private var clearNum:uint;
-		public function clearStore():void
-		{
-			_changedVos.length=0;
-			_tmpLength=0;
-			 _canSorption=false;
-		}
+		
 		/**
 		 * 执行吸附逻辑 
 		 * @param sourceVo
@@ -256,7 +256,7 @@ package collection
 		{
 			_canSorption=isDirectionChanged;
 			//只有根节点时，不执行吸附，返回空
-			if(_headNode==null || (numberChildren==1 && sourceVo==_headNode.nodeData)) return null;
+			if(headNode==null || (numberChildren==1 && sourceVo==headNode.nodeData)) return null;
 			if(numberChildren>0)
 			{
 				var isNext:Boolean=sourceVo.compare(_currentNode.nodeData)<0;
@@ -279,7 +279,7 @@ package collection
 					}
 				}
 			}
-			return _changedVos.length>0 ? _changedVos : null;
+			return changedVos.length>0 ? changedVos : null;
 		}
 		/**
 		 * 遍历所有相连链表，添加家具数据，如果添加成功，返回发生变动的所有家具数据集合
@@ -302,6 +302,7 @@ package collection
 			}
 			return null;
 		}
+		
 		override protected function createNode(nodeData:ICData):IDoubleNode
 		{
 			return new FurnitureNode(nodeData);
@@ -315,10 +316,11 @@ package collection
 		{
 			updateNodeSize();
 			if(_invalidPosition)
-				updateNodePosition(isNext);
+				updateNodePosition(_currentNode,isNext);
 			if(_invalidFix)
 			{
-				updateNodeFixPosition(isNext);
+				//宽度发生改变，修正链表中所有节点的坐标
+				fixNodePosition(isNext);
 				KitchenGlobalModel.instance.fixNodePostionByList(this);
 			}
 		}
@@ -333,6 +335,11 @@ package collection
 			(opreateData as CFurnitureVO).mark=null;
 			super.doRemoveNode(opreateData);
 		}
-
+		override public function clear():void
+		{
+			super.clear();
+			_tmpLength=0;
+			_canSorption=false;
+		}
 	}
 }

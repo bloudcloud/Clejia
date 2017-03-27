@@ -3,7 +3,9 @@ package model
 	import flash.geom.Vector3D;
 	
 	import cloud.core.collections.DoubleListNode;
+	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
+	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.interfaces.ICObject3DListData;
 	
 	import collection.Furniture3DList;
@@ -119,73 +121,138 @@ package model
 				return 0;
 		}
 		/**
-		 * 通过源节点数据与其相邻的节点数据，执行更新位置，返回是否需要更新
-		 * @param sourceVo		源家具数据
-		 * @param targetVo		吸附目标家具数据
-		 * @param isNext		吸附目标数据是否在源数据下方
-		 * @return Boolean	
+		 * 更新一条链表中从某一节点到根节点的，所有节点的数据位置 
+		 * @param startNode	起始节点
+		 * @param	list	节点所在的链表对象
+		 * @param isNext		遍历顺序是否向下遍历
+		 * @param isIgnoreCondition	是否忽略更新条件
+		 * @return 
 		 * 
 		 */		
-		public function doUpdatePosByDistance(sourceVo:CFurnitureVO,targetVo:CFurnitureVO,isNext:Boolean):Boolean
+		public function mapNodeToUpdatePosition(startNode:IDoubleNode,list:Furniture3DList,isNext:Boolean,isIgnoreCondition:Boolean=false):void
 		{
-			var dis:Number=(sourceVo.length+targetVo.length)*.5;
+			for(var child:IDoubleNode=startNode; child!=null; child=isNext?child.next:child.prev)
+			{
+				var otherNode:IDoubleNode=isNext ? child.prev : child.next;
+				if(child==null)
+				{
+					//节点为空，中断更新
+					break;
+				}
+				else if(otherNode!=null)
+				{
+					if(doUpdatePosition(child.nodeData,otherNode.nodeData,isNext,isIgnoreCondition))
+						list.addChangedVo(child.nodeData);
+				}
+				else
+				{
+					//根节点，修正坐标
+					doUpdateRootPostion(child.nodeData,list,isNext)
+				}
+			}
+		}
+		private function doUpdateRootPostion(vo:ICData,list:Furniture3DList,isNext:Boolean):void
+		{
+			var rootVo:ICObject3DData=vo as ICObject3DData;
+			var posX:Number;
+			var posY:Number;
+			posX=rootVo.position.x;
+			posY=rootVo.position.y;
+			switch(list.direction)
+			{
+				case DIR_FRONT:
+					if(isNext)
+					{
+						rootVo.position.x=list.listVo.headPos.x-(list.prev as Furniture3DList).width-rootVo.length*.5;
+					}
+					else
+					{
+						rootVo.position.x=list.listVo.endPos.x+(list.next as Furniture3DList).width+rootVo.length*.5;
+					}
+					rootVo.position.y=list.listVo.headPos.y-list.width+rootVo.width*.5;
+					break;
+				case DIR_RIGHT:
+					if(isNext)
+					{
+						rootVo.position.y=list.listVo.endPos.y-(list.next as Furniture3DList).width-rootVo.length*.5;
+					}
+					else
+					{
+						rootVo.position.y=list.listVo.headPos.y+(list.prev as Furniture3DList).width+rootVo.length*.5;
+					}
+					rootVo.position.x=list.listVo.headPos.x-list.width+rootVo.width*.5;
+					break;
+				case DIR_BACK:
+					if(isNext)
+					{
+						rootVo.position.x=list.listVo.endPos.x-(list.next as Furniture3DList).width-rootVo.length*.5;
+					}
+					else
+					{
+						rootVo.position.x=list.listVo.headPos.x+(list.prev as Furniture3DList).width+rootVo.length*.5;
+					}
+					rootVo.position.y=list.listVo.endPos.y+list.width-rootVo.width*.5;
+					break;
+				case DIR_LEFT:
+					if(isNext)
+					{
+						rootVo.position.y=list.listVo.headPos.y-(list.prev as Furniture3DList).width-rootVo.length*.5;
+					}
+					else
+					{
+						rootVo.position.y=list.listVo.endPos.y+(list.next as Furniture3DList).width+rootVo.length*.5;
+					}
+					rootVo.position.x=list.listVo.endPos.x+list.width-rootVo.width*.5;
+			}
+			if(posX!=rootVo.position.x || posY!=rootVo.position.y)
+				list.addChangedVo(vo);
+		}
+		/**
+		 * 通过与其当前节点数据相邻的来源节点数据，来执行当前节点数据的位置更新，返回当前节点数据是否发生改变
+		 * @param vo1		当前数据
+		 * @param vo2		来源数据
+		 * @param isNext		当前遍历顺序是否向下遍历
+		 * @param isIgnore	是否忽略更新条件
+		 * @return Boolean	当前节点数据是否发生改变
+		 * 
+		 */		
+		private function doUpdatePosition(vo1:ICData,vo2:ICData,isNext:Boolean,isIgnoreCondition:Boolean):Boolean
+		{
+			var currentVo:CFurnitureVO=vo1 as CFurnitureVO;
+			var sourceVo:CFurnitureVO=vo2 as CFurnitureVO;
+			var dis:Number=(currentVo.length+sourceVo.length)*.5;
 			var posDis:Number;
-			var newPos:Number;
-			
-			switch(targetVo.direction)
+			var posX:Number;
+			var posY:Number;
+			posX=currentVo.position.x;
+			posY=currentVo.position.y;
+			switch(sourceVo.direction)
 			{
 				case DIR_FRONT:
 				case DIR_BACK:
-					posDis=Math.abs(targetVo.position.x-sourceVo.position.x);
-					if(sourceVo.isSorpted==true || //当前节点已吸附
+					posDis=Math.abs(sourceVo.position.x-currentVo.position.x);
+					if(isIgnoreCondition ||
 						posDis<dis //当前节点与前一节点位置过小
 					)
 					{
-						sourceVo.position.copyFrom(targetVo.position);
-						sourceVo.position.x=isNext ? targetVo.position.x-dis : targetVo.position.x+dis;
-						sourceVo.isSorpted=false;
-						return true;
+						currentVo.position.x=isNext ? sourceVo.position.x-dis : sourceVo.position.x+dis;
 					}
-					return false;
+					currentVo.position.y=sourceVo.position.y;
+					break;
 				case DIR_LEFT:
 				case DIR_RIGHT:
-					posDis=Math.abs(targetVo.position.y-sourceVo.position.y);
-					if(sourceVo.isSorpted==true || //当前节点已吸附
+					posDis=Math.abs(sourceVo.position.y-currentVo.position.y);
+					if(isIgnoreCondition ||
 						posDis<dis //当前节点与前一节点位置过小
 					)
 					{
-						sourceVo.position.copyFrom(targetVo.position);
-						sourceVo.position.y=isNext ? targetVo.position.y-dis : targetVo.position.y+dis;
-						sourceVo.isSorpted=false;
-						return true;
+						currentVo.position.y=isNext ? sourceVo.position.y-dis : sourceVo.position.y+dis;
 					}
-					return false;
+					currentVo.position.x=sourceVo.position.x;
+					break;
 			}
-			return false;
+			return posX!=currentVo.position.x || posY!=currentVo.position.y;
 		}
-//		/**
-//		 * 根据遍历顺序，获取链表两端中，某一端的限制长度 
-//		 * @param list	链表
-//		 * @param isNext	遍历顺序
-//		 * @return Number
-//		 * 
-//		 */		
-//		public function getLimitLength(list:Furniture3DList,isNext:Boolean):Number
-//		{
-//			var limitLength:Number;
-//			switch(list.direction)
-//			{
-//				case DIR_FRONT:
-//				case DIR_LEFT:
-//					limitLength=isNext?(list.next as Furniture3DList).width:(list.prev as Furniture3DList).width;
-//					break;
-//				case DIR_BACK:
-//				case DIR_RIGHT:
-//					limitLength=isNext?(list.prev as Furniture3DList).width:(list.next as Furniture3DList).width;
-//					break;
-//			}
-//			return limitLength;
-//		}
 		/**
 		 * 根据方向和遍历顺序，获取与当前列表一端相连的链表 
 		 * @param list	当前列表
@@ -218,9 +285,10 @@ package model
 		 * @return Boolean
 		 * 
 		 */				
-		public function isNeedReverse(furnitureVo:CFurnitureVO,tmpLength:Number,list:Furniture3DList,isNext:Boolean):Boolean
+		public function isNeedReverse(vo:ICData,tmpLength:Number,list:Furniture3DList,isNext:Boolean):Boolean
 		{
 			var needReverse:Boolean;
+			var furnitureVo:CFurnitureVO=vo as CFurnitureVO;
 			switch(furnitureVo.direction)
 			{
 				case DIR_FRONT:
@@ -269,123 +337,69 @@ package model
 		 * 修正列表中的家具节点数据
 		 * @param vo 需修正的厨房家具节点数据
 		 * @param list	当前节点所在的链表对象
-		 * @param isNext
-		 * @return Boolean
 		 * 
 		 */			
-		public function fixPostion(vo:CFurnitureVO,list:Furniture3DList):Boolean
+		public function fixPostion(vo:ICData,list:Furniture3DList):void
 		{
+			var objectVo:ICObject3DData=vo as ICObject3DData;
 			var lastX:Number;
 			var lastY:Number;
 			var minLimit:Number;
 			var maxLimit:Number;
-			switch(vo.direction)
+			var isChanged:Boolean;
+			switch(objectVo.direction)
 			{
 				case DIR_FRONT:
-					minLimit=list.listVo.endPos.x+(list.next as Furniture3DList).width+vo.length*.5;
-					maxLimit=list.listVo.headPos.x-(list.prev as Furniture3DList).width-vo.length*.5;
-					lastX=vo.position.x;
-					if(vo.position.x<minLimit)
-						vo.position.x=minLimit;
-					else if(vo.position.x>maxLimit)
-						vo.position.x=maxLimit;
-					lastY=vo.position.y;
-					vo.position.y=leftTopWallPos.y-list.width+vo.width*.5;
-					return lastX!=vo.position.x || lastY!=vo.position.y;
-				case DIR_LEFT:
-					minLimit=list.listVo.endPos.y+(list.next as Furniture3DList).width+vo.length*.5;
-					maxLimit=list.listVo.headPos.y-(list.prev as Furniture3DList).width-vo.length*.5;
-					lastY=vo.position.y;
-					if(vo.position.y<minLimit)
-						vo.position.y=minLimit;
-					else if(vo.position.y>maxLimit)
-						vo.position.y=maxLimit;
-					lastX=vo.position.x;
-					vo.position.x=leftTopWallPos.x+list.width-vo.width*.5;
-					return lastX!=vo.position.x || lastY!=vo.position.y;
-				case DIR_BACK:
-					minLimit=list.listVo.headPos.x+(list.prev as Furniture3DList).width+vo.length*.5;
-					maxLimit=list.listVo.endPos.x-(list.next as Furniture3DList).width-vo.length*.5;
-					lastX=vo.position.x;
-					if(vo.position.x<minLimit)
-						vo.position.x=minLimit;
-					else if(vo.position.x>maxLimit)
-						vo.position.x=maxLimit;			
-					lastY=vo.position.y;
-					vo.position.y=leftBottomWallPos.y+list.width-vo.width*.5;
-					return lastX!=vo.position.x || lastY!=vo.position.y;
-				case DIR_RIGHT:
-					minLimit=list.listVo.headPos.y+(list.prev as Furniture3DList).width+vo.length*.5;
-					maxLimit=list.listVo.endPos.y-(list.next as Furniture3DList).width-vo.length*.5;
-					lastY=vo.position.y;
-					if(vo.position.y<minLimit)
-						vo.position.y=minLimit;
-					else if(vo.position.y>maxLimit)
-						vo.position.y=maxLimit;
-					lastX=vo.position.x;
-					vo.position.x=rightTopWallPos.x-list.width+vo.width*.5;
-					return lastX!=vo.position.x || lastY!=vo.position.y;
-			}
-			return true;
-		}
-		/**
-		 * 设置根部节点的位置 
-		 * @param rootVo	根部节点数据
-		 * @param list	当前链表
-		 * @param listWidth 链表的宽度
-		 * @param isHead		是否是链表中的头节点
-		 * 
-		 */		
-		public function setRootPosition(rootVo:CFurnitureVO,list:Furniture3DList,isHead:Boolean):void
-		{
-			rootVo.isSorpted=false;
-			switch(rootVo.direction)
-			{
-				case DIR_FRONT:
-					if(isHead)
-					{
-						rootVo.position.x=list.listVo.headPos.x-(list.prev as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.x=list.listVo.endPos.x+(list.next as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.y=list.listVo.endPos.y-list.width+rootVo.width*.5;
+					minLimit=list.listVo.endPos.x+(list.next as Furniture3DList).width+objectVo.length*.5;
+					maxLimit=list.listVo.headPos.x-(list.prev as Furniture3DList).width-objectVo.length*.5;
+					lastX=objectVo.position.x;
+					if(objectVo.position.x<minLimit)
+						objectVo.position.x=minLimit;
+					else if(objectVo.position.x>maxLimit)
+						objectVo.position.x=maxLimit;
+					lastY=objectVo.position.y;
+					objectVo.position.y=leftTopWallPos.y-list.width+objectVo.width*.5;
+					isChanged= lastX!=objectVo.position.x || lastY!=objectVo.position.y;
 					break;
 				case DIR_LEFT:
-					if(isHead)
-					{
-						rootVo.position.y=list.listVo.headPos.y-(list.prev as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.y=list.listVo.endPos.y+(list.next as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.x=list.listVo.endPos.x+list.width-rootVo.width*.5;
+					minLimit=list.listVo.endPos.y+(list.next as Furniture3DList).width+objectVo.length*.5;
+					maxLimit=list.listVo.headPos.y-(list.prev as Furniture3DList).width-objectVo.length*.5;
+					lastY=objectVo.position.y;
+					if(objectVo.position.y<minLimit)
+						objectVo.position.y=minLimit;
+					else if(objectVo.position.y>maxLimit)
+						objectVo.position.y=maxLimit;
+					lastX=objectVo.position.x;
+					objectVo.position.x=leftTopWallPos.x+list.width-objectVo.width*.5;
+					isChanged= lastX!=objectVo.position.x || lastY!=objectVo.position.y;
 					break;
 				case DIR_BACK:
-					if(isHead)
-					{
-						rootVo.position.x=list.listVo.endPos.x-(list.next as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.x=list.listVo.headPos.x+(list.prev as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.y=list.listVo.headPos.y+list.width-rootVo.width*.5;
+					minLimit=list.listVo.headPos.x+(list.prev as Furniture3DList).width+objectVo.length*.5;
+					maxLimit=list.listVo.endPos.x-(list.next as Furniture3DList).width-objectVo.length*.5;
+					lastX=objectVo.position.x;
+					if(objectVo.position.x<minLimit)
+						objectVo.position.x=minLimit;
+					else if(objectVo.position.x>maxLimit)
+						objectVo.position.x=maxLimit;			
+					lastY=objectVo.position.y;
+					objectVo.position.y=leftBottomWallPos.y+list.width-objectVo.width*.5;
+					isChanged= lastX!=objectVo.position.x || lastY!=objectVo.position.y;
 					break;
 				case DIR_RIGHT:
-					if(isHead)
-					{
-						rootVo.position.y=list.listVo.endPos.y-(list.prev as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.y=list.listVo.headPos.y+(list.next as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.x=list.listVo.headPos.x-list.width+rootVo.width*.5;
+					minLimit=list.listVo.headPos.y+(list.prev as Furniture3DList).width+objectVo.length*.5;
+					maxLimit=list.listVo.endPos.y-(list.next as Furniture3DList).width-objectVo.length*.5;
+					lastY=objectVo.position.y;
+					if(objectVo.position.y<minLimit)
+						objectVo.position.y=minLimit;
+					else if(objectVo.position.y>maxLimit)
+						objectVo.position.y=maxLimit;
+					lastX=objectVo.position.x;
+					objectVo.position.x=rightTopWallPos.x-list.width+objectVo.width*.5;
+					isChanged= lastX!=objectVo.position.x || lastY!=objectVo.position.y;
 					break;
 			}
+			if(isChanged)
+				list.addChangedVo(vo);
 		}
 		/**
 		 * 墙的左上方顶点的位置 
@@ -510,23 +524,82 @@ package model
 			list.addAfter(rootList);
 		}
 		/**
+		 * 修正竖直方向链表中的节点数据
+		 * @param list	链表对象
+		 * @param startNode	链表遍历的起始节点
+		 * @param endNode		链表遍历的终止节点
+		 * @param endListPos	链表遍历结束时这一端的端点位置
+		 * @param endMinLimit		链表遍历终止节点与端点之间的最小限制距离
+		 * @param isNext		链表的遍历顺序（是否向下遍历）
+		 * 
+		 */		
+		private function doFixListNodeByY(list:Furniture3DList,startNode:IDoubleNode,endNode:IDoubleNode,endListPos:Vector3D,endMinLimit:Number,isNext:Boolean):void
+		{
+			if(!list.isEmpty)
+			{
+				mapNodeToUpdatePosition(startNode,list,isNext,true);
+				if(Math.abs((endNode.nodeData as ICObject3DData).position.y-endListPos.y)<endMinLimit+(endNode.nodeData as ICObject3DData).length*.5)
+				{
+					//如果超出范围，删除尾部节点
+					endNode.nodeData.isLife=false;
+					list.addChangedVo(endNode.nodeData);
+				}
+			}
+		}
+		/**
+		 * 修正水平方向链表中的节点数据
+		 * @param list	链表对象
+		 * @param startNode	链表遍历的起始节点
+		 * @param endNode		链表遍历的终止节点
+		 * @param endListPos	链表遍历结束时这一端的端点位置
+		 * @param endMinLimit		链表遍历终止节点与端点之间的最小限制距离
+		 * @param isNext		链表的遍历顺序（是否向下遍历）
+		 * 
+		 */		
+		private function doFixListNodeByX(list:Furniture3DList,startNode:IDoubleNode,endNode:IDoubleNode,endListPos:Vector3D,endMinLimit:Number,isNext:Boolean):void
+		{
+			if(!list.isEmpty)
+			{
+				mapNodeToUpdatePosition(startNode,list,isNext,true);
+				if(Math.abs((endNode.nodeData as ICObject3DData).position.x-endListPos.x)<endMinLimit)
+				{
+					//如果超出范围，删除尾部节点
+					endNode.nodeData.isLife=false;
+					list.addChangedVo(endNode.nodeData);
+				}
+			}
+		}
+		/**
 		 * 修正一条链相关的节点坐标
 		 * @param list	
 		 * 
 		 */		
 		public function fixNodePostionByList(list:Furniture3DList):void
 		{
+			var prevList:Furniture3DList=list.prev as Furniture3DList;
+			var nextList:Furniture3DList=list.next as Furniture3DList;
+			var distance:Number;
 			switch(list.direction)
 			{
 				case DIR_FRONT:
+					doFixListNodeByY(prevList,prevList.headNode,prevList.endNode,prevList.listVo.headPos,(prevList.prev as Furniture3DList).width,true);
+					doFixListNodeByY(nextList,nextList.headNode,nextList.endNode,nextList.listVo.endPos,(nextList.next as Furniture3DList).width,true);
+					list.changedVos=list.changedVos.concat(prevList.changedVos,nextList.changedVos);
+					break;
 				case DIR_RIGHT:
-					(list.prev as Furniture3DList).updateNodeFixPosition(true);
-					(list.next as Furniture3DList).updateNodeFixPosition(true);
+					doFixListNodeByX(prevList,prevList.headNode,prevList.endNode,prevList.listVo.headPos,(prevList.prev as Furniture3DList).width,true);
+					doFixListNodeByX(nextList,nextList.headNode,nextList.endNode,nextList.listVo.endPos,(nextList.next as Furniture3DList).width,true);
+					list.changedVos=list.changedVos.concat(prevList.changedVos,nextList.changedVos);
 					break;
 				case DIR_LEFT:
+					doFixListNodeByX(prevList,prevList.endNode,prevList.headNode,prevList.listVo.headPos,(prevList.prev as Furniture3DList).width,false);
+					doFixListNodeByX(nextList,nextList.endNode,nextList.headNode,nextList.listVo.endPos,(nextList.next as Furniture3DList).width,false);
+					list.changedVos=list.changedVos.concat(prevList.changedVos,nextList.changedVos);
+					break;
 				case DIR_BACK:
-					(list.prev as Furniture3DList).updateNodeFixPosition(false);
-					(list.next as Furniture3DList).updateNodeFixPosition(false);
+					doFixListNodeByY(prevList,prevList.endNode,prevList.headNode,prevList.listVo.headPos,(prevList.prev as Furniture3DList).width,false);
+					doFixListNodeByY(nextList,nextList.endNode,nextList.headNode,nextList.listVo.endPos,(nextList.next as Furniture3DList).width,false);
+					list.changedVos=list.changedVos.concat(prevList.changedVos,nextList.changedVos);
 					break;
 			}
 		}

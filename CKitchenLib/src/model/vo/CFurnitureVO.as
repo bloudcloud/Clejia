@@ -20,6 +20,7 @@ package model.vo
 	{
 		protected var _uniqueID:String;
 		protected var _type:uint;
+		protected var _isLife:Boolean;
 		protected var _direction:int;
 		protected var _position:Vector3D;
 		protected var _length:Number;
@@ -100,9 +101,20 @@ package model.vo
 			_height=value;
 		}
 		
+		public function get isLife():Boolean
+		{
+			return _isLife;
+		}
+		
+		public function set isLife(value:Boolean):void
+		{
+			_isLife=value;
+		}
+		
 		public function CFurnitureVO()
 		{
 			position=new Vector3D();
+			_isLife=true;
 		}
 
 		public function clone():ICObject3DData

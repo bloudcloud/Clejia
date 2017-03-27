@@ -17,7 +17,7 @@ package model.vo
 		protected var _length:Number=0;
 		protected var _width:Number=0;
 		protected var _height:Number=0;
-		
+		protected var _isLife:Boolean;
 		protected var _headPos:Vector3D;
 		protected var _endPos:Vector3D;
 		
@@ -107,6 +107,14 @@ package model.vo
 			_type=value;
 		}
 		
+		public function get isLife():Boolean
+		{
+			return _isLife;
+		}
+		public function set isLife(value:Boolean):void
+		{
+			_isLife=value;
+		}
 		public function update(value:*):void
 		{
 			uniqueID=value.uniqueID;

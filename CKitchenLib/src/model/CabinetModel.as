@@ -127,13 +127,14 @@ package model
 		
 		public function excuteEnd():void
 		{
+			var list:Furniture3DList=getFurnitureVoList(_selectVo.direction);
 			switch(_state)
 			{
 				case KitchenGlobalModel.instance.STATE_MOUSEMOVE:
-					getFurnitureVoList(_selectVo.direction).clearStore();
-					break;
 				case KitchenGlobalModel.instance.STATE_MOUSEUP:
-					getFurnitureVoList(_selectVo.direction).clearStore();
+					list.clear();
+					(list.prev as Furniture3DList).clear();
+					(list.next as Furniture3DList).clear();
 					break;
 			}
 			_selectVo=null;

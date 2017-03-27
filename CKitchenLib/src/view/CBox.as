@@ -133,6 +133,14 @@ package view
 		{
 			
 		}
+		public function get isLife():Boolean
+		{
+			return false;
+		}
+		public function set isLife(value:Boolean):void
+		{
+			
+		}
 		public function compare(source:ICData):Number
 		{
 			return 0;

@@ -29,7 +29,6 @@ package modules.kitchen.view
 	
 	import utils.DatasEvent;
 	
-	import view.CBox;
 	import view.CShelterView;
 	import view.CTableBoardView;
 	
@@ -121,19 +120,41 @@ package modules.kitchen.view
 		}
 		private function updateMeshPosition(vos:Vector.<ICData>):void
 		{
+			var mesh:L3DMesh;
+			var meshes:Array;
 			for each(var vo:ICObject3DData in vos)
 			{
-				for each(var mesh:L3DMesh in cabinetSet.meshes)
+				for (var i:int=0; i<cabinetSet.meshes.length; i++)
 				{
+					mesh=cabinetSet.meshes[i] as L3DMesh;
 					if(mesh && mesh.UniqueID==vo.uniqueID)
 					{
-						mesh.rotationZ=MathUtil.toRadians(vo.direction);
-						mesh.x=vo.position.x;
-						mesh.y=vo.position.y;
-						mesh.z=vo.position.z;
+						if(vo.isLife)
+						{
+							mesh.rotationZ=MathUtil.toRadians(vo.direction);
+							mesh.x=vo.position.x;
+							mesh.y=vo.position.y;
+							mesh.z=vo.position.z;
+						}
+						else
+						{
+							meshes ||=new Array();
+							meshes.push(mesh);
+						}
 					}
 				}
 			}
+			if(meshes)
+			{
+				for(i=0;i<meshes.length;i++)
+				{
+					mesh=meshes[i];
+					cabinetModel.deleteFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ));
+					cabinetSet.removeFurnitureView(mesh);
+//					mesh.Dispose(false);
+				}
+			}
+			
 		}
 		/**
 		 * 创建单柜 
