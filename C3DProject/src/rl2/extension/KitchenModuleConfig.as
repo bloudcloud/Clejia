@@ -12,6 +12,7 @@ package rl2.extension
 	import core.view.WallViewSetMediator;
 	
 	import model.CabinetModel;
+	import model.HangingCabinetModel;
 	
 	import modules.kitchen.command.KitchenServiceStartCmd;
 	import modules.kitchen.service.Command2DService;
@@ -46,6 +47,7 @@ package rl2.extension
 		{
 			//数据模型
 			context.injector.map(CabinetModel).asSingleton();
+			context.injector.map(HangingCabinetModel).asSingleton();
 			//视图
 			mediatorMap.map(View).toMediator(Scene3DMediator);
 			mediatorMap.map(FloorViewSet).toMediator(FloorViewSetMediator);

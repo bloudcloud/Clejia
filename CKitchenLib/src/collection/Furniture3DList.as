@@ -177,8 +177,18 @@ package collection
 		private function judgeNeedReverse(node:IDoubleNode,isNext:Boolean):Boolean
 		{
 			_tmpLength=0;
-			mapFromNode(node,doCalculateLength,isNext);
-			return KitchenGlobalModel.instance.isNeedReverse(node.nodeData,_tmpLength,this,isNext);
+			var nodeData:ICData
+			if(node==null)
+			{
+				nodeData=isNext?headNode.nodeData:endNode.nodeData;
+				forEachNode(doCalculateLength,isNext);
+			}
+			else
+			{
+				nodeData=node.nodeData;
+				mapFromNode(node,doCalculateLength,isNext);
+			}
+			return KitchenGlobalModel.instance.isNeedReverse(nodeData,_tmpLength,this,isNext);
 		}
 		/**
 		 * 更新位置 
@@ -188,41 +198,40 @@ package collection
 		{
 			_invalidPosition=false;
 			
-			var negativeNode:IDoubleNode;
-			var positiveNode:IDoubleNode;
+			var reverseNode:IDoubleNode;
+			var orderNode:IDoubleNode;
 			
 			var isNeedReverse:Boolean;
 			if(node!=null)
 			{
 				if(isNext)
 				{
-					negativeNode=node.prev;
-					positiveNode=node.next;
+					reverseNode=node.prev;
+					orderNode=node.next;
 				}
 				else
 				{
-					negativeNode=node.next;
-					positiveNode=node.prev;
+					reverseNode=node.next;
+					orderNode=node.prev;
 				}
-				if(negativeNode==null && positiveNode==null)
+				if(reverseNode==orderNode)
 				{
-					//链表只有一个节点，不处理位置更新
-					return;
+					fixNodePosition(isNext);
 				}
-				if(negativeNode!=null && !judgeNeedReverse(negativeNode,isNext))
+				else if(!judgeNeedReverse(reverseNode,isNext))
 				{
 					//按照当前遍历顺序，刷新坐标
-					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,this,isNext);
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,reverseNode,this,isNext);
 				}
-				else if(positiveNode!=null && !judgeNeedReverse(positiveNode,!isNext))
+				else if(!judgeNeedReverse(orderNode,!isNext))
 				{
 					//按照相反方向遍历，刷新坐标
-					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,this,!isNext);
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,orderNode,this,!isNext);
 				}
 				else
 				{
 					//都需要反转，说明整条链从根节点开始，所有节点需要重排
-					KitchenGlobalModel.instance.mapNodeToUpdatePosition(isNext?endNode:headNode,this,!isNext,true);
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(isNext?endNode:headNode,null,this,!isNext,true);
 				}
 			}
 		}
@@ -231,6 +240,8 @@ package collection
 			//修正所有家具位置坐标
 			_invalidFix=false;
 			forEachNode(doFixNodePosition,isNext);
+			//修正相连链表的节点位置
+			KitchenGlobalModel.instance.fixNodePostionByList(this);
 		}
 		/**
 		 * 链表是否已满 
@@ -269,13 +280,13 @@ package collection
 						//开启吸附的状态下，执行吸附操作
 						isNext=sourceVo.compare(targetNode.nodeData)<0;
 						doAddNode(sourceVo,targetNode,isNext);
-						currentFurniture.furnitureVo.isSorpted=true;
 						updateList(isNext);
 					}
 					else
 					{
 						//链表已满
 						_isFullState=true;
+						addByMapList(sourceVo);
 					}
 				}
 			}
@@ -291,16 +302,18 @@ package collection
 		{
 			var isNext:Boolean=Vector3D.distance(this.listVo.endPos,sourceVo.position)<Vector3D.distance(this.listVo.headPos,sourceVo.position);
 			var list:Furniture3DList=isNext?this.endList:this.headList;
+			var vos:Vector.<ICData>;
 			for(;list!=this; list=isNext?list.endList:list.headList)
 			{
 				if(!list.isFull)
 				{
 					//找到链表，自动添加
 					sourceVo.direction=list.direction;
-					return list.add(sourceVo);
+					vos=list.add(sourceVo);
+					break;
 				}
 			}
-			return null;
+			return vos;
 		}
 		
 		override protected function createNode(nodeData:ICData):IDoubleNode
@@ -321,13 +334,15 @@ package collection
 			{
 				//宽度发生改变，修正链表中所有节点的坐标
 				fixNodePosition(isNext);
-				KitchenGlobalModel.instance.fixNodePostionByList(this);
 			}
 		}
 		override protected function doAddNode(opreateData:ICData, node:IDoubleNode, isNext:Boolean):Boolean
 		{
 			_invalidPosition=true;
-			(opreateData as CFurnitureVO).mark=(opreateData as CFurnitureVO).direction.toString();
+			var furnitureVo:CFurnitureVO=opreateData as CFurnitureVO;
+			furnitureVo.direction=listVo.direction;
+			furnitureVo.mark=listVo.direction.toString();
+			furnitureVo.isLife=true;
 			return super.doAddNode(opreateData,node,isNext);
 		}
 		override protected function doRemoveNode(opreateData:ICData):void

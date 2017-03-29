@@ -44,6 +44,7 @@ package modules.kitchen.view
 		public function createCabinet(mesh:L3DMesh):void
 		{
 			addFurnitureView(mesh);
+			_currentMesh=mesh;
 		}
 		/**
 		 *  删除当前橱柜
@@ -53,6 +54,7 @@ package modules.kitchen.view
 		public function deleteCabinet():void
 		{
 			removeFurnitureView(_currentMesh);
+			_currentMesh=null;
 		}
 		/**
 		 * 创建一个吊柜 

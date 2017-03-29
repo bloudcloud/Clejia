@@ -10,6 +10,7 @@ package interfaces
 	 */
 	public interface ICFurnitureModel
 	{
+		function initModel():void;
 		/**
 		 * 创建家具数据 
 		 * @param furnitureID
@@ -50,5 +51,10 @@ package interfaces
 		 * 
 		 */
 		function excuteMouseUp():Vector.<ICData>;
+		/**
+		 * 执行结束 
+		 * 
+		 */		
+		function excuteEnd():void;
 	}
 }

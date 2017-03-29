@@ -29,7 +29,7 @@ package model.vo
 		
 		public var index:int;
 		public var mark:String;
-		public var isSorpted:Boolean;
+		public var isCorner:Boolean;
 		
 		public function get uniqueID():String
 		{
@@ -148,7 +148,6 @@ package model.vo
 			height=vo.height;
 			index=vo.index;
 			mark=vo.mark;
-			isSorpted=vo.isSorpted;
 		}
 
 		public function clear():void

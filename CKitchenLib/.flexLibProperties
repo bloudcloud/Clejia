@@ -2,6 +2,8 @@
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="model.vo.CFurnitureListVO"/>
+    <classEntry path="model.HangingCabinetModel"/>
+    <classEntry path="model.vo.CShelterVO"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

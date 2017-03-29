@@ -5,6 +5,7 @@ package core.view
 	import core.model.GlobalModel;
 	
 	import model.CabinetModel;
+	import model.HangingCabinetModel;
 	import model.KitchenGlobalModel;
 	
 	import ns.cloudLib;
@@ -24,6 +25,8 @@ package core.view
 		public var scene:Scene3D;
 		[Inject]
 		public var cabinetModel:CabinetModel;
+		[Inject]
+		public var hangingModel:HangingCabinetModel;
 		
 		public function get wallSet():WallViewSet
 		{
@@ -43,7 +46,8 @@ package core.view
 			KitchenGlobalModel.instance.rightTopWallPos=wallSet.rightUpPos;
 			KitchenGlobalModel.instance.leftBottomWallPos=wallSet.leftDownPos;
 			KitchenGlobalModel.instance.rightBottomWallPos=wallSet.rightDownPos;
-			cabinetModel.initKitchen();
+			cabinetModel.initModel();
+			hangingModel.initModel();
 		}
 	}
 }

@@ -1,6 +1,9 @@
 package model
 {
 	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
+	
+	import mx.utils.UIDUtil;
 	
 	import cloud.core.collections.DoubleListNode;
 	import cloud.core.collections.IDoubleNode;
@@ -10,7 +13,10 @@ package model
 	
 	import collection.Furniture3DList;
 	
+	import interfaces.ICFurnitureModel;
+	
 	import model.vo.CFurnitureVO;
+	import model.vo.CShelterVO;
 	
 	import ns.cloudLib;
 	
@@ -89,6 +95,26 @@ package model
 			_upWallPos=new Vector3D();
 			_downWallPos=new Vector3D();
 		}
+		
+		public function getModerByDic(type:uint,dic:Dictionary):ICFurnitureModel
+		{
+			if(dic[type]==null)
+			{
+				switch(type)
+				{
+					case MESHTYPE_CABINET:
+						dic[type]=new CabinetModel();
+						break;
+					case MESHTYPE_HANGING_CABINET:
+						dic[type]=new HangingCabinetModel();
+						break;
+					default:
+						KitchenErrorModel.instance.throwErrorByMessage("CKithenModuleImp","getModel","furnitureType",String(type+" 没有获取到数据模型！"));
+						break;
+				}
+			}
+			return dic[type];
+		}
 		/**
 		 * 比较两个家具数据的大小 
 		 * @param thisVo	当前数据
@@ -122,90 +148,31 @@ package model
 		}
 		/**
 		 * 更新一条链表中从某一节点到根节点的，所有节点的数据位置 
-		 * @param startNode	起始节点
+		 * @param startNode	当前节点
+		 * @param sourceNode	源节点
 		 * @param	list	节点所在的链表对象
 		 * @param isNext		遍历顺序是否向下遍历
 		 * @param isIgnoreCondition	是否忽略更新条件
 		 * @return 
 		 * 
 		 */		
-		public function mapNodeToUpdatePosition(startNode:IDoubleNode,list:Furniture3DList,isNext:Boolean,isIgnoreCondition:Boolean=false):void
+		public function mapNodeToUpdatePosition(currenteNode:IDoubleNode,sourceNode:IDoubleNode,list:Furniture3DList,isNext:Boolean,isIgnoreCondition:Boolean=false):void
 		{
-			for(var child:IDoubleNode=startNode; child!=null; child=isNext?child.next:child.prev)
+			var current:IDoubleNode=currenteNode;
+			var prev:IDoubleNode=sourceNode;
+			while(current!=null)
 			{
-				var otherNode:IDoubleNode=isNext ? child.prev : child.next;
-				if(child==null)
+				if(prev==null)
 				{
-					//节点为空，中断更新
-					break;
+					fixPostion(current.nodeData,list);
 				}
-				else if(otherNode!=null)
+				else if(doUpdatePosition(current.nodeData,prev.nodeData,isNext,isIgnoreCondition))
 				{
-					if(doUpdatePosition(child.nodeData,otherNode.nodeData,isNext,isIgnoreCondition))
-						list.addChangedVo(child.nodeData);
+					list.addChangedVo(current.nodeData);
 				}
-				else
-				{
-					//根节点，修正坐标
-					doUpdateRootPostion(child.nodeData,list,isNext)
-				}
+				prev=current;
+				current=isNext?current.next:current.prev;
 			}
-		}
-		private function doUpdateRootPostion(vo:ICData,list:Furniture3DList,isNext:Boolean):void
-		{
-			var rootVo:ICObject3DData=vo as ICObject3DData;
-			var posX:Number;
-			var posY:Number;
-			posX=rootVo.position.x;
-			posY=rootVo.position.y;
-			switch(list.direction)
-			{
-				case DIR_FRONT:
-					if(isNext)
-					{
-						rootVo.position.x=list.listVo.headPos.x-(list.prev as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.x=list.listVo.endPos.x+(list.next as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.y=list.listVo.headPos.y-list.width+rootVo.width*.5;
-					break;
-				case DIR_RIGHT:
-					if(isNext)
-					{
-						rootVo.position.y=list.listVo.endPos.y-(list.next as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.y=list.listVo.headPos.y+(list.prev as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.x=list.listVo.headPos.x-list.width+rootVo.width*.5;
-					break;
-				case DIR_BACK:
-					if(isNext)
-					{
-						rootVo.position.x=list.listVo.endPos.x-(list.next as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.x=list.listVo.headPos.x+(list.prev as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.y=list.listVo.endPos.y+list.width-rootVo.width*.5;
-					break;
-				case DIR_LEFT:
-					if(isNext)
-					{
-						rootVo.position.y=list.listVo.headPos.y-(list.prev as Furniture3DList).width-rootVo.length*.5;
-					}
-					else
-					{
-						rootVo.position.y=list.listVo.endPos.y+(list.next as Furniture3DList).width+rootVo.length*.5;
-					}
-					rootVo.position.x=list.listVo.endPos.x+list.width-rootVo.width*.5;
-			}
-			if(posX!=rootVo.position.x || posY!=rootVo.position.y)
-				list.addChangedVo(vo);
 		}
 		/**
 		 * 通过与其当前节点数据相邻的来源节点数据，来执行当前节点数据的位置更新，返回当前节点数据是否发生改变
@@ -216,7 +183,7 @@ package model
 		 * @return Boolean	当前节点数据是否发生改变
 		 * 
 		 */		
-		private function doUpdatePosition(vo1:ICData,vo2:ICData,isNext:Boolean,isIgnoreCondition:Boolean):Boolean
+		private function doUpdatePosition(vo1:ICData,vo2:ICData,isNext:Boolean,isIgnoreCondition:Boolean=false):Boolean
 		{
 			var currentVo:CFurnitureVO=vo1 as CFurnitureVO;
 			var sourceVo:CFurnitureVO=vo2 as CFurnitureVO;
@@ -252,29 +219,6 @@ package model
 					break;
 			}
 			return posX!=currentVo.position.x || posY!=currentVo.position.y;
-		}
-		/**
-		 * 根据方向和遍历顺序，获取与当前列表一端相连的链表 
-		 * @param list	当前列表
-		 * @param isNext
-		 * @return Furniture3DList
-		 * 
-		 */		
-		public function getRootList(currentList:Furniture3DList,isNext:Boolean):Furniture3DList
-		{
-			var list:Furniture3DList;
-			switch(currentList.direction)
-			{
-				case DIR_FRONT:
-				case DIR_LEFT:
-					list=isNext ? currentList.next as Furniture3DList : currentList.prev as Furniture3DList;
-					break;
-				case DIR_BACK:
-				case DIR_RIGHT:
-					list=isNext ? currentList.prev as Furniture3DList : currentList.next as Furniture3DList;
-					break;
-			}
-			return list;
 		}
 		/**
 		 * 判断是否需要反转遍历 
@@ -537,7 +481,7 @@ package model
 		{
 			if(!list.isEmpty)
 			{
-				mapNodeToUpdatePosition(startNode,list,isNext,true);
+				mapNodeToUpdatePosition(startNode,null,list,isNext);
 				if(Math.abs((endNode.nodeData as ICObject3DData).position.y-endListPos.y)<endMinLimit+(endNode.nodeData as ICObject3DData).length*.5)
 				{
 					//如果超出范围，删除尾部节点
@@ -560,7 +504,7 @@ package model
 		{
 			if(!list.isEmpty)
 			{
-				mapNodeToUpdatePosition(startNode,list,isNext,true);
+				mapNodeToUpdatePosition(startNode,null,list,isNext);
 				if(Math.abs((endNode.nodeData as ICObject3DData).position.x-endListPos.x)<endMinLimit)
 				{
 					//如果超出范围，删除尾部节点
@@ -601,6 +545,329 @@ package model
 					doFixListNodeByY(nextList,nextList.endNode,nextList.headNode,nextList.listVo.endPos,(nextList.next as Furniture3DList).width,false);
 					list.changedVos=list.changedVos.concat(prevList.changedVos,nextList.changedVos);
 					break;
+			}
+		}
+		private function doCreateShelterVo(length:Number,width:Number,height:Number,direction:int,position:Vector3D,lengthOffset:Number,positionOffset:Number):ICData
+		{
+			var vo:CShelterVO;
+			vo=new CShelterVO();
+			vo.uniqueID=UIDUtil.createUID();
+			vo.type=MESHTYPE_SHELTER;
+			vo.length=length;
+			vo.width=width;
+			vo.height=height;
+			vo.direction=direction;
+			vo.position=position;
+			vo.lengthOffset=lengthOffset;
+			vo.positionOffset=positionOffset;
+			return vo;
+		}
+		private function judgeAndCreateShelterByHorizontal(vo1:ICData,vo2:ICData,shelterXHeight:Number,shelterYHeight:Number,vos:Vector.<ICData>):void
+		{
+			var rootNodeVo:ICObject3DData=vo1 as ICObject3DData;
+			var prevRootNodeVo:ICObject3DData=vo2 as ICObject3DData;
+			var dis:Number;
+			var position:Vector3D;
+			var positionOffset:Number;
+			var lengthOffset:Number;
+			if(Math.abs(rootNodeVo.position.x-prevRootNodeVo.position.x)==(rootNodeVo.length+prevRootNodeVo.width)*.5)
+			{
+				dis=Math.abs(rootNodeVo.position.y-prevRootNodeVo.position.y)-(rootNodeVo.width+prevRootNodeVo.length)*.5;
+				if(dis>0)
+				{
+					lengthOffset=rootNodeVo.width;
+					position=prevRootNodeVo.position.clone();
+					if(rootNodeVo.position.x<prevRootNodeVo.position.x)
+					{
+						position.y=rootNodeVo.position.y-(rootNodeVo.width+dis)*.5;
+						position.x-=(prevRootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=lengthOffset;
+					}
+					else
+					{
+						position.y=rootNodeVo.position.y+(rootNodeVo.width+dis)*.5;
+						position.x+=(prevRootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=-lengthOffset;
+					}
+					vos.push(doCreateShelterVo(dis,SHELTER_WIDTH,shelterYHeight,prevRootNodeVo.direction,position,lengthOffset,positionOffset));
+				}
+			}
+			if(Math.abs(rootNodeVo.position.y-prevRootNodeVo.position.y)==(rootNodeVo.width+prevRootNodeVo.length)*.5)
+			{
+				dis=Math.abs(rootNodeVo.position.x-prevRootNodeVo.position.x)-(rootNodeVo.length+prevRootNodeVo.width)*.5;
+				if(dis>0)
+				{
+					lengthOffset=prevRootNodeVo.width;
+					position=rootNodeVo.position.clone();
+					if(rootNodeVo.position.y<prevRootNodeVo.position.y)
+					{
+						position.x=prevRootNodeVo.position.x+(prevRootNodeVo.width+dis)*.5;
+						position.y+=(rootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=-lengthOffset;
+					}
+					else
+					{
+						position.x=prevRootNodeVo.position.x-(prevRootNodeVo.width+dis)*.5;
+						position.y-=(rootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=lengthOffset;
+					}
+					vos.push(doCreateShelterVo(dis,SHELTER_WIDTH,shelterXHeight,rootNodeVo.direction,position,lengthOffset,positionOffset));
+				}
+			}
+		}
+		private function JudgeAndCreateShelterByVertical(vo1:ICData,vo2:ICData,shelterXHeight:Number,shelterYHeight:Number,vos:Vector.<ICData>):void
+		{
+			var rootNodeVo:ICObject3DData=vo1 as ICObject3DData;
+			var prevRootNodeVo:ICObject3DData=vo2 as ICObject3DData;
+			var dis:Number;
+			var position:Vector3D;
+			var lengthOffset:Number;
+			var positionOffset:Number;
+			if(Math.abs(rootNodeVo.position.x-prevRootNodeVo.position.x)==(rootNodeVo.width+prevRootNodeVo.length)*.5)
+			{
+				dis=Math.abs(rootNodeVo.position.y-prevRootNodeVo.position.y)-(rootNodeVo.length+prevRootNodeVo.width)*.5;
+				if(dis>0)
+				{
+					position=rootNodeVo.position.clone();
+					lengthOffset=prevRootNodeVo.width;
+					if(rootNodeVo.position.x<prevRootNodeVo.position.x)
+					{
+						position.y=prevRootNodeVo.position.y-(prevRootNodeVo.width+dis)*.5;
+						position.x+=(rootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=lengthOffset;
+					}
+					else
+					{
+						position.y=prevRootNodeVo.position.y+(prevRootNodeVo.width+dis)*.5;
+						position.x-=(rootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=-lengthOffset;
+					}
+					vos.push(doCreateShelterVo(dis,SHELTER_WIDTH,shelterYHeight,rootNodeVo.direction,position,lengthOffset,positionOffset));
+				}
+			}
+			if(Math.abs(rootNodeVo.position.y-prevRootNodeVo.position.y)==(rootNodeVo.length+prevRootNodeVo.width)*.5)
+			{
+				dis=Math.abs(rootNodeVo.position.x-prevRootNodeVo.position.x)-(rootNodeVo.width+prevRootNodeVo.length)*.5;
+				if(dis>0)
+				{
+					lengthOffset=rootNodeVo.width;
+					position=prevRootNodeVo.position.clone();
+					if(rootNodeVo.position.y<prevRootNodeVo.position.y)
+					{
+						position.x=rootNodeVo.position.x+(rootNodeVo.width+dis)*.5;
+						position.y-=(prevRootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=-lengthOffset;
+					}
+					else
+					{
+						position.x=rootNodeVo.position.x-(rootNodeVo.width+dis)*.5;
+						position.y+=(prevRootNodeVo.width-SHELTER_WIDTH)*.5;
+						position.z+=shelterYHeight*.5;
+						positionOffset=lengthOffset;
+					}
+					vos.push(doCreateShelterVo(dis,SHELTER_WIDTH,shelterXHeight,prevRootNodeVo.direction,position,lengthOffset,positionOffset));
+				}
+			}
+		}
+		private function doCreateShelter(list:Furniture3DList,shelterVos:Vector.<ICData>):void
+		{
+			var prevList:Furniture3DList=list.prev as Furniture3DList;
+			var prevRootNodeFurnitureVo:ICObject3DData;
+			var rootNodeFurnitureVo:ICObject3DData;
+			if(!prevList.isEmpty && !list.isEmpty)
+			{
+				switch(list.direction)
+				{
+					case DIR_FRONT:
+						prevRootNodeFurnitureVo=prevList.headNode.nodeData as ICObject3DData;
+						rootNodeFurnitureVo=list.headNode.nodeData as ICObject3DData;
+						judgeAndCreateShelterByHorizontal(list.headNode.nodeData,prevList.headNode.nodeData,list.height,prevList.height,shelterVos);
+						break;
+					case DIR_RIGHT:
+						prevRootNodeFurnitureVo=prevList.headNode.nodeData as ICObject3DData;
+						rootNodeFurnitureVo=list.endNode.nodeData as ICObject3DData;
+						JudgeAndCreateShelterByVertical(list.endNode.nodeData,prevList.headNode.nodeData,prevList.height,list.height,shelterVos);
+						break;
+					case DIR_BACK:
+						prevRootNodeFurnitureVo=prevList.endNode.nodeData as ICObject3DData;
+						rootNodeFurnitureVo=list.endNode.nodeData as ICObject3DData;
+						judgeAndCreateShelterByHorizontal(list.endNode.nodeData,prevList.endNode.nodeData,list.height,prevList.height,shelterVos);
+						break;
+					case DIR_LEFT:
+						prevRootNodeFurnitureVo=prevList.endNode.nodeData as ICObject3DData;
+						rootNodeFurnitureVo=list.headNode.nodeData as ICObject3DData;
+						JudgeAndCreateShelterByVertical(list.headNode.nodeData,prevList.endNode.nodeData,prevList.height,list.height,shelterVos);
+						break;
+				}
+			}
+			
+		}
+		private function doCreateTableBoardVo(length:Number,width:Number,height:Number,direction:int,position:Vector3D,vos:Vector.<ICData>):CFurnitureVO
+		{
+			var vo:CFurnitureVO;
+			vo=new CFurnitureVO();
+			vo.uniqueID=UIDUtil.createUID();
+			vo.type=MESHTYPE_TABLEBOARD;
+			vo.length=length;
+			vo.width=width;
+			vo.height=height;
+			vo.direction=direction;
+			vo.position=position;
+			vos.push(vo);
+			return vo;
+		}
+		private function judgeAndCreateTableBoard(vo1:ICData,vo2:ICData,direction:int,tableBoardLength:Number,listWidth:Number,listHeight:Number,headVo:CFurnitureVO,isIgnore:Boolean,vos:Vector.<ICData>):Boolean
+		{
+			var furnitureVo:CFurnitureVO=vo1 as CFurnitureVO;
+			var nextFurnitureVo:CFurnitureVO=vo2 as CFurnitureVO;
+			var newPosition:Vector3D;
+			switch(direction)
+			{
+				case DIR_FRONT:
+					if(isIgnore || furnitureVo.position.x-nextFurnitureVo.position.x-(furnitureVo.length+nextFurnitureVo.length)*.5>0)
+					{ 
+						newPosition=new Vector3D(headVo.position.x+(headVo.length-tableBoardLength)*.5,furnitureVo.position.y+Math.abs(listWidth-furnitureVo.width),furnitureVo.position.z+listHeight+TABLEBOARD_HEIGHT*.5);
+						if(headVo is CShelterVO)
+						{
+							newPosition.x+=(headVo as CShelterVO).positionOffset;
+						}
+					}
+					break;
+				case DIR_BACK:
+					if(isIgnore || furnitureVo.position.x-nextFurnitureVo.position.x>(furnitureVo.length+nextFurnitureVo.length)*.5)
+					{
+						newPosition=new Vector3D(headVo.position.x+(headVo.length-tableBoardLength)*.5,furnitureVo.position.y-Math.abs(listWidth-furnitureVo.width),furnitureVo.position.z+listHeight+TABLEBOARD_HEIGHT*.5);
+						if(headVo is CShelterVO)
+						{
+							newPosition.x+=(headVo as CShelterVO).positionOffset;
+						}
+					}
+					break;
+				case DIR_RIGHT:
+					if(isIgnore || furnitureVo.position.y-nextFurnitureVo.position.y>(furnitureVo.length+nextFurnitureVo.length)*.5)
+					{
+						newPosition=new Vector3D(furnitureVo.position.x-Math.abs(listWidth-furnitureVo.width),headVo.position.y+(headVo.length-tableBoardLength)*.5,furnitureVo.position.z+listHeight+TABLEBOARD_HEIGHT*.5);
+						if(headVo is CShelterVO)
+						{
+							newPosition.y+=(headVo as CShelterVO).positionOffset;
+						}
+					}
+					break;
+				case DIR_LEFT:
+					if(isIgnore || furnitureVo.position.y-nextFurnitureVo.position.y>(furnitureVo.length+nextFurnitureVo.length)*.5)
+					{
+						newPosition=new Vector3D(furnitureVo.position.x+Math.abs(listWidth-furnitureVo.width),headVo.position.y+(headVo.length-tableBoardLength)*.5,furnitureVo.position.z+listHeight+TABLEBOARD_HEIGHT*.5);
+						if(headVo is CShelterVO)
+						{
+							newPosition.y+=(headVo as CShelterVO).positionOffset;
+						}
+					}
+					break;
+			}
+			if(newPosition!=null)
+			{
+				doCreateTableBoardVo(tableBoardLength,listWidth,TABLEBOARD_HEIGHT,direction,newPosition,vos);
+				return true;
+			}
+			return false;
+		}
+		private function doCreateTableBoard(list:Furniture3DList,shelterVos:Vector.<ICData>,tableBoardVos:Vector.<ICData>):void
+		{
+			var child:IDoubleNode;
+			var headVo:CFurnitureVO;
+			var endVo:CFurnitureVO;
+			var tableBoardLength:Number=0;
+			var headLengthOffset:Number;
+			var headPositionOffset:Number;
+			for each(var vo:CFurnitureVO in shelterVos)
+			{
+				if(list.direction==vo.direction)
+				{
+					//当前链表中有补板
+					if(list.headNode.nodeData.compare(vo)<0)
+					{
+						headVo=vo;
+					}
+					else
+					{
+						endVo=vo;
+					}
+				}
+			}
+			if(headVo!=null)
+			{
+				//链表头部有补板
+				tableBoardLength+=headVo.length+(headVo as CShelterVO).lengthOffset;
+			}
+			else
+			{
+				headVo=list.headNode.nodeData as CFurnitureVO;
+			}
+			child=list.headNode;
+			
+			while(child!=null)
+			{
+				tableBoardLength+=(child.nodeData as CFurnitureVO).length;
+				if(child.next!=null)
+				{
+					if(judgeAndCreateTableBoard(child.nodeData,child.next.nodeData,list.direction,tableBoardLength,list.width,list.height,headVo,false,tableBoardVos))
+					{
+						headVo=child.next.nodeData as CFurnitureVO;
+						tableBoardLength=0;
+					}
+				}
+				else
+				{
+					if(endVo!=null)
+					{
+						tableBoardLength+=endVo.length+(endVo as CShelterVO).lengthOffset;
+					}
+					judgeAndCreateTableBoard(child.nodeData,null,list.direction,tableBoardLength,list.width,list.height,headVo,true,tableBoardVos)
+				}
+				child=child.next;
+			}
+		}
+		
+		/**
+		 *  创建挡板数据集合
+		 * @param list	遍历开始链表
+		 * @param shelterVos	创建的挡板数据集合
+		 * 
+		 */		
+		public function createShelterVos(list:Furniture3DList,shelterVos:Vector.<ICData>):void
+		{
+			var currentList:Furniture3DList=list;
+			var currentIndex:int=0;
+			while(!(currentIndex>0 && currentList==list))
+			{
+				if(!currentList.isEmpty)
+				{
+					doCreateShelter(currentList,shelterVos);
+				}
+				currentIndex++;
+				currentList=currentList.next as Furniture3DList;
+			}
+		}
+		
+		public function createTableBoard(list:Furniture3DList,shelterVos:Vector.<ICData>,tableBoardVos:Vector.<ICData>):void
+		{
+			var currentList:Furniture3DList=list;
+			var currentIndex:int=0;
+			while(!(currentIndex>0 && currentList==list))
+			{
+				if(!currentList.isEmpty)
+				{
+					doCreateTableBoard(currentList,shelterVos,tableBoardVos);
+				}
+				currentIndex++;
+				currentList=currentList.next as Furniture3DList;
 			}
 		}
 	}

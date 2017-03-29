@@ -17,6 +17,7 @@ package main
 	
 	import ns.cloudLib;
 	
+	import view.CBox;
 	import view.CShelterView;
 	import view.CTableBoardView;
 
@@ -28,7 +29,6 @@ package main
 	internal class CKithenModuleImp extends EventDispatcher implements ICKithenModule
 	{
 		private var _modelsDict:Dictionary;
-		
 		private var _tableBoard:CTableBoardView;
 		private var _shelter:CShelterView;
 		
@@ -37,30 +37,9 @@ package main
 			_modelsDict=new Dictionary();
 		}
 
-		private function getModel(furnitureType:uint):ICFurnitureModel
-		{
-			if(_modelsDict[furnitureType]==null)
-			{
-				switch(furnitureType)
-				{
-					case KitchenGlobalModel.instance.MESHTYPE_CABINET:
-						_modelsDict[furnitureType]=new CabinetModel();
-						break;
-					case KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET:
-//						_modelsDict[furnitureType]=new HangingCabinetModel();
-						break;
-					case KitchenGlobalModel.instance.MESHTYPE_SINK:
-//						_modelsDict[furnitureType]=new KitchenPartModel();
-						break;
-					default:
-						KitchenErrorModel.instance.throwErrorByMessage("CKithenModuleImp","getModel","furnitureType",String(furnitureType+" 没有获取到数据模型！ "));
-						break;
-				}
-			}
-			return _modelsDict[furnitureType];
-		}
 		public function start():void
 		{
+			
 		}
 		public function stop():void
 		{
@@ -68,24 +47,20 @@ package main
 		}
 		public function importWallPosition(ptl:Vector3D,ptr:Vector3D,pbl:Vector3D,pbr:Vector3D):void
 		{
-//			for each(var chainModel:BaseChainFurnitureModel in _modelsDict)
-//			{
-//				if(chainModel)
-//				{
-//					chainModel.topLeftWallPos.copyFrom(ptl);
-//					chainModel.topRightWallPos.copyFrom(ptr);
-//					chainModel.bottomLeftWallPos.copyFrom(pbl);
-//					chainModel.bottomRightWallPos.copyFrom(pbr);
-//				}
-//			}
+			KitchenGlobalModel.instance.leftTopWallPos=ptl;
+			KitchenGlobalModel.instance.rightTopWallPos=ptr;
+			KitchenGlobalModel.instance.leftBottomWallPos=pbl;
+			KitchenGlobalModel.instance.rightBottomWallPos=pbr;
+			KitchenGlobalModel.instance.getModerByDic(KitchenGlobalModel.instance.MESHTYPE_CABINET,_modelsDict).initModel();
+			KitchenGlobalModel.instance.getModerByDic(KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET,_modelsDict).initModel();
 		}
 		public function createKitchenFurniture(furnitureID:String,furnitureDirection:int,furnitureType:uint,furnitureLength:uint,furnitureWidth:uint,furnitureHeight:uint):void
 		{
-			getModel(furnitureType).createFurnitureVo(furnitureID,furnitureDirection,furnitureType,furnitureLength,furnitureWidth,furnitureHeight);
+			KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).createFurnitureVo(furnitureID,furnitureDirection,furnitureType,furnitureLength,furnitureWidth,furnitureHeight);
 		}
 		public function deleteKitchenFurniture(furnitureID:String,furnitureDirection:int,furnitureType:uint):void
 		{
-			getModel(furnitureType).deleteFurnitureVo(furnitureID,furnitureDirection);
+			KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).deleteFurnitureVo(furnitureID,furnitureDirection);
 		}
 		public function updateFurnitureUniqueID(furnitureID:String,furnitureType:uint,uniqueID:String):void
 		{
@@ -94,62 +69,67 @@ package main
 		}
 		public function excuteMove(furnitureDir:int,furnitureType:uint,position:Vector3D):Vector.<ICData>
 		{
-			return getModel(furnitureType).excuteMove(furnitureDir,position);
+			return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMove(furnitureDir,position);
 		}
 		public function excuteMouseDown(furnitureID:String,furnitureDir:int,furnitureType:uint):Boolean
 		{
-			return getModel(furnitureType).excuteMouseDown(furnitureID,furnitureDir);
+			return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMouseDown(furnitureID,furnitureDir);
 		}
 		public function excuteMouseUp(furnitureType:uint):Vector.<ICData>
 		{
-			return getModel(furnitureType).excuteMouseUp();
+			return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMouseUp();
 		}
 		public function createTableBoard():ICFurnitureSet
-		{
-//			var cabinetModel:CabinetModel=getModel(KitchenGlobalModel.instance.MESHTYPE_CABINET) as CabinetModel;
-//			if(cabinetModel.tableBoardVo==null)
-//			{
-//				var vo:TableBoardVO=cabinetModel.createTableBoardVO(cabinetModel.length,cabinetModel.width,KitchenGlobalModel.instance.TABLEBOARD_HEIGHT,cabinetModel.combinePos);
-//				_tableBoard=new CTableBoardView();
-//				_tableBoard.createTableBoardMesh(vo);
-//				return _tableBoard;
-//			}
-			return null;	
+		{		
+			var vos:Vector.<ICData>=(KitchenGlobalModel.instance.getModerByDic(KitchenGlobalModel.instance.MESHTYPE_CABINET,_modelsDict) as CabinetModel).createTableBoard();
+			if(vos)
+			{
+				_tableBoard=new CTableBoardView();
+				_tableBoard.createTableBoard(vos);
+				var child:CBox;
+				for(var i:int=0; i<_tableBoard.numChildren; i++)
+				{
+					child=_tableBoard.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
+				}
+			}
+			return _tableBoard;	
 		}
 		public function createShelter(ptl:Vector3D,ptr:Vector3D,pbl:Vector3D,pbr:Vector3D):ICFurnitureSet
 		{
-//			if(_shelter==null)
-//			{
-//				var cabinetModel:CabinetModel=getModel(KitchenGlobalModel.instance.MESHTYPE_CABINET) as CabinetModel;
-//				cabinetModel.topLeftWallPos.copyFrom(ptl);
-//				cabinetModel.topRightWallPos.copyFrom(ptr);
-//				cabinetModel.bottomLeftWallPos.copyFrom(pbl);
-//				cabinetModel.bottomRightWallPos.copyFrom(pbr);
-//				var vos:Vector.<ShelterVO>=cabinetModel.createShelterVOs();
-//				if(vos)
-//				{
-//					_shelter=new CShelterView();
-//					_shelter.createShelter(vos);
-//				}
-//			}
+			var vos:Vector.<ICData>=(KitchenGlobalModel.instance.getModerByDic(KitchenGlobalModel.instance.MESHTYPE_CABINET,_modelsDict) as CabinetModel).createShelter();
+			if(vos)
+			{
+				_shelter=new CShelterView();
+				_shelter.createShelter(vos);
+				var child:CBox;
+				for(var i:int=0; i<_shelter.numChildren; i++)
+				{
+					child=_shelter.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
+				}
+			}
 			return _shelter;
 		}
 		public function clear():void
 		{
-			var cabinetModel:CabinetModel;
-			cabinetModel=getModel(KitchenGlobalModel.instance.MESHTYPE_CABINET) as CabinetModel;
-//			if(_tableBoard)
-//			{
-//				cabinetModel.deleteTableBoardVOs(_tableBoard.furnitureVos);
-//				_tableBoard.dispose();
-//				_tableBoard=null;
-//			}
-//			if(_shelter)
-//			{
-//				cabinetModel.deleteShelterVOs(_shelter.furnitureVos);
-//				_shelter.dispose();
-//				_shelter=null;
-//			}
+			var cabinetModel:CabinetModel=KitchenGlobalModel.instance.getModerByDic(KitchenGlobalModel.instance.MESHTYPE_CABINET,_modelsDict) as CabinetModel;
+			if(_tableBoard)
+			{
+				cabinetModel.deleteTableBoardVos();
+				_tableBoard.dispose();
+				_tableBoard=null;
+			}
+			if(_shelter)
+			{
+				cabinetModel.deleteShelterVos();
+				_shelter.dispose();
+				_shelter=null;
+			}
 		}
 		public function getQuotes():void
 		{

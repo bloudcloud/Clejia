@@ -21,7 +21,9 @@ package modules.kitchen.view
 	import interfaces.ICFurnitureModel;
 	
 	import model.CabinetModel;
+	import model.HangingCabinetModel;
 	import model.KitchenGlobalModel;
+	import model.vo.CFurnitureVO;
 	
 	import ns.cloudLib;
 	
@@ -29,6 +31,7 @@ package modules.kitchen.view
 	
 	import utils.DatasEvent;
 	
+	import view.CBox;
 	import view.CShelterView;
 	import view.CTableBoardView;
 	
@@ -43,6 +46,8 @@ package modules.kitchen.view
 		public var globalModel:GlobalModel;
 		[Inject]
 		public var cabinetModel:CabinetModel;
+		[Inject]
+		public var hangingCabinetModel:HangingCabinetModel;
 		[Inject]
 		public var scene:Scene3D;
 
@@ -62,14 +67,15 @@ package modules.kitchen.view
 			_intersectPos=new Vector3D();
 			_shelterPlanes=new Vector.<Plane>();
 		}
-		private function getModel():ICFurnitureModel
+		private function getModel(type:uint):ICFurnitureModel
 		{
 			switch(cabinetSet.currentMeshType)
 			{
 				case KitchenGlobalModel.instance.MESHTYPE_CABINET:
-				case KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET:
 				case KitchenGlobalModel.instance.MESHTYPE_SINK:
 					return cabinetModel;
+				case KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET:
+					return hangingCabinetModel;
 				default:
 					return null;
 			}
@@ -82,23 +88,23 @@ package modules.kitchen.view
 			scene.controller.disable();
 			var mesh:L3DMesh=evt.currentTarget as L3DMesh;
 			cabinetSet.setSelected(mesh);
-			cabinetModel.excuteMouseDown(mesh.UniqueID,KitchenGlobalModel.instance.DIR_FRONT);
+			getModel(mesh.catalog).excuteMouseDown(mesh.UniqueID,KitchenGlobalModel.instance.DIR_FRONT);
 		}
 		
 		private function onMouseMove(evt:MouseEvent):void
 		{
+			var furnitureModel:ICFurnitureModel=getModel(cabinetSet.currentMeshType);
 			scene.calculateMouseRay(Vector3DUtil.RAY_3D,evt.localX,evt.localY);
 			Geometry3DUtil.intersectPlaneByRay(Vector3DUtil.RAY_3D,Vector3DUtil.ZERO,Vector3DUtil.AXIS_Z,_intersectPos);
 			cabinetSet.fixPos(_intersectPos,globalModel.roomLength,globalModel.roomWidth,globalModel.floorHeight);
-			var vos:Vector.<ICData>=cabinetModel.excuteMove(cabinetSet.currentRotation,_intersectPos)
+			var vos:Vector.<ICData>=furnitureModel.excuteMove(cabinetSet.currentRotation,_intersectPos)
 			if(vos)
 			{
 				updateMeshPosition(vos);
 				scene.view.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
 				scene.view.removeEventListener(MouseEvent.MOUSE_UP,onMouseUp);
 				scene.controller.enable();
-				cabinetModel.excuteEnd();
-//				onMouseUp(evt);
+				furnitureModel.excuteEnd();
 			}
 			else
 			{
@@ -108,20 +114,22 @@ package modules.kitchen.view
 		}
 		private function onMouseUp(evt:MouseEvent):void
 		{
+			var furnitureModel:ICFurnitureModel=getModel(cabinetSet.currentMeshType);
 			scene.view.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
 			scene.view.removeEventListener(MouseEvent.MOUSE_UP,onMouseUp);
 			scene.controller.enable();
-			var vos:Vector.<ICData>=cabinetModel.excuteMouseUp();
+			var vos:Vector.<ICData>=furnitureModel.excuteMouseUp();
 			if(vos)
 			{
 				updateMeshPosition(vos);
-				cabinetModel.excuteEnd();
+				furnitureModel.excuteEnd();
 			}
 		}
 		private function updateMeshPosition(vos:Vector.<ICData>):void
 		{
 			var mesh:L3DMesh;
 			var meshes:Array;
+			var furnitureModel:ICFurnitureModel=getModel(cabinetSet.currentMeshType);
 			for each(var vo:ICObject3DData in vos)
 			{
 				for (var i:int=0; i<cabinetSet.meshes.length; i++)
@@ -149,7 +157,7 @@ package modules.kitchen.view
 				for(i=0;i<meshes.length;i++)
 				{
 					mesh=meshes[i];
-					cabinetModel.deleteFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ));
+					furnitureModel.deleteFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ));
 					cabinetSet.removeFurnitureView(mesh);
 //					mesh.Dispose(false);
 				}
@@ -166,7 +174,7 @@ package modules.kitchen.view
 			var mesh:L3DMesh = evt.data as L3DMesh;
 			mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
 			cabinetSet.createCabinet(mesh);
-			cabinetModel.createFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ),mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
+			getModel(mesh.catalog).createFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ),mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
 		}
 		
 		/**
@@ -176,37 +184,39 @@ package modules.kitchen.view
 		 */		
 		private function onCreateTableBoard(evt:DatasEvent):void
 		{
-//			if(cabinetModel.datas.length==0) return;
-//			if(_tableBoard)
-//			{
-//				deleteTableBoard();
-//			}
-//			else
-//			{
-//				createTableBoard();
-//			}
+			if(_tableBoard)
+			{
+				deleteTableBoard();
+			}
+			else
+			{
+				createTableBoard();
+			}
 		}
 		private function deleteTableBoard():void
 		{
-//			cabinetModel.deleteTableBoardVOs(_tableBoard.furnitureVos);
-//			cabinetSet.removeFurnitureView(_tableBoard);
-//			_tableBoard.dispose();
-//			_tableBoard=null;
+			cabinetModel.deleteTableBoardVos();
+			cabinetSet.removeFurnitureView(_tableBoard);
+			_tableBoard.dispose();
+			_tableBoard=null;
 		}
 		private function createTableBoard():void
 		{
-//			_tableBoard=new CTableBoardView();
-//			var vo:TableBoardVO=cabinetModel.createTableBoardVO(cabinetModel.length,cabinetModel.width,KitchenGlobalModel.instance.TABLEBOARD_HEIGHT,cabinetModel.combinePos);
-//			_tableBoard.createTableBoardMesh(vo);
-//			var mesh:CBox=_tableBoard.getChildAt(0) as CBox;
-//			mesh.scaleX=10;
-//			mesh.scaleY=10;
-//			mesh.scaleZ=10;
-//			cabinetSet.addFurnitureView(_tableBoard);
-//			
-//			var l3dmodel:L3DModel=new L3DModel();
-//			l3dmodel.Import(_tableBoard,false,true);
-//			var l3dmesh:L3DMesh=l3dmodel.Export(scene.stage3D);
+			var vos:Vector.<ICData>=cabinetModel.createTableBoard();
+			if(vos)
+			{
+				_tableBoard=new CTableBoardView();
+				_tableBoard.createTableBoard(vos);
+				var child:CBox;
+				for(var i:int=0; i<_tableBoard.numChildren; i++)
+				{
+					child=_tableBoard.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
+				}
+				cabinetSet.addFurnitureView(_tableBoard);
+			}
 		}
 		/**
 		 * 创建挡板 
@@ -215,37 +225,40 @@ package modules.kitchen.view
 		 */		
 		private function onCreateShelter(evt:DatasEvent):void
 		{
-//			if(cabinetModel.datas.length==0) return;
-//			if(_shelter)
-//			{
-//				deleteShelter();
-//			}
-//			else
-//			{
-//				createShelter();
-//			}
+			if(_shelter)
+			{
+				deleteShelter();
+			}
+			else
+			{
+				createShelter();
+			}
 		}
 		private function deleteShelter():void
 		{
-//			cabinetModel.deleteShelterVOs(_shelter.furnitureVos);
-//			cabinetSet.removeFurnitureView(_shelter);
-//			_shelter.dispose();
-//			_shelter=null;
+			cabinetModel.deleteShelterVos();
+			cabinetSet.removeFurnitureView(_shelter);
+			_shelter.dispose();
+			_shelter=null;
 		}
 		private function createShelter():void
 		{
-//			var vos:Vector.<ShelterVO>=cabinetModel.createShelterVOs();
-//			_shelter=new CShelterView();
-//			_shelter.createShelter(vos);
-//			var child:CBox;
-//			for(var i:int=0; i<_shelter.numChildren; i++)
-//			{
-//				child=_shelter.getChildAt(i) as CBox;
-//				child.scaleX=10;
-//				child.scaleY=10;
-//				child.scaleZ=10;
-//			}
-//			cabinetSet.addFurnitureView(_shelter);
+			var vos:Vector.<ICData>=cabinetModel.createShelter();
+			if(vos)
+			{
+				_shelter=new CShelterView();
+				_shelter.createShelter(vos);
+				var child:CBox;
+				for(var i:int=0; i<_shelter.numChildren; i++)
+				{
+					child=_shelter.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
+				}
+				cabinetSet.addFurnitureView(_shelter);
+			}
+			
 		}
 
 		override protected function addListener():void

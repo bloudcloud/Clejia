@@ -33,7 +33,9 @@ package view
 		}
 		public function dispose():void
 		{
+			_meshes.length=0;
 			_meshes=null;
+			_datas.length=0;
 			_datas=null;
 		}
 	}

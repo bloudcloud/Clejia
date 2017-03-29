@@ -3,7 +3,7 @@ package model
 	import flash.geom.Vector3D;
 	
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
+	import cloud.core.utils.CDebug;
 	
 	import collection.Furniture3DList;
 	
@@ -13,34 +13,29 @@ package model
 	
 	import ns.cloudLib;
 
-	use namespace cloudLib
+	use namespace cloudLib;
 	/**
-	 *  基础家具链表数据模型类
+	 *  
 	 * @author cloud
 	 */
-	public class CabinetModel implements ICFurnitureModel
+	public class HangingCabinetModel implements ICFurnitureModel
 	{
-		cloudLib var furnitureVos:Vector.<CFurnitureVO>;
+		private var _furnitureVos:Vector.<CFurnitureVO>;
 		private var _selectVo:CFurnitureVO;
 		private var _isDirectionChanged:Boolean;
 		private var _state:uint;
 		private var _selectVoPosition:Vector3D;
 		private var _rootList:Furniture3DList;
-		private var _shelterVos:Vector.<ICData>;
-		private var _tableBoardVos:Vector.<ICData>;
-
-		public function CabinetModel()
+		
+		public function HangingCabinetModel()
 		{
-			furnitureVos=new Vector.<CFurnitureVO>();
-			_shelterVos=new Vector.<ICData>();
-			_tableBoardVos=new Vector.<ICData>();
-			
+			_furnitureVos=new Vector.<CFurnitureVO>();
 		}
 		
 		private function getFurnitureVo(uniqueID:String,direction:int):CFurnitureVO
 		{
 			var vo:CFurnitureVO;
-			for each(vo in furnitureVos)
+			for each(vo in _furnitureVos)
 			{
 				if(vo.uniqueID==uniqueID)
 					return vo;
@@ -56,36 +51,7 @@ package model
 			}
 			return null;
 		}
-		/**
-		 * 创建挡板数据集合
-		 * @return Vector.<ICData>
-		 * 
-		 */		
-		public function createShelter():Vector.<ICData>
-		{
-			KitchenGlobalModel.instance.fixNodePostionByList(_rootList);
-			KitchenGlobalModel.instance.createShelterVos(_rootList,_shelterVos);
-			for each(var vo:ICData in _shelterVos)
-			{
-				furnitureVos.push(vo);
-			}
-			return _shelterVos.length>0?_shelterVos:null;
-		}
-		/**
-		 * 创建台面数据集合 
-		 * @return Vector.<ICData>
-		 * 
-		 */		
-		public function createTableBoard():Vector.<ICData>
-		{
-			KitchenGlobalModel.instance.fixNodePostionByList(_rootList);
-			KitchenGlobalModel.instance.createTableBoard(_rootList,_shelterVos,_tableBoardVos);
-			for each(var vo:ICData in _tableBoardVos)
-			{
-				furnitureVos.push(vo);
-			}
-			return _tableBoardVos.length>0?_tableBoardVos:null;
-		}
+		
 		/**
 		 * 执行移动处理
 		 * @param furnitureDir 家具的方向
@@ -104,8 +70,13 @@ package model
 				_selectVo.direction=furnitureDir;
 			}
 			_selectVo.position.copyFrom(position);
+			_selectVo.position.z=KitchenGlobalModel.instance.HANGING_Z;
+			CDebug.instance.traceStr("_selectVo.position.z",_selectVo.position.z);
 			vos=list.excuteSorption(_selectVo,true);
-			
+			if(list.isFull)
+			{
+				vos=list.addByMapList(_selectVo);
+			}
 			return vos;
 		}
 		/**
@@ -175,55 +146,17 @@ package model
 			vo.length=length;
 			vo.width=width;
 			vo.height=height;
-			furnitureVos.push(vo);
+			_furnitureVos.push(vo);
 		}
 		
 		public function deleteFurnitureVo(furnitureID:String,furnitureDirection:int):void
 		{
 			var vo:CFurnitureVO=getFurnitureVo(furnitureID,furnitureDirection);
-			deleteFurnitureVoByValue(vo);
-		}
-		
-		protected function deleteFurnitureVoByValue(vo:ICObject3DData):void
-		{
-			if(vo is CFurnitureVO)
+			if(vo.mark)
 			{
-				if((vo as CFurnitureVO).mark)
-				{
-					getFurnitureVoList(vo.direction).remove(vo);
-				}
+				getFurnitureVoList(vo.direction).remove(vo);
 			}
-			var index:int=furnitureVos.indexOf(vo);
-			if(index>=0)
-			{
-				furnitureVos.removeAt(index);
-				vo.clear();
-			}
-			
-		}
-		/**
-		 * 删除补板 
-		 * 
-		 */		
-		public function deleteShelterVos():void
-		{
-			for each(var vo:ICObject3DData in _shelterVos)
-			{
-				deleteFurnitureVoByValue(vo);
-			}
-			_shelterVos.length=0;
-		}
-		/**
-		 * 删除台面 
-		 * 
-		 */		
-		public function deleteTableBoardVos():void
-		{
-			for each(var vo:ICObject3DData in _tableBoardVos)
-			{
-				deleteFurnitureVoByValue(vo);
-			}
-			_tableBoardVos.length=0;
+			vo.clear();
 		}
 		
 		public function initModel():void
@@ -234,3 +167,5 @@ package model
 		}
 	}
 }
+
+
