@@ -2,14 +2,16 @@ package model
 {
 	import flash.geom.Vector3D;
 	
+	import cloud.core.collections.IDoubleList;
+	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.utils.CDebug;
 	
 	import collection.Furniture3DList;
 	
 	import interfaces.ICFurnitureModel;
 	
 	import model.vo.CFurnitureVO;
+	import model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
 
@@ -20,21 +22,22 @@ package model
 	 */
 	public class HangingCabinetModel implements ICFurnitureModel
 	{
-		private var _furnitureVos:Vector.<CFurnitureVO>;
-		private var _selectVo:CFurnitureVO;
+		private var _furnitureVos:Vector.<CObject3DVO>;
+		private var _selectVo:CObject3DVO;
 		private var _isDirectionChanged:Boolean;
 		private var _state:uint;
 		private var _selectVoPosition:Vector3D;
 		private var _rootList:Furniture3DList;
+		private var _floorID:String;
 		
 		public function HangingCabinetModel()
 		{
-			_furnitureVos=new Vector.<CFurnitureVO>();
+			_furnitureVos=new Vector.<CObject3DVO>();
 		}
 		
-		private function getFurnitureVo(uniqueID:String,direction:int):CFurnitureVO
+		private function getFurnitureVo(uniqueID:String):CObject3DVO
 		{
-			var vo:CFurnitureVO;
+			var vo:CObject3DVO;
 			for each(vo in _furnitureVos)
 			{
 				if(vo.uniqueID==uniqueID)
@@ -42,11 +45,11 @@ package model
 			}
 			return null;
 		}
-		private function getFurnitureVoList(direction:int):Furniture3DList
+		private function getFurnitureVoList(mark:String):Furniture3DList
 		{
 			for(var list:Furniture3DList=_rootList; list!=null; list=list.next as Furniture3DList)
 			{
-				if(list.direction==direction)
+				if(list.listVo.uniqueID==mark)
 					return list;
 			}
 			return null;
@@ -59,25 +62,21 @@ package model
 		 * @return Vector.<ICData>
 		 * 
 		 */		
-		public function excuteMove(furnitureDir:int,position:Vector3D):Vector.<ICData>
+		public function excuteMove(furnitureDir:int,position:Vector3D):Boolean
 		{
+			if(_selectVo==null) return false;
 			_state=KitchenGlobalModel.instance.STATE_MOUSEMOVE;
-			var vos:Vector.<ICData>;
-			var list:Furniture3DList=getFurnitureVoList(furnitureDir);
-			if(_selectVo.direction!=furnitureDir)
+			_selectVo.rotation=furnitureDir;
+			_selectVo.x=position.x;
+			_selectVo.y=position.y;
+			_selectVo.z=position.z;
+			var list:Furniture3DList=KitchenGlobalModel.instance.getBestFurnitureList(_selectVo,_rootList);
+			if(_selectVo.rotation!=furnitureDir)
 			{
+				//如果方向发生变化，打开最优链表中的吸附开关
 				list.canSorption=true;
-				_selectVo.direction=furnitureDir;
 			}
-			_selectVo.position.copyFrom(position);
-			_selectVo.position.z=KitchenGlobalModel.instance.HANGING_Z;
-			CDebug.instance.traceStr("_selectVo.position.z",_selectVo.position.z);
-			vos=list.excuteSorption(_selectVo,true);
-			if(list.isFull)
-			{
-				vos=list.addByMapList(_selectVo);
-			}
-			return vos;
+			return list.excuteSorption(_selectVo);
 		}
 		/**
 		 * 执行鼠标按下处理  
@@ -89,13 +88,12 @@ package model
 		public function excuteMouseDown(furnitureID:String,furnitureDir:int):Boolean
 		{
 			_state=KitchenGlobalModel.instance.STATE_MOUSEDOWN;
-			var vo:CFurnitureVO=getFurnitureVo(furnitureID,furnitureDir);
+			var vo:CFurnitureVO=getFurnitureVo(furnitureID) as CFurnitureVO;
 			if(vo==null) KitchenErrorModel.instance.throwErrorForNull("CabinetModel2","excuteMouseDown","vo");
-			var list:Furniture3DList=getFurnitureVoList(vo.direction);
-			if(vo.mark)
+			if(vo.ownerID)
 			{
 				//选中已加入链表的数据,然后移除
-				list.remove(vo);
+				getFurnitureVoList(vo.ownerID).remove(vo);
 			}
 			_selectVo=vo;
 			_selectVoPosition=_selectVo.position;
@@ -109,7 +107,7 @@ package model
 		public function excuteMouseUp():Vector.<ICData>
 		{
 			_state=KitchenGlobalModel.instance.STATE_MOUSEUP;
-			var list:Furniture3DList=getFurnitureVoList(_selectVo.direction);
+			var list:Furniture3DList=getFurnitureVoList(_selectVo.ownerID);
 			var vos:Vector.<ICData>;
 			if(!list.judgeFull(_selectVo))
 			{
@@ -124,14 +122,14 @@ package model
 		
 		public function excuteEnd():void
 		{
-			var list:Furniture3DList=getFurnitureVoList(_selectVo.direction);
+			var list:Furniture3DList=getFurnitureVoList(_selectVo.ownerID);
 			switch(_state)
 			{
 				case KitchenGlobalModel.instance.STATE_MOUSEMOVE:
 				case KitchenGlobalModel.instance.STATE_MOUSEUP:
-					list.clear();
-					(list.prev as Furniture3DList).clear();
-					(list.next as Furniture3DList).clear();
+					list.clearCalculationData();
+					(list.prev as Furniture3DList).clearCalculationData();
+					(list.next as Furniture3DList).clearCalculationData();
 					break;
 			}
 			_selectVo=null;
@@ -139,9 +137,9 @@ package model
 		}
 		public function createFurnitureVo(furnitureID:String,furnitureDirection:int,furnitureType:uint,length:uint,width:uint,height:uint):void
 		{
-			var vo:CFurnitureVO = new CFurnitureVO();
+			var vo:CObject3DVO = new CObject3DVO();
 			vo.uniqueID = furnitureID;
-			vo.direction = furnitureDirection;
+			vo.rotation = furnitureDirection;
 			vo.type = furnitureType;
 			vo.length=length;
 			vo.width=width;
@@ -149,21 +147,39 @@ package model
 			_furnitureVos.push(vo);
 		}
 		
-		public function deleteFurnitureVo(furnitureID:String,furnitureDirection:int):void
+		public function deleteFurnitureVo(furnitureID:String):void
 		{
-			var vo:CFurnitureVO=getFurnitureVo(furnitureID,furnitureDirection);
-			if(vo.mark)
+			var vo:CFurnitureVO=getFurnitureVo(furnitureID) as CFurnitureVO;
+			if(vo.ownerID)
 			{
-				getFurnitureVoList(vo.direction).remove(vo);
+				getFurnitureVoList(vo.ownerID).remove(vo);
 			}
 			vo.clear();
 		}
 		
-		public function initModel():void
+		public function initModel(floorID:String):void
 		{
 			//初始化单循环双向链表结构
-			_rootList=new Furniture3DList(0);
-			KitchenGlobalModel.instance.initKitchen(_rootList);
+			_floorID=floorID;
+			_rootList=KitchenGlobalModel.instance.initKitchenListByWall(KitchenGlobalModel.instance.OBJECT3D_HANGING_CABINET,_floorID);
+		}
+		
+		public function clear():void
+		{
+			_selectVo=null;
+			var num:int;
+			for(var child:IDoubleNode=_rootList; num==0 || child!=_rootList; child=child.next)
+			{
+				child.unlink();
+				(child as IDoubleList).clear();
+				num++;
+			}
+			_selectVoPosition=null;
+			for each(var vo:CObject3DVO in _furnitureVos)
+			{
+				vo.clear();
+			}
+			_furnitureVos.length=0;
 		}
 	}
 }

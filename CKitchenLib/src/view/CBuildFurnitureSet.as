@@ -21,10 +21,9 @@ package view
 			_datas=new Vector.<ICObject3DData>();
 		}
 		
-		protected function addContent(mesh:Mesh,vo:ICObject3DData):void
+		protected function addContent(mesh:Mesh):void
 		{
 			_meshes.push(mesh);
-			_datas.push(vo);
 		}
 
 		public function get furnitureVos():Vector.<ICObject3DData>
@@ -33,6 +32,10 @@ package view
 		}
 		public function dispose():void
 		{
+			for each(var mesh:Mesh in _meshes)
+			{
+				this.removeChild(mesh);
+			}
 			_meshes.length=0;
 			_meshes=null;
 			_datas.length=0;

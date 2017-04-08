@@ -2,14 +2,18 @@ package model
 {
 	import flash.geom.Vector3D;
 	
+	import cloud.core.collections.IDoubleList;
+	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3DData;
+	import cloud.core.interfaces.ICObject3DListData;
 	
 	import collection.Furniture3DList;
 	
 	import interfaces.ICFurnitureModel;
 	
 	import model.vo.CFurnitureVO;
+	import model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
 
@@ -20,26 +24,27 @@ package model
 	 */
 	public class CabinetModel implements ICFurnitureModel
 	{
-		cloudLib var furnitureVos:Vector.<CFurnitureVO>;
-		private var _selectVo:CFurnitureVO;
+		cloudLib var furnitureVos:Vector.<ICObject3DData>;
+		private var _selectVo:CObject3DVO;
 		private var _isDirectionChanged:Boolean;
 		private var _state:uint;
-		private var _selectVoPosition:Vector3D;
 		private var _rootList:Furniture3DList;
-		private var _shelterVos:Vector.<ICData>;
-		private var _tableBoardVos:Vector.<ICData>;
+		private var _corners:Vector.<ICObject3DData>;
+		private var _floorID:String;
+		private var _selectList:Furniture3DList;
+		private var _selectPos:Vector3D;
+		private var _selectRotation:Number;
 
 		public function CabinetModel()
 		{
-			furnitureVos=new Vector.<CFurnitureVO>();
-			_shelterVos=new Vector.<ICData>();
-			_tableBoardVos=new Vector.<ICData>();
+			furnitureVos=new Vector.<ICObject3DData>();
+			_corners=new Vector.<ICObject3DData>();
 			
 		}
 		
-		private function getFurnitureVo(uniqueID:String,direction:int):CFurnitureVO
+		private function getFurnitureVo(uniqueID:String):CObject3DVO
 		{
-			var vo:CFurnitureVO;
+			var vo:CObject3DVO;
 			for each(vo in furnitureVos)
 			{
 				if(vo.uniqueID==uniqueID)
@@ -47,66 +52,106 @@ package model
 			}
 			return null;
 		}
-		private function getFurnitureVoList(direction:int):Furniture3DList
+		private function getFurnitureVoListByID(listID:String):Furniture3DList
 		{
 			for(var list:Furniture3DList=_rootList; list!=null; list=list.next as Furniture3DList)
 			{
-				if(list.direction==direction)
+				if(list.listVo.uniqueID==listID)
 					return list;
 			}
 			return null;
 		}
 		/**
-		 * 创建挡板数据集合
-		 * @return Vector.<ICData>
+		 * 通过数据对象删除家具数据 
+		 * @param vo
 		 * 
 		 */		
-		public function createShelter():Vector.<ICData>
+		private function deleteFurnitureVoByValue(vo:ICObject3DData):void
 		{
-			KitchenGlobalModel.instance.fixNodePostionByList(_rootList);
-			KitchenGlobalModel.instance.createShelterVos(_rootList,_shelterVos);
-			for each(var vo:ICData in _shelterVos)
+			if(vo is CObject3DVO)
 			{
-				furnitureVos.push(vo);
+				if((vo as CObject3DVO).ownerID)
+				{
+					getFurnitureVoListByID((vo as CObject3DVO).ownerID).remove(vo);
+				}
 			}
-			return _shelterVos.length>0?_shelterVos:null;
+			var index:int=furnitureVos.indexOf(vo);
+			if(index>=0)
+			{
+				furnitureVos.removeAt(index);
+				vo.clear();
+			}
 		}
 		/**
-		 * 创建台面数据集合 
-		 * @return Vector.<ICData>
+		 * 获取房间拐角数据集合 
+		 * @return Vector.<ICObject3DListData>
 		 * 
 		 */		
-		public function createTableBoard():Vector.<ICData>
+		public function getRoomCorners():Vector.<ICObject3DData>
 		{
-			KitchenGlobalModel.instance.fixNodePostionByList(_rootList);
-			KitchenGlobalModel.instance.createTableBoard(_rootList,_shelterVos,_tableBoardVos);
-			for each(var vo:ICData in _tableBoardVos)
+			if(_corners.length==0)
 			{
-				furnitureVos.push(vo);
+				KitchenGlobalModel.instance.createRoomCorners(_rootList,_corners);
+				for each(var vo:ICObject3DData in _corners)
+				{
+					furnitureVos.push(vo);
+				}
 			}
-			return _tableBoardVos.length>0?_tableBoardVos:null;
+			return _corners;
+		}
+		/**
+		 * 获取家具列表 
+		 * @return Vector.<ICObject3DData>
+		 * 
+		 */		
+		public function getFurnituresInList():Vector.<ICObject3DData>
+		{
+			var vos:Vector.<ICObject3DData>=new Vector.<ICObject3DData>();
+			var func:Function=function(node:IDoubleNode):void
+			{
+				vos.push(node.nodeData as ICObject3DData);
+			}
+			for(var list:Furniture3DList=_rootList; list!=null; list=list.next!=_rootList ? list.next as Furniture3DList : null)
+			{
+				if(list.isEmpty) continue;
+				list.forEachNode(func);
+			}
+			return vos.length>0 ? vos : null;
+		}
+		/**
+		 * 删除拐角数据 
+		 * 
+		 */		
+		public function deleteRoomCorners():void
+		{
+			for each(var vo:ICObject3DListData in _corners)
+			{
+				deleteFurnitureVoByValue(vo);
+			}
+			_corners.length=0;
 		}
 		/**
 		 * 执行移动处理
 		 * @param furnitureDir 家具的方向
 		 * @param position	家具的最新坐标
-		 * @return Vector.<ICData>
+		 * @return Boolean
 		 * 
 		 */		
-		public function excuteMove(furnitureDir:int,position:Vector3D):Vector.<ICData>
+		public function excuteMove(furnitureDir:int,position:Vector3D):Boolean
 		{
+			if(_selectVo==null) return false;
 			_state=KitchenGlobalModel.instance.STATE_MOUSEMOVE;
-			var vos:Vector.<ICData>;
-			var list:Furniture3DList=getFurnitureVoList(furnitureDir);
-			if(_selectVo.direction!=furnitureDir)
+			_selectVo.rotation=furnitureDir;
+			_selectVo.x=position.x;
+			_selectVo.y=position.y;
+			_selectVo.z=position.z;
+			var list:Furniture3DList=KitchenGlobalModel.instance.getBestFurnitureList(_selectVo,_rootList);
+			if(_selectVo.rotation!=furnitureDir)
 			{
+				//如果方向发生变化，打开最优链表中的吸附开关
 				list.canSorption=true;
-				_selectVo.direction=furnitureDir;
 			}
-			_selectVo.position.copyFrom(position);
-			vos=list.excuteSorption(_selectVo,true);
-			
-			return vos;
+			return list.excuteSorption(_selectVo);
 		}
 		/**
 		 * 执行鼠标按下处理  
@@ -118,16 +163,21 @@ package model
 		public function excuteMouseDown(furnitureID:String,furnitureDir:int):Boolean
 		{
 			_state=KitchenGlobalModel.instance.STATE_MOUSEDOWN;
-			var vo:CFurnitureVO=getFurnitureVo(furnitureID,furnitureDir);
+			var vo:CFurnitureVO=getFurnitureVo(furnitureID) as CFurnitureVO;
 			if(vo==null) KitchenErrorModel.instance.throwErrorForNull("CabinetModel2","excuteMouseDown","vo");
-			var list:Furniture3DList=getFurnitureVoList(vo.direction);
-			if(vo.mark)
+			if(vo.ownerID)
 			{
-				//选中已加入链表的数据,然后移除
-				list.remove(vo);
+				//选中已加入链表的数据
+				_selectList=getFurnitureVoListByID(vo.ownerID);
+				_selectList.remove(vo);
 			}
+			else
+			{
+				_selectList=null;
+			}
+			_selectPos=vo.position.clone();
+			_selectRotation=vo.rotation;
 			_selectVo=vo;
-			_selectVoPosition=_selectVo.position;
 			return true;
 		}
 		/**
@@ -138,7 +188,7 @@ package model
 		public function excuteMouseUp():Vector.<ICData>
 		{
 			_state=KitchenGlobalModel.instance.STATE_MOUSEUP;
-			var list:Furniture3DList=getFurnitureVoList(_selectVo.direction);
+			var list:Furniture3DList=KitchenGlobalModel.instance.getBestFurnitureList(_selectVo,_rootList);
 			var vos:Vector.<ICData>;
 			if(!list.judgeFull(_selectVo))
 			{
@@ -148,89 +198,81 @@ package model
 			{
 				vos=list.addByMapList(_selectVo);
 			}
+			if(vos==null && _selectList)
+			{
+				//检测如果没法放置家具，恢复到初始状态
+				_selectVo.rotation=_selectRotation;
+				_selectVo.x=_selectPos.x;
+				_selectVo.y=_selectPos.y;
+				_selectVo.z=_selectPos.z;
+				_selectList.add(_selectVo);
+			}
 			return vos;
 		}
-		
+		/**
+		 * 执行结束 
+		 * 
+		 */		
 		public function excuteEnd():void
 		{
-			var list:Furniture3DList=getFurnitureVoList(_selectVo.direction);
+			var list:Furniture3DList=getFurnitureVoListByID(_selectVo.ownerID);
 			switch(_state)
 			{
 				case KitchenGlobalModel.instance.STATE_MOUSEMOVE:
 				case KitchenGlobalModel.instance.STATE_MOUSEUP:
-					list.clear();
-					(list.prev as Furniture3DList).clear();
-					(list.next as Furniture3DList).clear();
+					list.clearCalculationData();
+					(list.prev as Furniture3DList).clearCalculationData();
+					(list.next as Furniture3DList).clearCalculationData();
 					break;
 			}
 			_selectVo=null;
+			_selectList=null;
+			_selectPos=null;
 			_state=KitchenGlobalModel.instance.STATE_DEFAULT;
 		}
 		public function createFurnitureVo(furnitureID:String,furnitureDirection:int,furnitureType:uint,length:uint,width:uint,height:uint):void
 		{
 			var vo:CFurnitureVO = new CFurnitureVO();
 			vo.uniqueID = furnitureID;
-			vo.direction = furnitureDirection;
 			vo.type = furnitureType;
 			vo.length=length;
 			vo.width=width;
 			vo.height=height;
+			vo.rotation = furnitureDirection;
 			furnitureVos.push(vo);
+			_selectVo=vo;
 		}
 		
-		public function deleteFurnitureVo(furnitureID:String,furnitureDirection:int):void
+		public function deleteFurnitureVo(furnitureID:String):void
 		{
-			var vo:CFurnitureVO=getFurnitureVo(furnitureID,furnitureDirection);
+			var vo:CObject3DVO=getFurnitureVo(furnitureID);
 			deleteFurnitureVoByValue(vo);
 		}
-		
-		protected function deleteFurnitureVoByValue(vo:ICObject3DData):void
-		{
-			if(vo is CFurnitureVO)
-			{
-				if((vo as CFurnitureVO).mark)
-				{
-					getFurnitureVoList(vo.direction).remove(vo);
-				}
-			}
-			var index:int=furnitureVos.indexOf(vo);
-			if(index>=0)
-			{
-				furnitureVos.removeAt(index);
-				vo.clear();
-			}
-			
-		}
-		/**
-		 * 删除补板 
-		 * 
-		 */		
-		public function deleteShelterVos():void
-		{
-			for each(var vo:ICObject3DData in _shelterVos)
-			{
-				deleteFurnitureVoByValue(vo);
-			}
-			_shelterVos.length=0;
-		}
-		/**
-		 * 删除台面 
-		 * 
-		 */		
-		public function deleteTableBoardVos():void
-		{
-			for each(var vo:ICObject3DData in _tableBoardVos)
-			{
-				deleteFurnitureVoByValue(vo);
-			}
-			_tableBoardVos.length=0;
-		}
-		
-		public function initModel():void
+		public function initModel(floorID:String):void
 		{
 			//初始化单循环双向链表结构
-			_rootList=new Furniture3DList(0);
-			KitchenGlobalModel.instance.initKitchen(_rootList);
+			_floorID=floorID;
+			_rootList=KitchenGlobalModel.instance.initKitchenListByWall(KitchenGlobalModel.instance.OBJECT3D_CABINET,_floorID);
+		}
+		
+		public function clear():void
+		{
+			_selectList=null;
+			_selectPos=null;
+			_selectVo=null;
+			var num:int;
+			for(var child:IDoubleNode=_rootList; num==0 || child!=_rootList; child=child.next)
+			{
+				child.unlink();
+				(child as IDoubleList).clear();
+				num++;
+			}
+			for each(var vo:CObject3DVO in furnitureVos)
+			{
+				vo.clear();
+			}
+			furnitureVos.length=0;
+			_corners.length=0;
 		}
 	}
 }

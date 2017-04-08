@@ -5,10 +5,12 @@ package collection
 	import cloud.core.collections.DoubleListNode;
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
+	import cloud.core.interfaces.ICObject3DData;
 	
 	import model.KitchenGlobalModel;
-	import model.vo.CFurnitureListVO;
 	import model.vo.CFurnitureVO;
+	import model.vo.CObject3DListVO;
+	import model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
 	
@@ -27,9 +29,9 @@ package collection
 		//一段节点的长度
 		private var _tmpLength:Number=0;
 		
-		public function get listVo():CFurnitureListVO
+		public function get listVo():CObject3DListVO
 		{
-			return _data as CFurnitureListVO;
+			return _data as CObject3DListVO;
 		}
 		
 		public function get canSorption():Boolean
@@ -40,9 +42,9 @@ package collection
 		{
 			_canSorption=value;
 		}
-		public function get direction():int
+		public function get rotation():int
 		{
-			return listVo.direction;
+			return listVo.rotation;
 		}
 		public function get width():Number
 		{
@@ -83,64 +85,47 @@ package collection
 			return _currentNode as FurnitureNode;
 		}
 		
-		public function Furniture3DList(direction:int)
+		public function Furniture3DList(listVo:CObject3DListVO)
 		{
-			_data=new CFurnitureListVO();
-			listVo.direction=direction;
+			super(listVo);
 		}
 		/**
 		 * map回调函数，计算一段链表中的节点总长度
 		 * @param node	当前的节点
 		 * 
 		 */		
-		private function doCalculateLength(nodeData:ICData):void
+		private function doCalculateLength(node:IDoubleNode):void
 		{
-			_tmpLength+=(nodeData as CFurnitureVO).length;
+			_tmpLength+=(node.nodeData as CObject3DVO).length;
 		}
-		private function doUpdateNodeSize(vo:CFurnitureVO):void
+		private function doUpdateNodeSize(node:IDoubleNode):void
 		{
+			var vo:ICObject3DData=node.nodeData as ICObject3DData;
 			listVo.length+=vo.length;
 			if(_lastWidth<vo.width) 
-			{
 				_lastWidth=vo.width;
-			}
-			if(_lastHeight<vo.height) _lastHeight=vo.height;
+			if(_lastHeight<vo.height) 
+				_lastHeight=vo.height;
 		}
 		/**
 		 * 修正某一家具节点数据 
-		 * @param vo
+		 * @param node
 		 * 
 		 */		
-		private function doFixNodePosition(vo:ICData):void
+		private function doFixNodePosition(node:IDoubleNode):void
 		{
-			KitchenGlobalModel.instance.fixPostion(vo,this);
-		}
-		/**
-		 *  通过节点之间的距离判断是否能够执行吸附
-		 * @param sourceVo		源节点
-		 * @param targetVo		目标节点
-		 * @return Boolean
-		 * 
-		 */		
-		private function judgeSorptionByDistance(sourceVo:CFurnitureVO,targetVo:CFurnitureVO):Boolean
-		{
-			var distance:Number;
-			var dis:Number;
-			distance=Vector3D.distance(sourceVo.position,targetVo.position);
-			dis=KitchenGlobalModel.instance.SORPTION_RADIUS;
-			return distance<=dis;
+			KitchenGlobalModel.instance.fixPostion(node.nodeData,this);
 		}
 		/**
 		 * 判断当前节点与源节点数据的距离，决定是否执行吸附操作   
 		 * @param opreateVo	
 		 * @param node
-		 * @param isNext
 		 * @return FurnitureNode	返回吸附节点
 		 * 
 		 */						
-		private function doJudgeSorption(source:CFurnitureVO,node:FurnitureNode,isNext:Boolean):FurnitureNode
+		private function doJudgeSorption(source:ICData,node:IDoubleNode):IDoubleNode
 		{
-			if(judgeSorptionByDistance(source,node.furnitureVo))
+			if(Math.abs(source.compare(node.nodeData))<=KitchenGlobalModel.instance.SORPTION_RADIUS)
 			{
 				if(_canSorption)
 				{
@@ -150,7 +135,7 @@ package collection
 			}
 			else if(!_canSorption)
 			{
-				//距离达不到吸附要求,吸附标记为true
+				//距离达不到吸附要求,开启吸附开关
 				_canSorption=true;
 			}
 			return null;
@@ -166,7 +151,7 @@ package collection
 			{
 				//最大宽度发生改变
 				_invalidFix=true;
-				listVo.width=_lastWidth;
+				listVo.width=_lastWidth;width
 			}
 			if(height!=_lastHeight)
 			{
@@ -180,7 +165,7 @@ package collection
 			var nodeData:ICData
 			if(node==null)
 			{
-				nodeData=isNext?headNode.nodeData:endNode.nodeData;
+				nodeData=isNext?startNode.nodeData:endNode.nodeData;
 				forEachNode(doCalculateLength,isNext);
 			}
 			else
@@ -200,7 +185,7 @@ package collection
 			
 			var reverseNode:IDoubleNode;
 			var orderNode:IDoubleNode;
-			
+
 			var isNeedReverse:Boolean;
 			if(node!=null)
 			{
@@ -220,18 +205,18 @@ package collection
 				}
 				else if(!judgeNeedReverse(reverseNode,isNext))
 				{
-					//按照当前遍历顺序，刷新坐标
+					//不需要反转，按照当前遍历顺序，刷新坐标
 					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,reverseNode,this,isNext);
 				}
 				else if(!judgeNeedReverse(orderNode,!isNext))
 				{
-					//按照相反方向遍历，刷新坐标
+					//需要反转，按照相反方向遍历，刷新坐标
 					KitchenGlobalModel.instance.mapNodeToUpdatePosition(node,orderNode,this,!isNext);
 				}
 				else
 				{
 					//都需要反转，说明整条链从根节点开始，所有节点需要重排
-					KitchenGlobalModel.instance.mapNodeToUpdatePosition(isNext?endNode:headNode,null,this,!isNext,true);
+					KitchenGlobalModel.instance.mapNodeToUpdatePosition(isNext?endNode:startNode,null,this,!isNext,true);
 				}
 			}
 		}
@@ -249,9 +234,9 @@ package collection
 		 * @return Boolean
 		 * 
 		 */		
-		public function judgeFull(sourceVo:CFurnitureVO):Boolean
+		public function judgeFull(sourceVo:CObject3DVO):Boolean
 		{
-			return headList.width+endList.width+sourceVo.length+length>=Vector3D.distance(listVo.headPos,listVo.endPos);
+			return headList.width+endList.width+sourceVo.length+length>=Vector3D.distance(listVo.startPos,listVo.endPos);
 		}
 		private var updatePosNum:uint;
 		private var clearNum:uint;
@@ -263,34 +248,15 @@ package collection
 		 * @return Vector.<ICData>
 		 * 
 		 */		
-		public function excuteSorption(sourceVo:CFurnitureVO,isDirectionChanged:Boolean):Vector.<ICData>
+		public function excuteSorption(sourceVo:ICData):Boolean
 		{
-			_canSorption=isDirectionChanged;
 			//只有根节点时，不执行吸附，返回空
-			if(headNode==null || (numberChildren==1 && sourceVo==headNode.nodeData)) return null;
+			if(startNode==null || (numberChildren==1 && sourceVo==startNode.nodeData)) return false;
 			if(numberChildren>0)
 			{
-				var isNext:Boolean=sourceVo.compare(_currentNode.nodeData)<0;
-				var targetNode:FurnitureNode=compareFromNow(sourceVo,doJudgeSorption,isNext);
-				if(targetNode!=null)
-				{
-					//执行吸附操作,更新链表
-					if(!judgeFull(sourceVo))
-					{
-						//开启吸附的状态下，执行吸附操作
-						isNext=sourceVo.compare(targetNode.nodeData)<0;
-						doAddNode(sourceVo,targetNode,isNext);
-						updateList(isNext);
-					}
-					else
-					{
-						//链表已满
-						_isFullState=true;
-						addByMapList(sourceVo);
-					}
-				}
+				return doJudgeSorption(sourceVo,searchFromNowByCondition(sourceVo,bestCondition))!=null;
 			}
-			return changedVos.length>0 ? changedVos : null;
+			return false;
 		}
 		/**
 		 * 遍历所有相连链表，添加家具数据，如果添加成功，返回发生变动的所有家具数据集合
@@ -298,17 +264,15 @@ package collection
 		 * @return Vector.<ICData> 发生变动的所有家具数据集合
 		 * 
 		 */		
-		public function addByMapList(sourceVo:CFurnitureVO):Vector.<ICData>
+		public function addByMapList(sourceVo:CObject3DVO):Vector.<ICData>
 		{
-			var isNext:Boolean=Vector3D.distance(this.listVo.endPos,sourceVo.position)<Vector3D.distance(this.listVo.headPos,sourceVo.position);
-			var list:Furniture3DList=isNext?this.endList:this.headList;
+			var isNext:Boolean=Vector3D.distance(this.listVo.endPos,sourceVo.position)<Vector3D.distance(this.listVo.startPos,sourceVo.position);
 			var vos:Vector.<ICData>;
-			for(;list!=this; list=isNext?list.endList:list.headList)
+			for(var list:Furniture3DList=isNext?this.endList:this.headList;list!=this; list=isNext?list.endList:list.headList)
 			{
 				if(!list.isFull)
 				{
 					//找到链表，自动添加
-					sourceVo.direction=list.direction;
 					vos=list.add(sourceVo);
 					break;
 				}
@@ -336,25 +300,27 @@ package collection
 				fixNodePosition(isNext);
 			}
 		}
-		override protected function doAddNode(opreateData:ICData, node:IDoubleNode, isNext:Boolean):Boolean
+		override protected function doAddNode(opreateData:ICData, node:IDoubleNode):Boolean
 		{
 			_invalidPosition=true;
 			var furnitureVo:CFurnitureVO=opreateData as CFurnitureVO;
 			furnitureVo.direction=listVo.direction;
-			furnitureVo.mark=listVo.direction.toString();
+			furnitureVo.rotation=listVo.rotation;
+			furnitureVo.ownerID=listVo.uniqueID;
 			furnitureVo.isLife=true;
-			return super.doAddNode(opreateData,node,isNext);
+			return super.doAddNode(opreateData,node);
 		}
 		override protected function doRemoveNode(opreateData:ICData):void
 		{
-			(opreateData as CFurnitureVO).mark=null;
+			(opreateData as CFurnitureVO).ownerID=null;
 			super.doRemoveNode(opreateData);
 		}
-		override public function clear():void
+		override public function clearCalculationData():void
 		{
-			super.clear();
+			super.clearCalculationData();
 			_tmpLength=0;
 			_canSorption=false;
 		}
+		
 	}
 }

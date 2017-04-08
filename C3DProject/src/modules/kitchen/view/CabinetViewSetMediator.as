@@ -23,7 +23,6 @@ package modules.kitchen.view
 	import model.CabinetModel;
 	import model.HangingCabinetModel;
 	import model.KitchenGlobalModel;
-	import model.vo.CFurnitureVO;
 	
 	import ns.cloudLib;
 	
@@ -71,10 +70,10 @@ package modules.kitchen.view
 		{
 			switch(cabinetSet.currentMeshType)
 			{
-				case KitchenGlobalModel.instance.MESHTYPE_CABINET:
-				case KitchenGlobalModel.instance.MESHTYPE_SINK:
+				case KitchenGlobalModel.instance.OBJECT3D_CABINET:
+				case KitchenGlobalModel.instance.OBJECT3D_BASIN:
 					return cabinetModel;
-				case KitchenGlobalModel.instance.MESHTYPE_HANGING_CABINET:
+				case KitchenGlobalModel.instance.OBJECT3D_HANGING_CABINET:
 					return hangingCabinetModel;
 				default:
 					return null;
@@ -95,16 +94,12 @@ package modules.kitchen.view
 		{
 			var furnitureModel:ICFurnitureModel=getModel(cabinetSet.currentMeshType);
 			scene.calculateMouseRay(Vector3DUtil.RAY_3D,evt.localX,evt.localY);
-			Geometry3DUtil.intersectPlaneByRay(Vector3DUtil.RAY_3D,Vector3DUtil.ZERO,Vector3DUtil.AXIS_Z,_intersectPos);
+			Geometry3DUtil.intersectPlaneByRay(Vector3DUtil.RAY_3D,Vector3DUtil.ZERO,Vector3D.Z_AXIS,_intersectPos);
 			cabinetSet.fixPos(_intersectPos,globalModel.roomLength,globalModel.roomWidth,globalModel.floorHeight);
-			var vos:Vector.<ICData>=furnitureModel.excuteMove(cabinetSet.currentRotation,_intersectPos)
-			if(vos)
+			var bool:Boolean=furnitureModel.excuteMove(cabinetSet.currentRotation,_intersectPos);
+			if(bool)
 			{
-				updateMeshPosition(vos);
-				scene.view.removeEventListener(MouseEvent.MOUSE_MOVE,onMouseMove);
-				scene.view.removeEventListener(MouseEvent.MOUSE_UP,onMouseUp);
-				scene.controller.enable();
-				furnitureModel.excuteEnd();
+				onMouseUp(evt);
 			}
 			else
 			{
@@ -139,7 +134,7 @@ package modules.kitchen.view
 					{
 						if(vo.isLife)
 						{
-							mesh.rotationZ=MathUtil.toRadians(vo.direction);
+							mesh.rotationZ=MathUtil.toRadians(vo.rotation);
 							mesh.x=vo.position.x;
 							mesh.y=vo.position.y;
 							mesh.z=vo.position.z;
@@ -157,7 +152,7 @@ package modules.kitchen.view
 				for(i=0;i<meshes.length;i++)
 				{
 					mesh=meshes[i];
-					furnitureModel.deleteFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ));
+					furnitureModel.deleteFurnitureVo(mesh.UniqueID);
 					cabinetSet.removeFurnitureView(mesh);
 //					mesh.Dispose(false);
 				}
@@ -186,27 +181,23 @@ package modules.kitchen.view
 		{
 			if(_tableBoard)
 			{
-				deleteTableBoard();
+				delelteCorners();
 			}
 			else
 			{
 				createTableBoard();
 			}
 		}
-		private function deleteTableBoard():void
-		{
-			cabinetModel.deleteTableBoardVos();
-			cabinetSet.removeFurnitureView(_tableBoard);
-			_tableBoard.dispose();
-			_tableBoard=null;
-		}
 		private function createTableBoard():void
 		{
-			var vos:Vector.<ICData>=cabinetModel.createTableBoard();
+			var vos:Vector.<ICObject3DData>=cabinetModel.getRoomCorners();
 			if(vos)
 			{
 				_tableBoard=new CTableBoardView();
-				_tableBoard.createTableBoard(vos);
+				_tableBoard.createTableBoards(vos);
+				var furniturevos:Vector.<ICObject3DData>=cabinetModel.getFurnituresInList();
+				if(furniturevos)
+					_tableBoard.createTableBoards(furniturevos);
 				var child:CBox;
 				for(var i:int=0; i<_tableBoard.numChildren; i++)
 				{
@@ -227,27 +218,37 @@ package modules.kitchen.view
 		{
 			if(_shelter)
 			{
-				deleteShelter();
+				delelteCorners();
 			}
 			else
 			{
 				createShelter();
 			}
 		}
-		private function deleteShelter():void
+		private function delelteCorners():void
 		{
-			cabinetModel.deleteShelterVos();
-			cabinetSet.removeFurnitureView(_shelter);
-			_shelter.dispose();
-			_shelter=null;
+			if(_shelter)
+			{
+				cabinetSet.removeFurnitureView(_shelter);
+				_shelter.dispose();
+				_shelter=null;
+			}
+			if(_tableBoard)
+			{
+				cabinetSet.removeFurnitureView(_tableBoard);
+				_tableBoard.dispose();
+				_tableBoard=null;
+			}
+			cabinetModel.deleteRoomCorners();
 		}
+		
 		private function createShelter():void
 		{
-			var vos:Vector.<ICData>=cabinetModel.createShelter();
+			var vos:Vector.<ICObject3DData>=cabinetModel.getRoomCorners();
 			if(vos)
 			{
 				_shelter=new CShelterView();
-				_shelter.createShelter(vos);
+				_shelter.createShelters(vos);
 				var child:CBox;
 				for(var i:int=0; i<_shelter.numChildren; i++)
 				{

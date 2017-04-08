@@ -1,5 +1,6 @@
 package interfaces
 {
+	import cloud.core.interfaces.ICStatus;
 
 	/**
 	 *  应用接口
@@ -12,15 +13,5 @@ package interfaces
 		 * @return ICKithenModule
 		 */		
 		function getKitchenModuleImp():ICKithenModule;		
-		/**
-		 * 启动厨房功能应用 
-		 * 
-		 */		
-		function start():void;
-		/**
-		 * 停止厨房功能应用 
-		 * 
-		 */		
-		function stop():void;
 	}
 }

@@ -36,9 +36,12 @@ package core.view
 		 */		
 		public var rightDownPos:Vector3D=new Vector3D();
 		
+		public var wallPoses:Vector.<Vector3D>;
+		
 		public function WallViewSet()
 		{
 			super();
+			wallPoses=new Vector.<Vector3D>();
 		}
 		
 		public function createWall(isThin:Boolean,width:uint,length:uint,height:uint=1):void
@@ -86,6 +89,9 @@ package core.view
 			rightUpPos.setTo(length>>1,width>>1,width>>1);
 			leftDownPos.setTo(-length>>1,-width>>1,width>>1);
 			rightDownPos.setTo(length>>1,-width>>1,width>>1);
+			
+			
+			wallPoses.push(leftUpPos,rightUpPos,rightDownPos,leftDownPos);
 		}
 
 	}

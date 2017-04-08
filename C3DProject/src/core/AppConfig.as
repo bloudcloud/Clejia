@@ -1,8 +1,10 @@
 package core
 {
-	import core.model.GlobalModel;
-	
 	import flash.events.IEventDispatcher;
+	
+	import alternativa.engine3d.core.Debug;
+	
+	import core.model.GlobalModel;
 	
 	import robotlegs.bender.extensions.contextView.ContextView;
 	import robotlegs.bender.extensions.eventCommandMap.api.IEventCommandMap;
@@ -31,7 +33,7 @@ package core
 		
 		public function configure():void
 		{
-			context.logLevel=LogLevel.DEBUG;
+			context.logLevel=CONFIG::debug ? LogLevel.DEBUG : LogLevel.FATAL;
 			//数据模型
 			context.injector.map(GlobalModel).asSingleton();
 			//视图

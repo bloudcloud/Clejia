@@ -3,22 +3,28 @@ package interfaces
 	import flash.geom.Vector3D;
 	
 	import cloud.core.interfaces.ICData;
+	import cloud.core.interfaces.ICStatus;
 
 	/**
 	 *  厨房模块接口
 	 * @author cloud
 	 */
-	public interface ICKithenModule
+	public interface ICKithenModule extends ICStatus
 	{
 		/**
-		 * 导入墙的坐标(四面墙的高度相等)
-		 * @param ptl	左上顶点
-		 * @param ptr	右上顶点
-		 * @param pbl	左下顶点
-		 * @param pbr	右下顶点
+		 * 是否拥有地面ID 
+		 * @param floorID	地面ID
+		 * @return Boolean
 		 * 
 		 */		
-		function importWallPosition(ptl:Vector3D,ptr:Vector3D,pbl:Vector3D,pbr:Vector3D):void;
+		function hasFloorID(floorID:String):Boolean;
+		/**
+		 * 导入墙的围点3D坐标 
+		 * @param poses	3D围点数组
+		 * @param floorID	 所围成的地面ID
+		 * 
+		 */		
+		function importWallPosition(poses:Vector.<Vector3D>,floorID:String):void;
 		/**
 		 * 创建厨房家具可视对象数据 
 		 * @param furnitureID	家具唯一id
@@ -38,23 +44,23 @@ package interfaces
 		 * 
 		 */	
 		function deleteKitchenFurniture(furnitureID:String,furnitureDirection:int,furnitureType:uint):void;
-		/**
-		 * 更新家具的唯一ID 
-		 * @param furnitureID	旧的家具ID
-		 * @param furnitureType	家具类型
-		 * @param uniqueID	新的家具唯一ID
-		 * 
-		 */		
-		function updateFurnitureUniqueID(furnitureID:String,furnitureType:uint,uniqueID:String):void;
+//		/**
+//		 * 更新家具的唯一ID 
+//		 * @param furnitureID	旧的家具ID
+//		 * @param furnitureType	家具类型
+//		 * @param uniqueID	新的家具唯一ID
+//		 * 
+//		 */		
+//		function updateFurnitureUniqueID(furnitureID:String,furnitureType:uint,uniqueID:String):void;
 		/**
 		 * 执行移动处理
 		 * @param furnitureDir 家具的方向
 		 * @param furnitureType	家具的类型
 		 * @param position	家具的最新坐标
-		 * @return Vector.<ICData>		反生改变的家具数据集合
+		 * @return Boolean	是否中断移动
 		 * 
 		 */				
-		function excuteMove(furnitureDir:int,furnitureType:uint,position:Vector3D):Vector.<ICData>;
+		function excuteMove(furnitureDir:int,furnitureType:uint,position:Vector3D):Boolean;
 		/**
 		 * 执行鼠标按下处理  
 		 * @param furnitureID	家具的唯一id

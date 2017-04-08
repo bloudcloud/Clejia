@@ -30,7 +30,6 @@ package model
 		public function throwErrorForNull(className:String,functionName:String,varName:String):void
 		{
 			CDebug.instance.throwError(className,functionName,varName,"为空！");
-			
 		}
 		/**
 		 * 根据信息 抛出错误 

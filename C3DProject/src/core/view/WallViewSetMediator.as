@@ -1,6 +1,12 @@
 package core.view
 {
+	import flash.geom.Vector3D;
+	
+	import mx.utils.UIDUtil;
+	
 	import a3d.support.Scene3D;
+	
+	import cloud.core.utils.CDebug;
 	
 	import core.model.GlobalModel;
 	
@@ -42,12 +48,10 @@ package core.view
 		{
 			super.initialize();
 			wallSet.createWall(global.isThin,global.roomWidth,global.roomLength,global.floorHeight);
-			KitchenGlobalModel.instance.leftTopWallPos=wallSet.leftUpPos;
-			KitchenGlobalModel.instance.rightTopWallPos=wallSet.rightUpPos;
-			KitchenGlobalModel.instance.leftBottomWallPos=wallSet.leftDownPos;
-			KitchenGlobalModel.instance.rightBottomWallPos=wallSet.rightDownPos;
-			cabinetModel.initModel();
-			hangingModel.initModel();
+			var floorID:String=UIDUtil.createUID();
+			KitchenGlobalModel.instance.parseWalls(wallSet.wallPoses,floorID);
+			cabinetModel.initModel(floorID);
+			hangingModel.initModel(floorID);
 		}
 	}
 }
