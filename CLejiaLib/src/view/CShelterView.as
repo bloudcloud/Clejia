@@ -10,7 +10,6 @@ package view
 	import alternativa.engine3d.materials.Material;
 	
 	import cloud.core.interfaces.ICObject3DData;
-	import cloud.core.interfaces.ICObject3DListData;
 	import cloud.core.utils.Geometry3DUtil;
 	import cloud.core.utils.Matrix3DUtil;
 	
@@ -90,9 +89,10 @@ package view
 		 */
 		public function createShelters(vos:Vector.<ICObject3DData>):void
 		{
-			for each(var vo:CRoomCornerVO in vos)
+			for each(var vo:ICObject3DData in vos)
 			{
-				createShelter(vo);
+//				createShelter(vo);
+				doCreateShelter(vo.length,vo.width,vo.height,vo.rotation,vo.position.x,vo.position.y,vo.position.z);
 			}
 		}
 

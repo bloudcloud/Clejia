@@ -1,21 +1,16 @@
 package rl2.extension
 {
+	import flash.events.IEventDispatcher;
+	
 	import a3d.support.Scene3D;
 	
-	import alternativa.engine3d.core.View;
 	import alternativa.engine3d.core.events.Event3D;
 	
 	import core.view.BaseFurnitureViewSet;
 	
-	import dict.EventTypeDict;
-	
-	import flash.events.IEventDispatcher;
-	
 	import robotlegs.bender.extensions.mediatorMap.api.IMediatorMap;
 	import robotlegs.bender.framework.api.IContext;
 	import robotlegs.bender.framework.api.ILogger;
-	
-	import utils.DatasEvent;
 
 	/**
 	 *  厨房功能模块

@@ -36,6 +36,7 @@ package modules.kitchen.service
 		
 		private function onLoadMesh(evt:DatasEvent):void
 		{
+//			_loader.LoadByCode((evt.data as L3DMaterialInformations).code);
 			_loader.Load(evt.data as L3DMaterialInformations);
 		}
 		private function onLoadComplete(evt:Event):void

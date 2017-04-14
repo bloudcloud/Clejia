@@ -1,0 +1,253 @@
+//Scene3D->Scene3D
+//主项目启动时就执行
+			kitchenModule=main.cmodules.getKitchenModuleImp();
+
+//Scene3D->Show45,Show3D
+//cloud
+			if(kitchenModule)
+			{
+				if(!kitchenModule.isRunning)
+					kitchenModule.start();
+				importWallToKitchenModule();
+			}
+
+//Scene3D->importWallToKitchenModule
+private function importWallToKitchenModule():void
+		{
+			var points:Vector.<Point>
+			var wallPoses:Vector.<Vector3D>;
+			var tmpPos:Vector3D;
+			for each(var floor3D:Floor3D in floors)
+			{
+				if(floor3D.Exist && !kitchenModule.hasFloorID(floor3D.FloorID))
+				{
+					points=floor3D.GetRoundPoints();
+					if(points)
+					{
+						wallPoses=new Vector.<Vector3D>();
+						
+						for	(var i:int=0; i<points.length; i++)
+						{
+							tmpPos=new Vector3D(points[i].x,points[i].y,floor3D.RoomHeight);
+							wallPoses.push(tmpPos);
+						}
+						kitchenModule.importWallPosition(wallPoses,floor3D.FloorID);
+					}
+					
+				}
+			}
+			
+		}
+
+//Furniture3D->
+/**
+		 * 创建厨房功能模块的实体对象 
+		 * 
+		 */		
+		private function createKitchenModuleEntity():void
+		{
+			if(IsParamCupBoardCabinet || IsParamCupBoardHangCabinet || IsParamCupBoardBasin)
+			{
+				scene3D.kitchenModule.createKitchenFurniture(FurnitureID,Rotation,Catalog,Length,Width,Height);
+			}
+		}
+		private function removeKitchenModuleEntity():void
+		{
+			if(IsParamCupBoardCabinet || IsParamCupBoardHangCabinet || IsParamCupBoardBasin)
+			{
+				scene3D.kitchenModule.deleteKitchenFurniture(FurnitureID,Rotation,Catalog);
+			}
+		}
+
+//Furniture3D->OnMouseMoveFurniture
+if(Scene3D.CurrentFurniture.IsParamCupBoardCabinet || Scene3D.CurrentFurniture.IsParamCupBoardHangCabinet || Scene3D.CurrentFurniture.IsParamCupBoardBasin)
+			{
+				//鼠标操作时地柜或吊柜已经移动完成，添加吸附或旋转等自定义方法
+				var vos:Vector.<ICData>;
+				if(scene3D.kitchenModule)
+				{
+					return scene3D.kitchenModule.excuteMove(Rotation,Catalog,position);
+				}
+
+//Core3D->OnMouseDown3D
+if(Scene3D.CurrentFurniture &&
+						(Scene3D.CurrentFurniture.IsParamCupBoardCabinet || Scene3D.CurrentFurniture.IsParamCupBoardHangCabinet || Scene3D.CurrentFurniture.IsParamCupBoardBasin))
+					{
+						//当前家具属于厨房，执行厨房模块的逻辑
+						//获取厨房所在的floor3D
+						m_scene.scene.ImportWallToKitchenModule(Scene3D.CurrentFurniture.LinkedFloor);
+						m_scene.scene.kitchenModule.excuteMouseDown(Scene3D.CurrentFurniture.FurnitureID,Scene3D.CurrentFurniture.Rotation,Scene3D.CurrentFurniture.Catalog);
+					}
+
+//Core3D->OnMouseUp3D->case Command3D.MoveObject:
+//判断当前家具是否是厨房家具，如果是执行厨房模块逻辑
+						if(Scene3D.CurrentFurniture && 
+							(Scene3D.CurrentFurniture.IsParamCupBoardCabinet || Scene3D.CurrentFurniture.IsParamCupBoardHangCabinet || Scene3D.CurrentFurniture.IsParamCupBoardBasin))
+						{
+							var vos:Vector.<ICData>=m_scene.scene.kitchenModule.excuteMouseUp(Scene3D.CurrentFurniture.Catalog);
+							if(vos)
+							{
+								for each(var vo:ICObject3DData in vos)
+								{
+									for each(var furniture:Furniture3D in m_scene.scene.Furnitures)
+									{
+										if(furniture.FurnitureID==vo.uniqueID)
+										{
+											furniture.PositionX = vo.position.x;
+											furniture.PositionY = vo.position.y;
+											furniture.PositionZ = vo.position.z;
+											furniture.Rotation = vo.direction;
+										}
+										
+									}
+								}
+								m_scene.scene.kitchenModule.excuteMouseEnd(furniture.Catalog);
+							}
+						}
+
+//Lively3D->
+//点击厨房
+			private function wardrobeFun():void
+			{
+				l3dLibraryView.visible = false;
+				l3dwardrobe.visible = true;
+			}
+			private function importKitchenL3DMaterialInfo(material:L3DMaterialInformations):void
+			{
+//				Command3D.CurrentCommand = Command3D.OnSelectKitchenPartFurniture;
+				ImportMaterial(material, 1);
+			}
+			//清除
+			private function wardrobeClearFun():void
+			{
+				for each(var furniture:Furniture3D in kitchenBuildFurnitures)
+				{
+					furniture.Dispose();
+				}
+				kitchenBuildFurnitures.length=0;
+				m_A3D.m_scene.scene.kitchenModule.clear();
+			}
+			//补板
+			private function wardrobePartnerFun():void
+			{
+				var mesh:L3DMesh;
+				var cur:Furniture3D=Scene3D.CurrentFurniture;
+				
+				var createMesh:ICFurnitureSet=m_A3D.m_scene.scene.kitchenModule.createShelter();
+				if(createMesh==null) return;
+				var l3dmodel:L3DModel=new L3DModel();
+				l3dmodel.Import(createMesh as Mesh,false,true);
+				mesh=l3dmodel.Export(Scene3D.GetStage3D());
+				var furniture:Furniture3D=Furniture3D.FromMesh(mesh,m_A3D.m_scene.scene);
+				if(furniture != null && furniture.Exist)
+				{					
+					kitchenBuildFurnitures.push(furniture);
+					m_A3D.m_RenderScene.addChild(mesh);
+				}
+			}
+			//报价
+			private function wardrobePriceFun():void
+			{
+				m_A3D.m_scene.scene.kitchenModule.getQuotes();
+			}
+			//台面
+			private function wardrobeTableFun():void
+			{
+				var cur:Furniture3D=Scene3D.CurrentFurniture;
+				var createMesh:ICFurnitureSet=m_A3D.m_scene.scene.kitchenModule.createTableBoard();
+				if(createMesh==null) return;
+				var l3dmodel:L3DModel=new L3DModel();
+				l3dmodel.Import(createMesh as Mesh,false,true);
+				var mesh:L3DMesh=l3dmodel.Export(Scene3D.GetStage3D());
+				var furniture:Furniture3D=Furniture3D.FromMesh(mesh,m_A3D.m_scene.scene);
+				if(furniture != null && furniture.Exist)
+				{					
+					kitchenBuildFurnitures.push(furniture);
+					m_A3D.m_RenderScene.addChild(mesh);
+				}
+			}
+
+//Lively3D->designHandler
+l3dwardrobe.AddItem = importKitchenL3DMaterialInfo;
+				l3dwardrobe.tableFun = wardrobeTableFun;
+				l3dwardrobe.clearFun = wardrobeClearFun;
+				l3dwardrobe.partnerFun = wardrobePartnerFun;
+				l3dwardrobe.priceFun = wardrobePriceFun;
+
+//Lively3D->HideAllMenus
+l3dwardrobe.visible = false;
+
+
+
+/**
+		 * 根据wallData创建放样模型 
+		 * 
+		 */		
+		private function createLoftingMeshes():void
+		{
+			//创建腰线
+			if(WallTilingExist)
+			{
+				var tilePlan:WallTilePlan;
+				var tilePlans:Array;
+				var loader:L3DLoadHelper;
+				var len:int=wallTileData.wallPlans.length;
+				var roundPoints:Vector.<Point>=GetRoundPoints(true);
+				for(var i:int=0; i<len; i++)
+				{
+					if(wallTileData.wallPlans[i]!=null && wallTileData.wallPlans[i].waistCount>0)
+					{
+						//有腰线
+						tilePlans=wallTileData.wallPlans[i].walltilePlans;
+						for each(tilePlan in tilePlans)
+						{
+							if(tilePlan.isWaist && tilePlan.waist3DCode && tilePlan.waist3DCode.length>0)
+							{
+								//需要创建放样模型,添加创建腰线的装修任务
+								addWaistDecorationTask(roundPoints,i,tilePlan);
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+		/**
+		 * 添加创建腰线的装修任务
+		 * @param roundPoints	地面围点数据，用于模型顶点的线性变换
+		 * @param index	当前墙的起始点在地面围点数据中的索引
+		 * @param tilePlan	腰线计划数据
+		 * 
+		 */		
+		private function addWaistDecorationTask(roundPoints:Vector.<Point>,index:int,tilePlan:WallTilePlan):void
+		{
+			var next:int=index==roundPoints.length-1 ? 0 : index+1;
+			var directionPoint:Point=roundPoints[next].subtract(roundPoints[index]);
+			
+			var taskVo:CTaskVO=new CTaskVO();
+			taskVo.type=Object3DDic.OBJECT3D_WAIST;
+			taskVo.url=tilePlan.waist3DUrl;
+			taskVo.x=roundPoints[index].x+directionPoint.x*.5;
+			taskVo.y=roundPoints[index].y+directionPoint.y*.5;
+			taskVo.z=tilePlan.startH*.1;
+			taskVo.direction=new Vector3D(directionPoint.x,directionPoint.y,0);
+			taskVo.length=tilePlan.width;
+			taskVo.height=tilePlan.height;
+			taskVo.endCallback=createWaistlineEnd;
+			taskVo.code=tilePlan.waist3DCode;
+			scene3D.decorationModule.addDecorationTask(taskVo,Scene3D.Main.m_A3D.m_Stage3D);
+		}
+		private function createWaistlineEnd(mesh:Mesh):void
+		{
+			var material:Material=mesh.getSurface(0).material;
+			var root:Mesh=new Mesh();
+			root.addChild(mesh);
+			var l3dModel:L3DModel=new L3DModel();
+			l3dModel.Import(root,false,true);
+			var l3dMesh:L3DMesh=l3dModel.Export(Scene3D.Main.m_A3D.m_Stage3D);
+			var child:L3DMesh=l3dMesh.getChildAt(0) as L3DMesh
+			child.addSurface(material,0,child.NumberTriangles);
+			var furniture3d:Furniture3D=Furniture3D.FromMesh(l3dMesh,scene3D);
+			Scene3D.Main.m_A3D.m_RenderScene.addChild(furniture3d.Mesh);
+		}

@@ -31,6 +31,8 @@
 			}
 			
 			private function completeHandler(e:Event):void {
+//				dv.setupqiangz();
+				//				dv.setupdiz();
 				login.addEventListener(L3DLogin.LOGINCOMPLETE,loginComplete);
 				login.Login("ZHS","000000");
 			}
@@ -60,6 +62,7 @@
 			  horizontalAlign="right"
 			  verticalAlign="middle">
 		<local:DecorationView id="dv"/>
+		<!--<local:TileView id="dv" width="100%" height="100%"/>-->
 	</s:VGroup>
 	<s:Button id="createTableBoard" label="台面" visible="false"
 			  click="createHandler(event)"/>

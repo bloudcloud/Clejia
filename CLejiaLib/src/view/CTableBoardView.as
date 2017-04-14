@@ -109,12 +109,13 @@ package view
 		 */
 		public function createTableBoards(vos:Vector.<ICObject3DData>):void
 		{
-			for(var i:int=0; i<vos.length; i++)
+			for each(var vo:ICObject3DData in vos)
 			{
-				if(vos[i] is CRoomCornerVO)
-					createTableBoardByCornerVo(vos[i] as CRoomCornerVO);
-				else if(vos[i] is CFurnitureVO)
-					createTableBoardByFurnitureVo(vos[i] as CFurnitureVO);
+				doCreateTableBoard(vo.length,vo.width,vo.height,vo.rotation,vo.position);
+//				if(vos[i] is CRoomCornerVO)
+//					createTableBoardByCornerVo(vos[i] as CRoomCornerVO);
+//				else if(vos[i] is CFurnitureVO)
+//					createTableBoardByFurnitureVo(vos[i] as CFurnitureVO);
 			}
 		}
 		override public function dispose():void

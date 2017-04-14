@@ -6,7 +6,11 @@ package modules.kitchen.view
 	import a3d.support.Scene3D;
 	
 	import alternativa.engine3d.core.events.MouseEvent3D;
+	import alternativa.engine3d.materials.Material;
+	import alternativa.engine3d.objects.Mesh;
 	import alternativa.engine3d.primitives.Plane;
+	
+	import bearas.geometrytool.IGeometryVertex;
 	
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3DData;
@@ -17,12 +21,21 @@ package modules.kitchen.view
 	import core.model.GlobalModel;
 	
 	import dict.EventTypeDict;
+	import dict.Object3DDict;
 	
 	import interfaces.ICFurnitureModel;
+	
+	import l3dbuild.geometry.L3DGeometryData;
+	import l3dbuild.geometry.L3DVertex;
+	import l3dbuild.geometry.ProcessPathExtrude;
+	
+	import main.CDecorationModuleImp;
 	
 	import model.CabinetModel;
 	import model.HangingCabinetModel;
 	import model.KitchenGlobalModel;
+	import model.vo.CWallVO;
+	import model.vo.task.CTaskVO;
 	
 	import ns.cloudLib;
 	
@@ -70,10 +83,10 @@ package modules.kitchen.view
 		{
 			switch(cabinetSet.currentMeshType)
 			{
-				case KitchenGlobalModel.instance.OBJECT3D_CABINET:
-				case KitchenGlobalModel.instance.OBJECT3D_BASIN:
+				case Object3DDict.OBJECT3D_CABINET:
+				case Object3DDict.OBJECT3D_BASIN:
 					return cabinetModel;
-				case KitchenGlobalModel.instance.OBJECT3D_HANGING_CABINET:
+				case Object3DDict.OBJECT3D_HANGING_CABINET:
 					return hangingCabinetModel;
 				default:
 					return null;
@@ -93,6 +106,7 @@ package modules.kitchen.view
 		private function onMouseMove(evt:MouseEvent):void
 		{
 			var furnitureModel:ICFurnitureModel=getModel(cabinetSet.currentMeshType);
+			var lastPos:Vector3D=_intersectPos;
 			scene.calculateMouseRay(Vector3DUtil.RAY_3D,evt.localX,evt.localY);
 			Geometry3DUtil.intersectPlaneByRay(Vector3DUtil.RAY_3D,Vector3DUtil.ZERO,Vector3D.Z_AXIS,_intersectPos);
 			cabinetSet.fixPos(_intersectPos,globalModel.roomLength,globalModel.roomWidth,globalModel.floorHeight);
@@ -119,6 +133,28 @@ package modules.kitchen.view
 				updateMeshPosition(vos);
 				furnitureModel.excuteEnd();
 			}
+			//test
+			var geo:L3DGeometryData=new L3DGeometryData();
+			var sourceGeo:L3DGeometryData=new L3DGeometryData();
+			var sourceMesh:L3DMesh=cabinetSet.meshes[i].getChildAt(0) as L3DMesh
+			sourceGeo.readFromMesh(sourceMesh);
+			var paths:Vector.<Vector3D>=new Vector.<Vector3D>();
+			var walls:Vector.<CWallVO>=KitchenGlobalModel.instance.wallVos;
+			for(var i:int=0; i<walls.length; i++)
+			{
+				paths.push(walls[i].startPos.clone());
+			}
+			var func:Function=function travelFunction(vertex:IGeometryVertex,pos:Vector3D,dir:Vector3D):void{
+				var v:L3DVertex = vertex as  L3DVertex;
+				var length:Number = pos.subtract(v.position).dotProduct(dir);
+				v.texcord0.y += length/100;
+				v.texcord1.y += length/100;
+			};
+			ProcessPathExtrude(geo,sourceGeo,paths,func);
+			var mesh:Mesh=new Mesh();
+			var material:Material=sourceMesh.getSurface(0).material;
+			geo.writeToMesh(mesh,material);
+			cabinetSet.addFurnitureView(mesh);
 		}
 		private function updateMeshPosition(vos:Vector.<ICData>):void
 		{
@@ -167,8 +203,10 @@ package modules.kitchen.view
 		private function onCreateKitchenFurniture(evt:DatasEvent):void
 		{
 			var mesh:L3DMesh = evt.data as L3DMesh;
+			var childMesh:L3DMesh=mesh.getChildAt(0) as L3DMesh;
+			var material:Material=childMesh.getSurface(0).material;
 			mesh.addEventListener(MouseEvent3D.MOUSE_DOWN,onMouseDown);
-			cabinetSet.createCabinet(mesh);
+	 		cabinetSet.createCabinet(mesh);
 			getModel(mesh.catalog).createFurnitureVo(mesh.UniqueID,MathUtil.toDegrees(mesh.rotationZ),mesh.catalog,mesh.Length,mesh.Width,mesh.Height);
 		}
 		
@@ -190,14 +228,11 @@ package modules.kitchen.view
 		}
 		private function createTableBoard():void
 		{
-			var vos:Vector.<ICObject3DData>=cabinetModel.getRoomCorners();
+			var vos:Vector.<ICObject3DData>=cabinetModel.createTableBoards();
 			if(vos)
 			{
 				_tableBoard=new CTableBoardView();
 				_tableBoard.createTableBoards(vos);
-				var furniturevos:Vector.<ICObject3DData>=cabinetModel.getFurnituresInList();
-				if(furniturevos)
-					_tableBoard.createTableBoards(furniturevos);
 				var child:CBox;
 				for(var i:int=0; i<_tableBoard.numChildren; i++)
 				{
@@ -232,19 +267,22 @@ package modules.kitchen.view
 				cabinetSet.removeFurnitureView(_shelter);
 				_shelter.dispose();
 				_shelter=null;
+				cabinetModel.deleteShelters();
 			}
 			if(_tableBoard)
 			{
 				cabinetSet.removeFurnitureView(_tableBoard);
 				_tableBoard.dispose();
 				_tableBoard=null;
+				cabinetModel.deleteTableBoards();
 			}
 			cabinetModel.deleteRoomCorners();
 		}
 		
+		private var decorationModule:CDecorationModuleImp;
 		private function createShelter():void
 		{
-			var vos:Vector.<ICObject3DData>=cabinetModel.getRoomCorners();
+			var vos:Vector.<ICObject3DData>=cabinetModel.createShelterVos();
 			if(vos)
 			{
 				_shelter=new CShelterView();
@@ -259,9 +297,33 @@ package modules.kitchen.view
 				}
 				cabinetSet.addFurnitureView(_shelter);
 			}
-			
+			//Test
+			var taskVo:CTaskVO=new CTaskVO();
+			taskVo.type=Object3DDict.OBJECT3D_WAIST;
+			taskVo.code="YX-3R30472BP";
+			taskVo.url="LIBRARY\\JD20170411201325387427\\YX-3R30472BP.L3D";
+			taskVo.direction=Vector3D.X_AXIS;
+			taskVo.length=1000;
+			taskVo.height=80;
+			taskVo.x=0;
+			taskVo.y=0;
+			taskVo.z=0;
+			taskVo.endCallback=endCallback;
+			decorationModule=new CDecorationModuleImp();
+			decorationModule.addDecorationTask(taskVo,scene.stage3D);
 		}
-
+		private function endCallback(mesh:Mesh):void
+		{
+			var material:Material=mesh.getSurface(0).material;
+			var parentMesh:Mesh=new Mesh();
+			parentMesh.addChild(mesh);
+			var l3dModel:L3DModel=new L3DModel();
+			l3dModel.Import(parentMesh,false,true);
+			var l3dMesh:L3DMesh=l3dModel.Export(scene.stage3D);
+			var child:L3DMesh=l3dMesh.getChildAt(0) as L3DMesh;
+			child.addSurface(material,0,child.NumberTriangles);
+			cabinetSet.addFurnitureView(l3dMesh);
+		}
 		override protected function addListener():void
 		{
 			dispatcher.addEventListener(EventTypeDict.CMD_CREATE_CABINET,onCreateKitchenFurniture);

@@ -20,5 +20,9 @@
 			<name>CLOUDLIBS</name>
 			<value>file:/F:/work/git/kitchen_lejia/selfLibs</value>
 		</variable>
+		<variable>
+			<name>LEJIALIBS</name>
+			<value>file:/C:/Lively3Dlibs</value>
+		</variable>
 	</variableList>
 </projectDescription>

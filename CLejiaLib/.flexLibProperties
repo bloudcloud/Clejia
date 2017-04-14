@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="model.vo.CObject3DListVO"/>
+    <classEntry path="model.HangingCabinetModel"/>
+    <classEntry path="model.vo.CShelterVO"/>
+    <classEntry path="model.vo.CWallVO"/>
+    <classEntry path="model.vo.CFurnitureVO"/>
+    <classEntry path="model.vo.CRoomCornerVO"/>
+    <classEntry path="interfaces.ICDecorationModule"/>
+    <classEntry path="main.CDecorationModuleImp"/>
+    <classEntry path="model.vo.task.ITaskVO"/>
+    <classEntry path="model.vo.task.CTaskVO"/>
+    <classEntry path="dict.Object3DDict"/>
+    <classEntry path="model.vo.CRoomVO"/>
+    <classEntry path="model.CWallModel"/>
+    <classEntry path="model.BaseObject3DVOModel"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

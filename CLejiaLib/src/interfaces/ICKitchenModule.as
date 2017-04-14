@@ -9,7 +9,7 @@ package interfaces
 	 *  厨房模块接口
 	 * @author cloud
 	 */
-	public interface ICKithenModule extends ICStatus
+	public interface ICKitchenModule extends ICStatus
 	{
 		/**
 		 * 是否拥有地面ID 
@@ -78,15 +78,16 @@ package interfaces
 		 */		
 		function excuteMouseUp(furnitureType:uint):Vector.<ICData>;
 		/**
+		 * 执行结束 
+		 * 
+		 */		
+		function excuteEnd(furnitureType:uint):void;
+		/**
 		 * 创建挡板  
-		 * @param ptl 	左上方墙的顶点坐标
-		 * @param ptr	右上方墙的顶点坐标
-		 * @param pbl	左下方墙的顶点坐标
-		 * @param pbr	右下方墙的顶点坐标
 		 * @return IFurnitureSet 家具数据集合,接口的实现是Mesh的扩展
 		 * 
 		 */			
-		function createShelter(ptl:Vector3D,ptr:Vector3D,pbl:Vector3D,pbr:Vector3D):ICFurnitureSet
+		function createShelter():ICFurnitureSet
 		/**
 		 * 创建台面数据  
 		 * @return IFurnitureSet 家具数据集合,接口的实现是Mesh的扩展

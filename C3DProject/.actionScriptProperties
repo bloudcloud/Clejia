@@ -11,11 +11,20 @@
           <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/core.swc" useDefaultLinkType="false"/>
         </excludedEntries>
       </libraryPathEntry>
-      <libraryPathEntry kind="1" linkType="1" path="libs"/>
-      <libraryPathEntry kind="3" linkType="1" path="/Alternativa3D-master/bin/Alternativa3D-master.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="/L3DBuild/bin/L3DBuild.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="/CKitchenLib/bin/CKitchenLib.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="1" linkType="1" path="${CLOUDLIBS}"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/Alternativa3D-master.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DBuild.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/bearas.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/CLejiaLib/bin-debug/CLejiaLib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/CWorldLib/bin-debug/CWorldLib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/ComponentsLib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DImageList.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DLogin.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DRegister.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DSetupBarTest.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DTiling.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/SVGExtension.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/CRL2Lib/bin-debug/CRL2Lib.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>

@@ -306,13 +306,13 @@ package collection
 			var furnitureVo:CFurnitureVO=opreateData as CFurnitureVO;
 			furnitureVo.direction=listVo.direction;
 			furnitureVo.rotation=listVo.rotation;
-			furnitureVo.ownerID=listVo.uniqueID;
+			furnitureVo.parentID=listVo.uniqueID;
 			furnitureVo.isLife=true;
 			return super.doAddNode(opreateData,node);
 		}
 		override protected function doRemoveNode(opreateData:ICData):void
 		{
-			(opreateData as CFurnitureVO).ownerID=null;
+			(opreateData as CFurnitureVO).parentID=null;
 			super.doRemoveNode(opreateData);
 		}
 		override public function clearCalculationData():void

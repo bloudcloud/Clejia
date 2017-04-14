@@ -11,11 +11,13 @@ package model
 	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.utils.CDebug;
 	import cloud.core.utils.Geometry3DUtil;
-	import cloud.core.utils.MathUtil;
+	import cloud.core.utils.Vector3DUtil;
 	
 	import collection.Furniture3DList;
 	
 	import interfaces.ICFurnitureModel;
+	
+	import dict.Object3DDict;
 	
 	import model.vo.CObject3DListVO;
 	import model.vo.CObject3DVO;
@@ -46,23 +48,6 @@ package model
 		public const DIR_LEFT:int = 90;
 		public const DIR_RIGHT:int = -90;
 		
-		public const OBJECT3D_DEFAULT:uint = 0;
-		public const OBJECT3D_WALL:uint = 200;
-		public const OBJECT3D_TABLEBOARD:uint = 201;
-		public const OBJECT3D_SHELTER:uint = 202;
-		public const OBJECT3D_ROOMCORNER:uint = 203;
-		/**
-		 *	单柜 
-		 */		
-		public const OBJECT3D_CABINET:uint = 23;
-		/**
-		 * 吊柜 
-		 */		
-		public const OBJECT3D_HANGING_CABINET:uint = 24;
-		/**
-		 * 厨房部件 (水盆，燃气灶等)
-		 */		
-		public const OBJECT3D_BASIN:uint = 25;
 		/**
 		 * 判断是否吸附距离 
 		 */		
@@ -92,25 +77,6 @@ package model
 			wallVos=new Vector.<CWallVO>();
 			_floorDic = new Dictionary(true);
 			_caculationVec=new Vector3D();
-		}
-		/**
-		 * 计算与X轴正方向的夹角角度值 
-		 * @param dir
-		 * @return Number
-		 * 
-		 */		
-		public function calculateRotationByXAxis(dir:Vector3D):Number
-		{
-			var degree:Number;
-			var len:Number = dir.length;
-			var dot:Number = Vector3D.X_AXIS.dotProduct(dir);
-			var cosValue:Number = dot / len;
-			var nor:Vector3D=Vector3D.X_AXIS.crossProduct(dir);
-			if(nor.dotProduct(Vector3D.Z_AXIS)<0)
-				degree=MathUtil.toDegrees(Math.acos(cosValue))*-1;
-			else
-				degree=MathUtil.toDegrees(Math.acos(cosValue));
-			return degree;
 		}
 		/**
 		 * 根据当前家具数据，获取最优双向链表 
@@ -163,9 +129,9 @@ package model
 			{
 				next=i+1==len?0:i+1;
 				wallVo=new CWallVO();
-				wallVo.floorID=floorID;  
+				wallVo.parentID=floorID;  
 				wallVo.uniqueID=UIDUtil.createUID();
-				wallVo.type=OBJECT3D_WALL;
+				wallVo.type=Object3DDict.OBJECT3D_WALL;
 				wallVo.startPos=new Vector3D(wallPoses[i].x,wallPoses[i].y,0);
 				wallVo.endPos=new Vector3D(wallPoses[next].x,wallPoses[next].y,0);
 				_caculationVec=wallVo.endPos.subtract(wallVo.startPos);
@@ -173,7 +139,7 @@ package model
 				wallVo.width=0;
 				wallVo.height=wallPoses[i].z;
 				wallVo.direction=_caculationVec;
-				wallVo.rotation=calculateRotationByXAxis(_caculationVec);
+				wallVo.rotation=Vector3DUtil.calculateRotationByAxis(_caculationVec,Vector3D.X_AXIS);
 				_caculationVec.scaleBy(.5);
 				_caculationVec.incrementBy(wallVo.startPos);
 				wallVo.x=_caculationVec.x;
@@ -193,14 +159,12 @@ package model
 			{
 				switch(type)
 				{
-					case OBJECT3D_CABINET:
+					case Object3DDict.OBJECT3D_BASIN:
+					case Object3DDict.OBJECT3D_CABINET:
 						dic[type]=new CabinetModel();
 						break;
-					case OBJECT3D_HANGING_CABINET:
+					case Object3DDict.OBJECT3D_HANGING_CABINET:
 						dic[type]=new HangingCabinetModel();
-						break;
-					case OBJECT3D_BASIN:
-						dic[type]=new CKitchenPartModel();
 						break;
 					default:
 						KitchenErrorModel.instance.throwErrorByMessage("CKithenModuleImp","getModel","furnitureType",String(type+" 没有获取到数据模型！"));
@@ -351,7 +315,7 @@ package model
 		{
 			var listData:CObject3DListVO=new CObject3DListVO();
 			listData.isLife=true;
-			listData.ownerID=floorID;
+			listData.parentID=floorID;
 			listData.uniqueID=UIDUtil.createUID();
 			listData.type=type;
 			listData.length=0;
@@ -435,7 +399,7 @@ package model
 			var vo:CRoomCornerVO;
 			vo=new CRoomCornerVO();
 			vo.uniqueID=UIDUtil.createUID();
-			vo.type=OBJECT3D_ROOMCORNER;
+			vo.type=Object3DDict.OBJECT3D_ROOMCORNER;
 			vo.length=length;
 			vo.width=width;
 			vo.height=height;
@@ -448,9 +412,11 @@ package model
 			vo.startPos=startPos;
 			vo.endPos=endPos;
 			var vec:Vector3D=endPos.subtract(startPos);
-			vo.x=startPos.x+vec.x;
-			vo.y=startPos.y+vec.y;
-			vo.z=startPos.z+vec.z;
+			vec.scaleBy(.5);
+			vec.incrementBy(startPos);
+			vo.x=vec.x;
+			vo.y=vec.y;
+			vo.z=vec.z;
 			return vo;
 		}
 		private function createRoomCorner(list:Furniture3DList,corners:Vector.<ICObject3DData>):void
@@ -480,6 +446,7 @@ package model
 				startPos=Geometry3DUtil.transformVectorByTransform3D(startPos,list.listVo.transform);
 				endPos=Geometry3DUtil.transformVectorByTransform3D(endPos,list.listVo.transform);
 				var cornerVo:CRoomCornerVO=doCreateRoomCornerVO(length,width,height,prevLength,prevWidth,nextLength,nextWidth,startVo.rotation,startVo.direction,startPos,endPos);
+				cornerVo.parentID=list.listVo.uniqueID;
 				cornerVo.parentTransform=list.listVo.transform;
 				cornerVo.parentInverseTransform=list.listVo.inverseTransform;
 				corners.push(cornerVo);
