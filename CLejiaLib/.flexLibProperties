@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
-    <classEntry path="model.vo.CObject3DListVO"/>
-    <classEntry path="model.HangingCabinetModel"/>
-    <classEntry path="model.vo.CShelterVO"/>
-    <classEntry path="model.vo.CWallVO"/>
-    <classEntry path="model.vo.CFurnitureVO"/>
-    <classEntry path="model.vo.CRoomCornerVO"/>
-    <classEntry path="interfaces.ICDecorationModule"/>
-    <classEntry path="main.CDecorationModuleImp"/>
-    <classEntry path="model.vo.task.ITaskVO"/>
-    <classEntry path="model.vo.task.CTaskVO"/>
-    <classEntry path="dict.Object3DDict"/>
-    <classEntry path="model.vo.CRoomVO"/>
-    <classEntry path="model.CWallModel"/>
-    <classEntry path="model.BaseObject3DVOModel"/>
+    <classEntry path="main.model.vo.CObject3DListVO"/>
+    <classEntry path="kitchenModule.model.HangingCabinetModel"/>
+    <classEntry path="kitchenModule.model.vo.CShelterVO"/>
+    <classEntry path="main.model.vo.CWallVO"/>
+    <classEntry path="kitchenModule.model.vo.CFurnitureVO"/>
+    <classEntry path="kitchenModule.model.vo.CRoomCornerVO"/>
+    <classEntry path="wallDecorationModule.interfaces.ICDecorationModule"/>
+    <classEntry path="wallDecorationModule.CDecorationModuleImp"/>
+    <classEntry path="main.model.vo.task.ITaskVO"/>
+    <classEntry path="main.model.vo.task.CTaskVO"/>
+    <classEntry path="main.dict.Object3DDict"/>
+    <classEntry path="main.model.vo.CRoomVO"/>
+    <classEntry path="main.model.CWallDataModel"/>
+    <classEntry path="main.model.BaseObject3DDataModel"/>
+    <classEntry path="wallDecorationModule.model.vo.CDecorationTaskVO"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

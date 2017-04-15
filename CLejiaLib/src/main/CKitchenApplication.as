@@ -5,9 +5,11 @@ package main
 	import cloud.core.interfaces.ICData;
 	import cloud.core.model.BaseDataModel;
 	
-	import interfaces.ICDecorationModule;
-	import interfaces.ICKitchenModule;
-	import interfaces.ICLejiaApplication;
+	import kitchenModule.CKitchenModuleImp;
+	import kitchenModule.interfaces.ICKitchenModule;
+	
+	import wallDecorationModule.CDecorationModuleImp;
+	import wallDecorationModule.interfaces.ICDecorationModule;
 	
 	/**
 	 *  厨房功能应用类
@@ -32,7 +34,11 @@ package main
 		{
 			return _decorationModule ||= new CDecorationModuleImp();
 		}
-		
+		/**
+		 * 初始化数据 
+		 * @param data
+		 * 
+		 */		
 		public function initData(data:ICData):void
 		{
 			_dataModel.addData(data);

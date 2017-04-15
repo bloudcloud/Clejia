@@ -10,9 +10,9 @@ package core.view
 	
 	import core.model.GlobalModel;
 	
-	import model.CabinetModel;
-	import model.HangingCabinetModel;
-	import model.KitchenGlobalModel;
+	import kitchenModule.model.CabinetModel;
+	import kitchenModule.model.HangingCabinetModel;
+	import kitchenModule.model.KitchenGlobalModel;
 	
 	import ns.cloudLib;
 	

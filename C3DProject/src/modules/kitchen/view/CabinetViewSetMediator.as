@@ -21,21 +21,21 @@ package modules.kitchen.view
 	import core.model.GlobalModel;
 	
 	import dict.EventTypeDict;
-	import dict.Object3DDict;
+	import main.dict.Object3DDict;
 	
-	import interfaces.ICFurnitureModel;
+	import kitchenModule.interfaces.ICFurnitureModel;
 	
 	import l3dbuild.geometry.L3DGeometryData;
 	import l3dbuild.geometry.L3DVertex;
 	import l3dbuild.geometry.ProcessPathExtrude;
 	
-	import main.CDecorationModuleImp;
+	import wallDecorationModule.CDecorationModuleImp;
 	
-	import model.CabinetModel;
-	import model.HangingCabinetModel;
-	import model.KitchenGlobalModel;
-	import model.vo.CWallVO;
-	import model.vo.task.CTaskVO;
+	import kitchenModule.model.CabinetModel;
+	import kitchenModule.model.HangingCabinetModel;
+	import kitchenModule.model.KitchenGlobalModel;
+	import kitchenModule.model.vo.CWallVO;
+	import kitchenModule.model.vo.task.CTaskVO;
 	
 	import ns.cloudLib;
 	
@@ -43,9 +43,9 @@ package modules.kitchen.view
 	
 	import utils.DatasEvent;
 	
-	import view.CBox;
-	import view.CShelterView;
-	import view.CTableBoardView;
+	import kitchenModule.view.CBox;
+	import kitchenModule.view.CShelterView;
+	import kitchenModule.view.CTableBoardView;
 	
 	use namespace cloudLib;
 	/**

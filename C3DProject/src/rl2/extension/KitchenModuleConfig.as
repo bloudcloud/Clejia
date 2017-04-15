@@ -11,8 +11,8 @@ package rl2.extension
 	import core.view.WallViewSet;
 	import core.view.WallViewSetMediator;
 	
-	import model.CabinetModel;
-	import model.HangingCabinetModel;
+	import kitchenModule.model.CabinetModel;
+	import kitchenModule.model.HangingCabinetModel;
 	
 	import modules.kitchen.command.KitchenServiceStartCmd;
 	import modules.kitchen.service.Command2DService;
