@@ -179,32 +179,43 @@ l3dwardrobe.visible = false;
 
 
 
-/**
-		 * 根据wallData创建放样模型 
+		/**
+		 * 根据wallData获取需要装修的对象
 		 * 
 		 */		
-		private function createLoftingMeshes():void
+		private function buildDecorationTask():void
 		{
 			//创建腰线
 			if(WallTilingExist)
 			{
-				var tilePlan:WallTilePlan;
 				var tilePlans:Array;
 				var loader:L3DLoadHelper;
 				var len:int=wallTileData.wallPlans.length;
-				var roundPoints:Vector.<Point>=GetRoundPoints(true);
+				var roundPoints:Vector.<Point>=GetRoundPoints(true,true);
+				var wallID:String;
 				for(var i:int=0; i<len; i++)
 				{
 					if(wallTileData.wallPlans[i]!=null && wallTileData.wallPlans[i].waistCount>0)
 					{
 						//有腰线
 						tilePlans=wallTileData.wallPlans[i].walltilePlans;
-						for each(tilePlan in tilePlans)
+						//判断腰线所在墙的ID
+						var next:int=i+1==len ? 0 : i+1;
+						for each(var wall:Wall3D in scene3D.Walls)
 						{
-							if(tilePlan.isWaist && tilePlan.waist3DCode && tilePlan.waist3DCode.length>0)
+							if((wall.InnerWallStartPoint.x*Scene3D.ScaleRatio==roundPoints[i].x && wall.InnerWallStartPoint.y*Scene3D.ScaleRatio==roundPoints[i].y && wall.InnerWallEndPoint.x*Scene3D.ScaleRatio==roundPoints[next].x && wall.InnerWallEndPoint.y*Scene3D.ScaleRatio==roundPoints[next].y) || 
+								(wall.InnerWallStartPoint.x*Scene3D.ScaleRatio==roundPoints[next].x && wall.InnerWallStartPoint.y*Scene3D.ScaleRatio==roundPoints[next].y && wall.InnerWallEndPoint.x*Scene3D.ScaleRatio==roundPoints[i].x && wall.InnerWallEndPoint.y*Scene3D.ScaleRatio==roundPoints[i].y))
+							{
+								wallID=wall.WallID;
+								break;
+							}
+						}
+						for(var j:int=0; j<tilePlans.length; j++)
+						{
+							if(tilePlans[j].isWaist && tilePlans[j].waist3DCode && tilePlans[j].waist3DCode.length>0)
 							{
 								//需要创建放样模型,添加创建腰线的装修任务
-								addWaistDecorationTask(roundPoints,i,tilePlan);
+								addWaistDecorationTask(roundPoints,i,tilePlans[j],wallID);
 							}
 						}
 					}
@@ -220,34 +231,95 @@ l3dwardrobe.visible = false;
 		 * @param tilePlan	腰线计划数据
 		 * 
 		 */		
-		private function addWaistDecorationTask(roundPoints:Vector.<Point>,index:int,tilePlan:WallTilePlan):void
+		private function addWaistDecorationTask(roundPoints:Vector.<Point>,index:int,tilePlan:WallTilePlan,parentID:String):void
 		{
 			var next:int=index==roundPoints.length-1 ? 0 : index+1;
 			var directionPoint:Point=roundPoints[next].subtract(roundPoints[index]);
-			
-			var taskVo:CTaskVO=new CTaskVO();
-			taskVo.type=Object3DDic.OBJECT3D_WAIST;
+			var taskVo:CDecorationTaskVO=new CDecorationTaskVO();
+			taskVo.parentID = parentID;
+			taskVo.type=Object3DDict.OBJECT3D_WAIST;
 			taskVo.url=tilePlan.waist3DUrl;
-			taskVo.x=roundPoints[index].x+directionPoint.x*.5;
-			taskVo.y=roundPoints[index].y+directionPoint.y*.5;
-			taskVo.z=tilePlan.startH*.1;
-			taskVo.direction=new Vector3D(directionPoint.x,directionPoint.y,0);
+			taskVo.x=(roundPoints[index].x+directionPoint.x*.5)*10;
+			taskVo.y=(-roundPoints[index].y+directionPoint.y*.5)*10;
+			taskVo.z=tilePlan.startH;
+			taskVo.direction=new Vector3D(roundPoints[next].x-roundPoints[index].x,roundPoints[next].y-roundPoints[index].y,0);
 			taskVo.length=tilePlan.width;
 			taskVo.height=tilePlan.height;
 			taskVo.endCallback=createWaistlineEnd;
-			taskVo.code=tilePlan.waist3DCode;
+			taskVo.code=tilePlan.meshCodeode+"_"+tilePlan.materialCode;
 			scene3D.decorationModule.addDecorationTask(taskVo,Scene3D.Main.m_A3D.m_Stage3D);
 		}
 		private function createWaistlineEnd(mesh:Mesh):void
 		{
-			var material:Material=mesh.getSurface(0).material;
-			var root:Mesh=new Mesh();
-			root.addChild(mesh);
+			for each(var furniture:Furniture3D in scene3D.Furnitures)
+			{
+				if(furniture.IsDoor)
+				{
+					var len:int=furniture.Mesh.numChildren;
+					for(var i:int=0; i<len; i++)
+					{
+						var obj:Object3D=furniture.Mesh.getChildAt(i);
+						trace(obj.toString());
+					}
+				}
+			}
 			var l3dModel:L3DModel=new L3DModel();
-			l3dModel.Import(root,false,true);
+			l3dModel.Import(mesh,false,true)
 			var l3dMesh:L3DMesh=l3dModel.Export(Scene3D.Main.m_A3D.m_Stage3D);
-			var child:L3DMesh=l3dMesh.getChildAt(0) as L3DMesh
-			child.addSurface(material,0,child.NumberTriangles);
 			var furniture3d:Furniture3D=Furniture3D.FromMesh(l3dMesh,scene3D);
+			scene3D.waists.push(furniture3d);
+//			scene3D.AddFurniture(furniture3d);
 			Scene3D.Main.m_A3D.m_RenderScene.addChild(furniture3d.Mesh);
+		}
+		private function addFloorDecorationData():void
+		{
+			var roundPoints:Vector.<Point>=GetRoundPoints(true);
+			var maxX:int=int.MIN_VALUE,maxY:int=int.MIN_VALUE,minX:int=int.MAX_VALUE,minY:int=int.MAX_VALUE;
+			for each(var pt:Point in roundPoints)
+			{
+				if(maxX<pt.x)	 maxX=pt.x;
+				if(minX>pt.x) minX=pt.x;
+				if(maxY<pt.y) maxY=pt.y;
+				if(minY>pt.y) minY=pt.y;
+			}
+			scene3D.decorationModule.addObject3DData(floorID,Object3DDict.OBJECT3D_FLOOR,null,(maxX-minX)/Scene3D.ScaleRatio,(maxY-minY)/Scene3D.ScaleRatio,roomHeight,(maxX+minX)*.5/Scene3D.ScaleRatio,(maxY+minY)*.5/Scene3D.ScaleRatio,0,0);
+		}
+		private function importDecorationDatas():void
+		{
+			addFloorDecorationData();
+			var disVec:Vector3D;
+			var position:Vector3D;
+			for each(var wall:Wall3D in scene3D.Walls)
+			{
+				disVec=wall.End.subtract(wall.Start);
+				scene3D.decorationModule.addObject3DData(wall.WallID,Object3DDict.OBJECT3D_WALL,floorID,wall.Length,wall.Thickness,roomHeight,wall.Center.x,wall.Center.y,wall.Center.z,Vector3DUtil.calculateRotationByAxis(disVec,Vector3D.X_AXIS));
+			}
+			
+			for each(var furniture:Furniture3D in scene3D.Furnitures)
+			{
+				if(furniture.IsDoor)
+				{
+//					var len:int=Scene3D.Main.m_A3D.m_RenderScene.numChildren;
+//					for(var i:int = 0; i<len; i++)
+//					{
+//						var cmesh:Mesh = Scene3D.Main.m_A3D.m_RenderScene.getChildAt(i) as Mesh;
+//						if(cmesh!=null)
+//						{
+//							trace(cmesh.toString());
+//						}
+//					}
+					trace(furniture.toString());
+				}
+				scene3D.decorationModule.addObject3DData(furniture.FurnitureID,furniture.Catalog,furniture.LinkedWall.WallID,furniture.Length,furniture.Width,furniture.Height,furniture.PositionX,furniture.PositionY,furniture.PositionZ,furniture.Rotation);
+			}
+		}
+		/**
+		 * 开始装修
+		 * 
+		 */		
+		public function buildDecoration():void
+		{
+			scene3D.decorationModule.start();
+			importDecorationDatas();
+			buildDecorationTask();
 		}

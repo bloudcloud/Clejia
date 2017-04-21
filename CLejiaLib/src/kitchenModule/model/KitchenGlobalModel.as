@@ -1,7 +1,6 @@
 package kitchenModule.model
 {
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
 	
 	import mx.utils.UIDUtil;
 	
@@ -9,19 +8,14 @@ package kitchenModule.model
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3DData;
-	import cloud.core.utils.CDebug;
 	import cloud.core.utils.Geometry3DUtil;
-	import cloud.core.utils.Vector3DUtil;
 	
-	import main.model.collection.Furniture3DList;
-	
-	import kitchenModule.interfaces.ICFurnitureModel;
+	import kitchenModule.model.vo.CRoomCornerVO;
 	
 	import main.dict.Object3DDict;
-	
+	import main.model.collection.Furniture3DList;
 	import main.model.vo.CObject3DListVO;
 	import main.model.vo.CObject3DVO;
-	import kitchenModule.model.vo.CRoomCornerVO;
 	import main.model.vo.CWallVO;
 	
 	import ns.cloudLib;
@@ -64,19 +58,9 @@ package kitchenModule.model
 		 * 挡板的厚度 
 		 */		
 		public const SHELTER_WIDTH:uint=20;
-		
-		public var wallVos:Vector.<CWallVO>;
-		/**
-		 * 地面字典
-		 */		
-		private var _floorDic:Dictionary;
-		private var _caculationVec:Vector3D;
 
 		public function KitchenGlobalModel(enforcer:SingleEnforce)
 		{
-			wallVos=new Vector.<CWallVO>();
-			_floorDic = new Dictionary(true);
-			_caculationVec=new Vector3D();
 		}
 		/**
 		 * 根据当前家具数据，获取最优双向链表 
@@ -104,74 +88,6 @@ package kitchenModule.model
 				}
 			}
 			return bestList;
-		}
-		/**
-		 * 是否拥有地面ID 
-		 * @param floorID		地面ID
-		 * @return Boolean
-		 * 
-		 */		
-		public function hasFloorID(floorID:String):Boolean
-		{
-			return _floorDic.hasOwnProperty(floorID);
-		}
-		/**
-		 * 解析一个房间内的所有墙的位置数据 
-		 * @param wallPoses
-		 * 
-		 */		
-		public function parseWalls(wallPoses:Vector.<Vector3D>,floorID:String):void
-		{
-			var wallVo:CWallVO;
-			var len:int=wallPoses.length;
-			var next:int;
-			for(var i:int=0; i<len; i++)
-			{
-				next=i+1==len?0:i+1;
-				wallVo=new CWallVO();
-				wallVo.parentID=floorID;  
-				wallVo.uniqueID=UIDUtil.createUID();
-				wallVo.type=Object3DDict.OBJECT3D_WALL;
-				wallVo.startPos=new Vector3D(wallPoses[i].x,wallPoses[i].y,0);
-				wallVo.endPos=new Vector3D(wallPoses[next].x,wallPoses[next].y,0);
-				_caculationVec=wallVo.endPos.subtract(wallVo.startPos);
-				wallVo.length=_caculationVec.length;
-				wallVo.width=0;
-				wallVo.height=wallPoses[i].z;
-				wallVo.direction=_caculationVec;
-				wallVo.rotation=Vector3DUtil.calculateRotationByAxis(_caculationVec,Vector3D.X_AXIS);
-				_caculationVec.scaleBy(.5);
-				_caculationVec.incrementBy(wallVo.startPos);
-				wallVo.x=_caculationVec.x;
-				wallVo.y=_caculationVec.y;
-				wallVo.z=0;
-				wallVo.direction.normalize();
-				wallVo.isLife=true;
-				wallVos.push(wallVo);
-				CDebug.instance.traceStr("rotation:",wallVo.rotation);
-			}
-			_floorDic[floorID]=wallVos;
-		}
-		
-		public function getModerByDic(type:uint,dic:Dictionary):ICFurnitureModel
-		{
-			if(dic[type]==null)
-			{
-				switch(type)
-				{
-					case Object3DDict.OBJECT3D_BASIN:
-					case Object3DDict.OBJECT3D_CABINET:
-						dic[type]=new CabinetModel();
-						break;
-					case Object3DDict.OBJECT3D_HANGING_CABINET:
-						dic[type]=new HangingCabinetModel();
-						break;
-					default:
-						KitchenErrorModel.instance.throwErrorByMessage("CKithenModuleImp","getModel","furnitureType",String(type+" 没有获取到数据模型！"));
-						break;
-				}
-			}
-			return dic[type];
 		}
 		/**
 		 * 更新一条链表中从某一节点到根节点的，所有节点的数据位置 
@@ -219,9 +135,10 @@ package kitchenModule.model
 			var currentPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(currentVo.position,list.listVo.inverseTransform);
 			var sourcePos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(sourceVo.position,list.listVo.inverseTransform);
 			var position:Vector3D=new Vector3D();
-			_caculationVec=currentPos.subtract(sourcePos);
+			var caculationVec:Vector3D;
+			caculationVec=currentPos.subtract(sourcePos);
 			
-			if(isForcedUpdate || Math.abs(Vector3D.X_AXIS.dotProduct(_caculationVec))<=dis)
+			if(isForcedUpdate || Math.abs(Vector3D.X_AXIS.dotProduct(caculationVec))<=dis)
 			{
 				position.x=isNext ? sourcePos.x+dis : sourcePos.x-dis;
 			}
@@ -258,18 +175,19 @@ package kitchenModule.model
 		{
 			var furnitureVo:ICObject3DData=vo as ICObject3DData;
 			var otherList:Furniture3DList;
+			var caculationVec:Vector3D;
 			if(isNext)
 			{
-				_caculationVec=list.listVo.endPos;
+				caculationVec=list.listVo.endPos;
 				otherList=list.next as Furniture3DList;
 			}
 			else
 			{
-				_caculationVec=list.listVo.startPos;
+				caculationVec=list.listVo.startPos;
 				otherList=list.prev as Furniture3DList;
 			}
-			_caculationVec=_caculationVec.subtract(furnitureVo.position);
-			return tmpLength+otherList.width-furnitureVo.length*.5>Math.abs(list.listVo.direction.dotProduct(_caculationVec));
+			caculationVec=caculationVec.subtract(furnitureVo.position);
+			return tmpLength+otherList.width-furnitureVo.length*.5>Math.abs(list.listVo.direction.dotProduct(caculationVec));
 		}
 		/**
 		 * 修正列表中的家具节点数据
@@ -337,20 +255,20 @@ package kitchenModule.model
 		 * @return Furniture3DList
 		 * 
 		 */		 
-		public function initKitchenListByWall(type:uint,floorID:String):Furniture3DList
+		public function initKitchenListByWalls(type:uint,floorID:String,walls:Vector.<ICData>):Furniture3DList
 		{
 			//根据厨房墙面，初始化单循环双向链表
 			var list:DoubleListNode;
 			var rootList:DoubleListNode;
-			for(var i:int=0; i<wallVos.length; i++)
+			for(var i:int=0; i<walls.length; i++)
 			{
 				if(list==null)
 				{
-					rootList=list=createFurnitureListVOByWallVO(wallVos[i],type,floorID);
+					rootList=list=createFurnitureListVOByWallVO(walls[i] as CWallVO,type,floorID);
 				}
 				else
 				{
-					list.addAfter(createFurnitureListVOByWallVO(wallVos[i],type,floorID));
+					list.addAfter(createFurnitureListVOByWallVO(walls[i] as CWallVO,type,floorID));
 					list=list.next as DoubleListNode;
 				}
 			}

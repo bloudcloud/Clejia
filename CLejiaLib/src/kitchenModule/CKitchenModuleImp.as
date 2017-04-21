@@ -4,22 +4,13 @@ package kitchenModule
 	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	import flash.utils.getTimer;
 	
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
-	import cloud.core.utils.CDebug;
 	
-	import kitchenModule.interfaces.ICFurnitureModel;
 	import kitchenModule.interfaces.ICFurnitureSet;
 	import kitchenModule.interfaces.ICKitchenModule;
-	import kitchenModule.model.CabinetModel;
-	import kitchenModule.model.KitchenGlobalModel;
-	import kitchenModule.view.CBox;
 	import kitchenModule.view.CShelterView;
 	import kitchenModule.view.CTableBoardView;
-	
-	import main.dict.Object3DDict;
 	
 	import ns.cloudLib;
 

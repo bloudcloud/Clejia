@@ -13,9 +13,15 @@
     <classEntry path="main.model.vo.task.CTaskVO"/>
     <classEntry path="main.dict.Object3DDict"/>
     <classEntry path="main.model.vo.CRoomVO"/>
-    <classEntry path="main.model.CWallDataModel"/>
+    <classEntry path="main.model.WallDataModel"/>
     <classEntry path="main.model.BaseObject3DDataModel"/>
     <classEntry path="wallDecorationModule.model.vo.CDecorationTaskVO"/>
+    <classEntry path="main.model.ModelManager"/>
+    <classEntry path="wallDecorationModule.service.CDecorationService"/>
+    <classEntry path="main.dict.GlobalConstDict"/>
+    <classEntry path="main.model.TaskDataModel"/>
+    <classEntry path="main.dict.EventTypeDict"/>
+    <classEntry path="utils.CDataUtil"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

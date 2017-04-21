@@ -54,7 +54,7 @@ package a3d.support
 			
 			releaseContext3DOnClose = _stage3D!=null ? false:true;
 			
-			view = new View(container.width, container.height, false, 0, 0, 0);
+			view = new View(container.width, container.height, false, 0xfff111, 0, 0);
 			camera = new Camera3D(0.1, 50000);
 			camera.debug = true;
 			camera.view = view;

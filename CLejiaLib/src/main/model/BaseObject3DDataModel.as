@@ -1,6 +1,5 @@
 package main.model
 {
-	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.model.BaseDataModel;
 	
 	/**
@@ -9,20 +8,36 @@ package main.model
 	 */
 	public class BaseObject3DDataModel extends BaseDataModel
 	{
-		public var currentID:String;
+		private var _invalidDataCache:Boolean;
 		
+		protected var _parentID:String;
+		public function get parentID():String
+		{
+			return _parentID;
+		}
+		public function set parentID(value:String):void
+		{
+			if(_parentID!=value)
+			{
+				_parentID=value;
+				initDataCache();
+			}
+			else
+			{
+				_parentID=value;
+			}
+		}
 		public function BaseObject3DDataModel()
 		{
 			super();
 		}
+		/**
+		 * 初始化数据模型的数据缓存，该方法需要子类重写实现 
+		 * 
+		 */		
+		protected function initDataCache():void
+		{
+		}
 		
-		protected function filterDataByParentID(data:ICObject3DData):Boolean
-		{
-			return data.parentID==currentID;
-		}
-		public function initModel():void
-		{
-			
-		}
 	}
 }

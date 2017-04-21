@@ -11,15 +11,14 @@ package kitchenModule.model
 	import cloud.core.interfaces.ICObject3DListData;
 	import cloud.core.utils.Geometry3DUtil;
 	
-	import main.model.collection.Furniture3DList;
-	
 	import kitchenModule.interfaces.ICFurnitureModel;
+	import kitchenModule.model.vo.CFurnitureVO;
+	import kitchenModule.model.vo.CRoomCornerVO;
 	
 	import main.dict.Object3DDict;
-	
-	import kitchenModule.model.vo.CFurnitureVO;
+	import main.model.BaseObject3DDataModel;
+	import main.model.collection.Furniture3DList;
 	import main.model.vo.CObject3DVO;
-	import kitchenModule.model.vo.CRoomCornerVO;
 	
 	import ns.cloudLib;
 
@@ -28,7 +27,7 @@ package kitchenModule.model
 	 *  基础家具链表数据模型类
 	 * @author cloud
 	 */
-	public class CabinetModel implements ICFurnitureModel
+	public class CabinetModel extends BaseObject3DDataModel implements ICFurnitureModel
 	{
 		cloudLib var furnitureVos:Vector.<ICObject3DData>;
 		private var _selectVo:CObject3DVO;
@@ -44,6 +43,11 @@ package kitchenModule.model
 		private var _selectPos:Vector3D=new Vector3D();
 		private var _selectRotation:Number;
 
+		public function set rootList(value:Furniture3DList):void
+		{
+			_rootList = value;
+		}
+		
 		public function CabinetModel()
 		{
 			furnitureVos=new Vector.<ICObject3DData>();
@@ -249,6 +253,10 @@ package kitchenModule.model
 			}
 			return vos.length>0 ? vos : null;
 		}
+		public function getDatasByTypeAndID(type:uint,id:String):Vector.<ICData>
+		{
+			return getDatasByTypeAndParentID(type,id);
+		}
 		/**
 		 * 删除拐角数据 
 		 * 
@@ -436,13 +444,6 @@ package kitchenModule.model
 			var vo:CObject3DVO=getFurnitureVo(furnitureID);
 			deleteFurnitureVoByValue(vo);
 		}
-		public function initModel(floorID:String):void
-		{
-			//初始化单循环双向链表结构
-			_floorID=floorID;
-			_rootList=KitchenGlobalModel.instance.initKitchenListByWall(Object3DDict.OBJECT3D_CABINET,_floorID);
-		}
-		
 		public function clear():void
 		{
 			_selectList=null;

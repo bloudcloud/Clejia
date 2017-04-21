@@ -7,13 +7,11 @@ package kitchenModule.model
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3DData;
 	
-	import main.model.collection.Furniture3DList;
-	
 	import kitchenModule.interfaces.ICFurnitureModel;
-	
-	import main.dict.Object3DDict;
-	
 	import kitchenModule.model.vo.CFurnitureVO;
+	
+	import main.model.BaseObject3DDataModel;
+	import main.model.collection.Furniture3DList;
 	import main.model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
@@ -23,7 +21,7 @@ package kitchenModule.model
 	 *  
 	 * @author cloud
 	 */
-	public class HangingCabinetModel implements ICFurnitureModel
+	public class HangingCabinetModel extends BaseObject3DDataModel implements ICFurnitureModel
 	{
 		private var _furnitureVos:Vector.<CObject3DVO>;
 		private var _state:uint;
@@ -33,6 +31,11 @@ package kitchenModule.model
 		private var _selectList:Furniture3DList;
 		private var _selectPos:Vector3D;
 		private var _selectRotation:int;
+		
+		public function set rootList(value:Furniture3DList):void
+		{
+			_rootList = value;
+		}
 		
 		public function HangingCabinetModel()
 		{
@@ -198,14 +201,6 @@ package kitchenModule.model
 			var vo:CObject3DVO=getFurnitureVo(furnitureID);
 			deleteFurnitureVoByValue(vo);
 		}
-		
-		public function initModel(floorID:String):void
-		{
-			//初始化单循环双向链表结构
-			_floorID=floorID;
-			_rootList=KitchenGlobalModel.instance.initKitchenListByWall(Object3DDict.OBJECT3D_HANGING_CABINET,_floorID);
-		}
-		
 		public function clear():void
 		{
 			_selectList=null;

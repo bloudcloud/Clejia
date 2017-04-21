@@ -11,12 +11,6 @@
           <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/core.swc" useDefaultLinkType="false"/>
         </excludedEntries>
       </libraryPathEntry>
-      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/Alternativa3D-master.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DBuild.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/bearas.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="/CLejiaLib/bin-debug/CLejiaLib.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="/CWorldLib/bin-debug/CWorldLib.swc" useDefaultLinkType="false"/>
-      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/ComponentsLib.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DImageList.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DLogin.swc" useDefaultLinkType="false"/>
@@ -25,6 +19,12 @@
       <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DTiling.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/SVGExtension.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="/CRL2Lib/bin-debug/CRL2Lib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/bearas.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/CWorldLib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/CLejiaLib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/L3DBuild.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="C:/Lively3Dlibs/Alternativa3D-master.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>

@@ -8,7 +8,7 @@ package wallDecorationModule.model.vo
 	 */
 	public class CDecorationTaskVO extends CTaskVO
 	{
-		public var mesh:L3DMesh;
+		public var regionRoundPoints:Array;
 		
 		public function CDecorationTaskVO()
 		{
@@ -18,7 +18,7 @@ package wallDecorationModule.model.vo
 		override public function clear():void
 		{
 			super.clear();
-			mesh=null;
+			regionRoundPoints=null;
 		}
 	}
 }

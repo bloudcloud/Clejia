@@ -1,18 +1,17 @@
 package core.view
 {
-	import flash.geom.Vector3D;
-	
 	import mx.utils.UIDUtil;
 	
 	import a3d.support.Scene3D;
-	
-	import cloud.core.utils.CDebug;
 	
 	import core.model.GlobalModel;
 	
 	import kitchenModule.model.CabinetModel;
 	import kitchenModule.model.HangingCabinetModel;
 	import kitchenModule.model.KitchenGlobalModel;
+	
+	import main.dict.Object3DDict;
+	import main.model.WallDataModel;
 	
 	import ns.cloudLib;
 	
@@ -29,6 +28,8 @@ package core.view
 		public var global:GlobalModel;
 		[Inject]
 		public var scene:Scene3D;
+		[Inject]
+		public var wallModel:WallDataModel;
 		[Inject]
 		public var cabinetModel:CabinetModel;
 		[Inject]
@@ -49,9 +50,9 @@ package core.view
 			super.initialize();
 			wallSet.createWall(global.isThin,global.roomWidth,global.roomLength,global.floorHeight);
 			var floorID:String=UIDUtil.createUID();
-			KitchenGlobalModel.instance.parseWalls(wallSet.wallPoses,floorID);
-			cabinetModel.initModel(floorID);
-			hangingModel.initModel(floorID);
+			wallModel.createWalls(wallSet.wallPoses,floorID);
+			cabinetModel.rootList=KitchenGlobalModel.instance.initKitchenListByWalls(Object3DDict.OBJECT3D_CABINET,floorID,wallModel.walls);
+			hangingModel.rootList=KitchenGlobalModel.instance.initKitchenListByWalls(Object3DDict.OBJECT3D_CABINET,floorID,wallModel.walls);
 		}
 	}
 }

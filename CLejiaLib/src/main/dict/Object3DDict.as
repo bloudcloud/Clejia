@@ -12,6 +12,9 @@ package main.dict
 		public static const OBJECT3D_SHELTER:uint = 202;
 		public static const OBJECT3D_ROOMCORNER:uint = 203;
 		public static const OBJECT3D_WAIST:uint = 204;
+		public static const OBJECT3D_DOOR:uint=3|8|9|14|15|16|17;
+		public static const OBJECT3D_WINDOW:uint = 4|10|11|30;
+		public static const OBJECT3D_FLOOR:uint = 207;
 		/**
 		 *	单柜 
 		 */		

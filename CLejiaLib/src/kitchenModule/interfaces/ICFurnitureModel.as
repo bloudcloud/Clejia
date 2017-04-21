@@ -10,7 +10,6 @@ package kitchenModule.interfaces
 	 */
 	public interface ICFurnitureModel
 	{
-		function initModel(floorID:String):void;
 		/**
 		 * 创建家具数据 
 		 * @param furnitureID
