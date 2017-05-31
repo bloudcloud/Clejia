@@ -2,9 +2,9 @@ package kitchenModule.view
 {
 	import alternativa.engine3d.objects.Mesh;
 	
-	import cloud.core.interfaces.ICObject3DData;
-	
 	import kitchenModule.interfaces.ICFurnitureSet;
+	
+	import main.model.vo.CObject3DVO;
 	
 	/**
 	 *  
@@ -13,12 +13,12 @@ package kitchenModule.view
 	public class CBuildFurnitureSet extends Mesh implements ICFurnitureSet
 	{
 		private var _meshes:Vector.<Mesh>;
-		private var _datas:Vector.<ICObject3DData>;
+		private var _datas:Vector.<CObject3DVO>;
 		public function CBuildFurnitureSet()
 		{
 			super();
 			_meshes=new Vector.<Mesh>();
-			_datas=new Vector.<ICObject3DData>();
+			_datas=new Vector.<CObject3DVO>();
 		}
 		
 		protected function addContent(mesh:Mesh):void
@@ -26,7 +26,7 @@ package kitchenModule.view
 			_meshes.push(mesh);
 		}
 
-		public function get furnitureVos():Vector.<ICObject3DData>
+		public function get furnitureVos():Vector.<CObject3DVO>
 		{
 			return _datas;			
 		}

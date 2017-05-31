@@ -3,12 +3,11 @@ package main.model.vo
 	import flash.geom.Vector3D;
 	import flash.utils.getQualifiedClassName;
 	
-	import alternativa.engine3d.core.Transform3D;
-	
+	import cloud.core.dataStruct.CTransform3D;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
+	import cloud.core.interfaces.ICObject3D;
+	import cloud.core.singleton.CVector3DUtil;
 	import cloud.core.utils.MathUtil;
-	import cloud.core.utils.Vector3DUtil;
 	
 	import kitchenModule.model.KitchenErrorModel;
 	
@@ -19,8 +18,10 @@ package main.model.vo
 	 *	3D家具基础数据类
 	 * @author cloud
 	 */
-	public class CObject3DVO implements ICObject3DData
+	public class CObject3DVO implements ICObject3D,ICData
 	{
+		private var _refCount:uint;
+		
 		protected var _uniqueID:String;
 		protected var _parentID:String;
 		protected var _type:uint;
@@ -37,9 +38,17 @@ package main.model.vo
 		private var _z:Number;
 		private var _rotation:int;
 		private var _position:Vector3D;
-		private var _transform:Transform3D;
-		private var _inverseTransform:Transform3D;
-		
+		private var _transform:CTransform3D;
+		private var _inverseTransform:CTransform3D;
+
+		public function get refCount():uint
+		{
+			return _refCount;
+		}
+		public function set refCount(value:uint):void
+		{
+			_refCount=value;
+		}		
 		public function get uniqueID():String
 		{
 			return _uniqueID;
@@ -120,7 +129,7 @@ package main.model.vo
 			if(value!=null)
 				_direction.copyFrom(value);
 			else
-				_direction.copyFrom(Vector3DUtil.ZERO);
+				_direction.copyFrom(CVector3DUtil.ZERO);
 		}
 		
 		public function get x():Number
@@ -184,14 +193,14 @@ package main.model.vo
 			return _position;
 		}
 		
-		public function get transform():Transform3D
+		public function get transform():CTransform3D
 		{
 			if(_invalidTransform)
 				updateTransform();
 			return _transform;
 		}
 		
-		public function get inverseTransform():Transform3D
+		public function get inverseTransform():CTransform3D
 		{
 			if(_invalidTransform)
 				updateTransform();
@@ -207,8 +216,8 @@ package main.model.vo
 		{
 			_position=new Vector3D();
 			_direction=new Vector3D();
-			_transform=new Transform3D();
-			_inverseTransform=new Transform3D();
+			_transform=new CTransform3D();
+			_inverseTransform=new CTransform3D();
 			_length=_width=_height=_rotation=_x=_y=_z=0;
 			_isLife=true;
 		}
@@ -226,8 +235,8 @@ package main.model.vo
 			var sinX:Number = 0;
 			var cosY:Number = 1;
 			var sinY:Number = 0;
-			var cosZ:Number = Math.cos(MathUtil.toDegrees(rotation));
-			var sinZ:Number = Math.sin(MathUtil.toDegrees(rotation));
+			var cosZ:Number = Math.cos(MathUtil.instance.toRadians(rotation));
+			var sinZ:Number = Math.sin(MathUtil.instance.toRadians(rotation));
 			var cosZsinY:Number = cosZ*sinY;
 			var sinZsinY:Number = sinZ*sinY;
 			var cosYscaleX:Number = cosY;
@@ -267,7 +276,7 @@ package main.model.vo
 			inverseTransform.l = -inverseTransform.i*_x - inverseTransform.j*_y - inverseTransform.k*_z;
 		}
 
-		public function clone():ICObject3DData
+		public function clone():CObject3DVO
 		{
 			var vo:CObject3DVO=new CObject3DVO();
 			vo.uniqueID=this.uniqueID;
@@ -322,7 +331,7 @@ package main.model.vo
 		public function compare(source:ICData):Number
 		{
 			var distance:Number;
-			var vo:ICObject3DData=source as ICObject3DData;
+			var vo:ICObject3D=source as ICObject3D;
 			if(vo)
 			{
 				var vec:Vector3D=this.position.subtract(vo.position);

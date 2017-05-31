@@ -7,7 +7,6 @@ package kitchenModule.model
 	import cloud.core.collections.DoubleListNode;
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.utils.Geometry3DUtil;
 	
 	import kitchenModule.model.vo.CRoomCornerVO;
@@ -132,8 +131,8 @@ package kitchenModule.model
 			var currentVo:CObject3DVO=vo1 as CObject3DVO;
 			var sourceVo:CObject3DVO=vo2 as CObject3DVO;
 			var dis:Number=(currentVo.length+sourceVo.length)*.5;
-			var currentPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(currentVo.position,list.listVo.inverseTransform);
-			var sourcePos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(sourceVo.position,list.listVo.inverseTransform);
+			var currentPos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(currentVo.position,list.listVo.inverseTransform);
+			var sourcePos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(sourceVo.position,list.listVo.inverseTransform);
 			var position:Vector3D=new Vector3D();
 			var caculationVec:Vector3D;
 			caculationVec=currentPos.subtract(sourcePos);
@@ -152,7 +151,7 @@ package kitchenModule.model
 			}
 			position.y=sourcePos.y-list.width*.5+currentVo.width*.5;
 			
-			position=Geometry3DUtil.transformVectorByTransform3D(position,list.listVo.transform);
+			position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,list.listVo.transform);
 			currentVo.x=position.x;
 			currentVo.y=position.y;
 			if(currentVo.invalidPosition)
@@ -173,7 +172,7 @@ package kitchenModule.model
 		 */				
 		public function isNeedReverse(vo:ICData,tmpLength:Number,list:Furniture3DList,isNext:Boolean):Boolean
 		{
-			var furnitureVo:ICObject3DData=vo as ICObject3DData;
+			var furnitureVo:CObject3DVO=vo as CObject3DVO;
 			var otherList:Furniture3DList;
 			var caculationVec:Vector3D;
 			if(isNext)
@@ -197,13 +196,13 @@ package kitchenModule.model
 		 */			
 		public function fixPostion(vo:ICData,list:Furniture3DList):void
 		{
-			var objectVo:ICObject3DData=vo as ICObject3DData;
+			var objectVo:CObject3DVO=vo as CObject3DVO;
 			var minLimit:Number;
 			var maxLimit:Number;
 			var isChanged:Boolean;
-			var startPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(list.listVo.startPos,list.listVo.inverseTransform);
-			var endPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(list.listVo.endPos,list.listVo.inverseTransform);
-			var position:Vector3D=Geometry3DUtil.transformVectorByTransform3D(objectVo.position,list.listVo.inverseTransform);
+			var startPos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(list.listVo.startPos,list.listVo.inverseTransform);
+			var endPos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(list.listVo.endPos,list.listVo.inverseTransform);
+			var position:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(objectVo.position,list.listVo.inverseTransform);
 			
 			minLimit=startPos.x+(list.prev as Furniture3DList).width+objectVo.length*.5;
 			maxLimit=endPos.x-(list.next as Furniture3DList).width-objectVo.length*.5;
@@ -212,7 +211,7 @@ package kitchenModule.model
 			else if(position.x>maxLimit)
 				position.x=maxLimit;
 			position.y=startPos.y-list.width+objectVo.width*.5;
-			position=Geometry3DUtil.transformVectorByTransform3D(position,list.listVo.transform);
+			position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,list.listVo.transform);
 			
 			objectVo.x=position.x;
 			objectVo.y=position.y;
@@ -255,7 +254,7 @@ package kitchenModule.model
 		 * @return Furniture3DList
 		 * 
 		 */		 
-		public function initKitchenListByWalls(type:uint,floorID:String,walls:Vector.<ICData>):Furniture3DList
+		public function initKitchenListByWalls(type:uint,walls:Vector.<ICData>):Furniture3DList
 		{
 			//根据厨房墙面，初始化单循环双向链表
 			var list:DoubleListNode;
@@ -264,11 +263,11 @@ package kitchenModule.model
 			{
 				if(list==null)
 				{
-					rootList=list=createFurnitureListVOByWallVO(walls[i] as CWallVO,type,floorID);
+					rootList=list=createFurnitureListVOByWallVO(walls[i] as CWallVO,type,walls[i].parentID);
 				}
 				else
 				{
-					list.addAfter(createFurnitureListVOByWallVO(walls[i] as CWallVO,type,floorID));
+					list.addAfter(createFurnitureListVOByWallVO(walls[i] as CWallVO,type,walls[i].parentID));
 					list=list.next as DoubleListNode;
 				}
 			}
@@ -293,7 +292,7 @@ package kitchenModule.model
 				else
 				{
 					//如果超出范围，删除尾部节点
-					endNode.nodeData.isLife=false;
+					(endNode.nodeData as CObject3DVO).isLife=false;
 					list.addChangedVo(endNode.nodeData);
 				}
 			}
@@ -337,18 +336,18 @@ package kitchenModule.model
 			vo.z=vec.z;
 			return vo;
 		}
-		private function createRoomCorner(list:Furniture3DList,corners:Vector.<ICObject3DData>):void
+		private function createRoomCorner(list:Furniture3DList,corners:Vector.<CObject3DVO>):void
 		{
 			var nextList:Furniture3DList=list.next as Furniture3DList;
 			if(!list.isEmpty && !nextList.isEmpty)
 			{
-				var startVo:ICObject3DData=list.endNode.nodeData as ICObject3DData;
-				var endVo:ICObject3DData=nextList.startNode.nodeData as ICObject3DData;
-				var startPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(startVo.position,list.listVo.inverseTransform);
+				var startVo:CObject3DVO=list.endNode.nodeData as CObject3DVO;
+				var endVo:CObject3DVO=nextList.startNode.nodeData as CObject3DVO;
+				var startPos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(startVo.position,list.listVo.inverseTransform);
 				startPos.x+=startVo.length*.5;
 				startPos.y+=startVo.width*.5;
 				startPos.z=startVo.height*.5;
-				var endPos:Vector3D=Geometry3DUtil.transformVectorByTransform3D(endVo.position,list.listVo.inverseTransform);
+				var endPos:Vector3D=Geometry3DUtil.instance.transformVectorByCTransform3D(endVo.position,list.listVo.inverseTransform);
 				endPos.x+=endVo.width*.5;
 				endPos.y+=endVo.length*.5;
 				endPos.z=endVo.height*.5;
@@ -361,8 +360,8 @@ package kitchenModule.model
 				var prevLength:Number=length-nextWidth;
 				var nextLength:Number=width-prevWidth;
 				//转换成真实坐标
-				startPos=Geometry3DUtil.transformVectorByTransform3D(startPos,list.listVo.transform);
-				endPos=Geometry3DUtil.transformVectorByTransform3D(endPos,list.listVo.transform);
+				startPos=Geometry3DUtil.instance.transformVectorByCTransform3D(startPos,list.listVo.transform);
+				endPos=Geometry3DUtil.instance.transformVectorByCTransform3D(endPos,list.listVo.transform);
 				var cornerVo:CRoomCornerVO=doCreateRoomCornerVO(length,width,height,prevLength,prevWidth,nextLength,nextWidth,startVo.rotation,startVo.direction,startPos,endPos);
 				cornerVo.parentID=list.listVo.uniqueID;
 				cornerVo.parentTransform=list.listVo.transform;
@@ -376,7 +375,7 @@ package kitchenModule.model
 		 * @param corners	房间拐角数据对象集合
 		 * 
 		 */		
-		public function createRoomCorners(list:Furniture3DList,corners:Vector.<ICObject3DData>):void
+		public function createRoomCorners(list:Furniture3DList,corners:Vector.<CObject3DVO>):void
 		{
 			for(var current:Furniture3DList=list; current!=null; current=current.next!=list ? current.next as Furniture3DList : null)
 			{

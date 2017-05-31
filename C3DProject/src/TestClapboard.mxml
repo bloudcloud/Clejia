@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   minWidth="800"
+			   minHeight="600"
+			   width = "1200"
+			   height = "800"
+			   xmlns:local="*"
+			   xmlns:core="core.*"
+			   backgroundAlpha="0" backgroundColor="0x888888"
+			   addedToStage="application1_creationCompleteHandler(event)" 
+			   >
+	<fx:Script>
+		<![CDATA[
+			
+			protected function application1_creationCompleteHandler(event:Event):void 
+			{
+//				var loader:L3DLoadHelper=new L3DLoadHelper(stage.);
+			}
+		]]>
+	</fx:Script>
+</s:Application>

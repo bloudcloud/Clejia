@@ -1,6 +1,6 @@
 package kitchenModule.interfaces
 {
-	import cloud.core.interfaces.ICObject3DData;
+	import main.model.vo.CObject3DVO;
 
 	/**
 	 *  家具集合接口
@@ -13,7 +13,7 @@ package kitchenModule.interfaces
 		 * @return Vector.<ICFurnitureVO>
 		 * 
 		 */		
-		function get furnitureVos():Vector.<ICObject3DData>;
+		function get furnitureVos():Vector.<CObject3DVO>;
 		/**
 		 * 销毁家具集合对象
 		 * 

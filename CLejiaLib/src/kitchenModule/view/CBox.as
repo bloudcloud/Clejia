@@ -6,7 +6,7 @@ package kitchenModule.view
 	import alternativa.engine3d.primitives.Box;
 	import alternativa.engine3d.utils.Object3DUtils;
 	
-	import cloud.core.utils.Vector3DUtil;
+	import cloud.core.singleton.CVector3DUtil;
 	
 	/**
 	 *  
@@ -59,7 +59,7 @@ package kitchenModule.view
 			if(value!=null)
 				_position.copyFrom(value);
 			else
-				_position.copyFrom(Vector3DUtil.ZERO);
+				_position.copyFrom(CVector3DUtil.ZERO);
 			this.x=_position.x;
 			this.y=_position.y;
 			this.z=_position.z;

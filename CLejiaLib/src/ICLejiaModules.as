@@ -1,7 +1,9 @@
 package 
 {
-	import wallDecorationModule.interfaces.ICDecorationModule;
 	import kitchenModule.interfaces.ICKitchenModule;
+	
+	import wallDecorationModule.interfaces.ICClapboardDecorationModule;
+	import wallDecorationModule.interfaces.ICWaistDecorationModule;
 	
 	/**
 	 *  应用接口
@@ -19,6 +21,12 @@ package
 		 * @return ICDecorationModule
 		 * 
 		 */		
-		function get decorationModule():ICDecorationModule;
+		function get waistDecorationModule():ICWaistDecorationModule;
+		/**
+		 * 获取护墙板模块的实例 
+		 * @return ICClapboardDecorationModule
+		 * 
+		 */		
+		function get clapboardDecorationModule():ICClapboardDecorationModule;
 	}
 }

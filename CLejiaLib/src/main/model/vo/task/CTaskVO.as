@@ -10,8 +10,21 @@ package main.model.vo.task
 	{
 		protected var _url:String;
 		protected var _code:String;
+		protected var _material:String;
+		
+		private var _isMaterialTask:Boolean;
+		
 		public var endCallback:Function;
 
+		public function get isMaterialTask():Boolean
+		{
+			return _isMaterialTask;
+		}
+		public function set isMaterialTask(value:Boolean):void
+		{
+			_isMaterialTask = value;
+		}
+		
 		public function CTaskVO()
 		{
 			super();
@@ -40,6 +53,16 @@ package main.model.vo.task
 		public function set code(value:String):void
 		{
 			_code=value;
+		}
+		
+		public function get material():String
+		{
+			return _material;
+		}
+		
+		public function set material(value:String):void
+		{
+			_material=value;
 		}
 	}
 }

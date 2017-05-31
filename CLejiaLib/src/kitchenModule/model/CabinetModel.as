@@ -7,8 +7,6 @@ package kitchenModule.model
 	import cloud.core.collections.IDoubleList;
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
-	import cloud.core.interfaces.ICObject3DListData;
 	import cloud.core.utils.Geometry3DUtil;
 	
 	import kitchenModule.interfaces.ICFurnitureModel;
@@ -29,15 +27,15 @@ package kitchenModule.model
 	 */
 	public class CabinetModel extends BaseObject3DDataModel implements ICFurnitureModel
 	{
-		cloudLib var furnitureVos:Vector.<ICObject3DData>;
+		cloudLib var furnitureVos:Vector.<CObject3DVO>;
 		private var _selectVo:CObject3DVO;
 		private var _isDirectionChanged:Boolean;
 		private var _state:uint;
 		private var _rootList:Furniture3DList;
-		private var _corners:Vector.<ICObject3DData>;
-		private var _shelters:Vector.<ICObject3DData>;
-		private var _tableBoards:Vector.<ICObject3DData>;
-		private var _kitchenParts:Vector.<ICObject3DData>;
+		private var _corners:Vector.<CObject3DVO>;
+		private var _shelters:Vector.<CObject3DVO>;
+		private var _tableBoards:Vector.<CObject3DVO>;
+		private var _kitchenParts:Vector.<CObject3DVO>;
 		private var _floorID:String;
 		private var _selectList:Furniture3DList;
 		private var _selectPos:Vector3D=new Vector3D();
@@ -50,11 +48,11 @@ package kitchenModule.model
 		
 		public function CabinetModel()
 		{
-			furnitureVos=new Vector.<ICObject3DData>();
-			_corners=new Vector.<ICObject3DData>();
-			_shelters=new Vector.<ICObject3DData>();
-			_tableBoards=new Vector.<ICObject3DData>();
-			_kitchenParts=new Vector.<ICObject3DData>();
+			furnitureVos=new Vector.<CObject3DVO>();
+			_corners=new Vector.<CObject3DVO>();
+			_shelters=new Vector.<CObject3DVO>();
+			_tableBoards=new Vector.<CObject3DVO>();
+			_kitchenParts=new Vector.<CObject3DVO>();
 		}
 		
 		private function getFurnitureVo(uniqueID:String):CObject3DVO
@@ -81,14 +79,11 @@ package kitchenModule.model
 		 * @param vo
 		 * 
 		 */		
-		private function deleteFurnitureVoByValue(vo:ICObject3DData):void
+		private function deleteFurnitureVoByValue(vo:CObject3DVO):void
 		{
-			if(vo is CObject3DVO)
+			if(vo.parentID)
 			{
-				if((vo as CObject3DVO).parentID)
-				{
-					getFurnitureVoListByID((vo as CObject3DVO).parentID).remove(vo);
-				}
+				getFurnitureVoListByID(vo.parentID).remove(vo);
 			}
 			var index:int=furnitureVos.indexOf(vo);
 			if(index>=0)
@@ -102,21 +97,21 @@ package kitchenModule.model
 		 * @return Vector.<ICObject3DListData>
 		 * 
 		 */		
-		public function getRoomCorners():Vector.<ICObject3DData>
+		public function getRoomCorners():Vector.<CObject3DVO>
 		{
 			if(_corners.length==0)
 			{
 				KitchenGlobalModel.instance.createRoomCorners(_rootList,_corners);
-				for each(var vo:ICObject3DData in _corners)
+				for each(var vo:CObject3DVO in _corners)
 				{
 					furnitureVos.push(vo);
 				}
 			}
 			return _corners;
 		}
-		private function createObject3DVo(length:Number,width:Number,height:Number,position:Vector3D,rotation:int,direction:Vector3D):ICObject3DData
+		private function createObject3DVo(length:Number,width:Number,height:Number,position:Vector3D,rotation:int,direction:Vector3D):CObject3DVO
 		{
-			var vo:ICObject3DData=new CObject3DVO();
+			var vo:CObject3DVO=new CObject3DVO();
 			vo.uniqueID=UIDUtil.createUID();
 			vo.type=Object3DDict.OBJECT3D_SHELTER;
 			vo.length=length;
@@ -134,7 +129,7 @@ package kitchenModule.model
 		 * @return Vector.<ICObject3DData>
 		 * 
 		 */		
-		public function createShelterVos():Vector.<ICObject3DData>
+		public function createShelterVos():Vector.<CObject3DVO>
 		{
 			var vo:CObject3DVO;
 			getRoomCorners();
@@ -150,8 +145,8 @@ package kitchenModule.model
 					position.x=-cornerVo.length*.5+length*.5;
 					position.y=cornerVo.width*.5-cornerVo.prevWidth+width*.5;
 					position.z=0;
-					position=Geometry3DUtil.transformVectorByTransform3D(position,cornerVo.transform);
-					vo=createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction) as CObject3DVO;
+					position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,cornerVo.transform);
+					vo=createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction);
 					vo.parentID=cornerVo.parentID;
 					_shelters.push(vo);
 				}
@@ -163,8 +158,8 @@ package kitchenModule.model
 					position.x=cornerVo.length*.5-cornerVo.nextWidth+length*.5;
 					position.y=-cornerVo.width*.5+width*.5;
 					position.z=0;
-					position=Geometry3DUtil.transformVectorByTransform3D(position,cornerVo.transform);
-					vo=createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction) as CObject3DVO;
+					position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,cornerVo.transform);
+					vo=createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction);
 					vo.parentID=cornerVo.parentID;
 					_shelters.push(vo);
 				}
@@ -183,7 +178,7 @@ package kitchenModule.model
 				position.x=-cornerVo.length*.5+length*.5;
 				position.y=cornerVo.width*.5-width*.5;
 				position.z=cornerVo.height*.5+height*.5;
-				position=Geometry3DUtil.transformVectorByTransform3D(position,cornerVo.transform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,cornerVo.transform);
 				_tableBoards.push(createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction));
 			}
 			if(cornerVo.nextLength>0)
@@ -201,7 +196,7 @@ package kitchenModule.model
 				position.x=cornerVo.length*.5-length*.5;
 				position.y=-cornerVo.width*.5+width*.5;
 				position.z=cornerVo.height*.5+height*.5;
-				position=Geometry3DUtil.transformVectorByTransform3D(position,cornerVo.transform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,cornerVo.transform);
 				_tableBoards.push(createObject3DVo(length,width,height,position,cornerVo.rotation,cornerVo.direction));
 			}
 		}
@@ -217,14 +212,14 @@ package kitchenModule.model
 		 * @return Vector.<ICObject3DData>
 		 * 
 		 */		
-		public function createTableBoards():Vector.<ICObject3DData>
+		public function createTableBoards():Vector.<CObject3DVO>
 		{
 			getRoomCorners();
-			for each(var vo:ICObject3DData in _corners)
+			for each(var vo:CObject3DVO in _corners)
 			{
 				createTableBoardByCorner(vo as CRoomCornerVO);
 			}
-			var furnitures:Vector.<ICObject3DData>=getFurnituresInList();
+			var furnitures:Vector.<CObject3DVO>=getFurnituresInList();
 			if(furnitures)
 			{
 				for each(vo in furnitures)
@@ -239,12 +234,12 @@ package kitchenModule.model
 		 * @return Vector.<ICObject3DData>
 		 * 
 		 */		
-		public function getFurnituresInList():Vector.<ICObject3DData>
+		public function getFurnituresInList():Vector.<CObject3DVO>
 		{
-			var vos:Vector.<ICObject3DData>=new Vector.<ICObject3DData>();
+			var vos:Vector.<CObject3DVO>=new Vector.<CObject3DVO>();
 			var func:Function=function(node:IDoubleNode):void
 			{
-				vos.push(node.nodeData as ICObject3DData);
+				vos.push(node.nodeData as CObject3DVO);
 			}
 			for(var list:Furniture3DList=_rootList; list!=null; list=list.next!=_rootList ? list.next as Furniture3DList : null)
 			{
@@ -263,7 +258,7 @@ package kitchenModule.model
 		 */		
 		public function deleteRoomCorners():void
 		{
-			for each(var vo:ICObject3DListData in _corners)
+			for each(var vo:CObject3DVO in _corners)
 			{
 				deleteFurnitureVoByValue(vo);
 			}
@@ -271,7 +266,7 @@ package kitchenModule.model
 		}
 		public function deleteShelters():void
 		{
-			for each(var vo:ICObject3DData in _shelters)
+			for each(var vo:CObject3DVO in _shelters)
 			{
 				vo.clear();
 			}
@@ -279,7 +274,7 @@ package kitchenModule.model
 		}
 		public function deleteTableBoards():void
 		{
-			for each(var vo:ICObject3DData in _tableBoards)
+			for each(var vo:CObject3DVO in _tableBoards)
 			{
 				vo.clear();
 			}
@@ -454,7 +449,7 @@ package kitchenModule.model
 				child.unlink();
 				(child as IDoubleList).clear();
 			}
-			for each(var vo:ICObject3DData in furnitureVos)
+			for each(var vo:CObject3DVO in furnitureVos)
 			{
 				vo.clear();
 			}

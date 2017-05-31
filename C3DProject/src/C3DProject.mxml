@@ -28,8 +28,9 @@
 				L3DRootNode.instance.addEventListener(Event.COMPLETE, completeHandler);
 				L3DLibraryWebService.SetupWebService();
 				dv.AddItem = capplication.getMaterialInfo;
+				
 			}
-			
+
 			private function completeHandler(e:Event):void {
 //				dv.setupqiangz();
 				//				dv.setupdiz();
@@ -49,6 +50,7 @@
 				createShelter.left=createTableBoard.width+20;
 				createShelter.bottom=20;
 				createShelter.visible=true;
+				
 			}
 			
 			private function createHandler(evt:MouseEvent):void

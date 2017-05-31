@@ -7,6 +7,7 @@ package main.dict
 	public class EventTypeDict
 	{
 		public static const EVENT_LOADCOMPLETE:String = "loadComplete";
+		public static const EVENT_LOADALLCOMPLETE:String = "loadAllComplete";
 		
 		public function EventTypeDict()
 		{

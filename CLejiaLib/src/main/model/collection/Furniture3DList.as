@@ -5,10 +5,11 @@ package main.model.collection
 	import cloud.core.collections.DoubleListNode;
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
+	import cloud.core.interfaces.ICObject3D;
 	
 	import kitchenModule.model.KitchenGlobalModel;
 	import kitchenModule.model.vo.CFurnitureVO;
+	
 	import main.model.vo.CObject3DListVO;
 	import main.model.vo.CObject3DVO;
 	
@@ -96,11 +97,11 @@ package main.model.collection
 		 */		
 		private function doCalculateLength(node:IDoubleNode):void
 		{
-			_tmpLength+=(node.nodeData as CObject3DVO).length;
+			_tmpLength+=(node.nodeData as ICObject3D).length;
 		}
 		private function doUpdateNodeSize(node:IDoubleNode):void
 		{
-			var vo:ICObject3DData=node.nodeData as ICObject3DData;
+			var vo:ICObject3D=node.nodeData as ICObject3D;
 			listVo.length+=vo.length;
 			if(_lastWidth<vo.width) 
 				_lastWidth=vo.width;

@@ -8,20 +8,24 @@
     <classEntry path="kitchenModule.model.vo.CFurnitureVO"/>
     <classEntry path="kitchenModule.model.vo.CRoomCornerVO"/>
     <classEntry path="wallDecorationModule.interfaces.ICDecorationModule"/>
-    <classEntry path="wallDecorationModule.CDecorationModuleImp"/>
     <classEntry path="main.model.vo.task.ITaskVO"/>
     <classEntry path="main.model.vo.task.CTaskVO"/>
     <classEntry path="main.dict.Object3DDict"/>
-    <classEntry path="main.model.vo.CRoomVO"/>
     <classEntry path="main.model.WallDataModel"/>
     <classEntry path="main.model.BaseObject3DDataModel"/>
     <classEntry path="wallDecorationModule.model.vo.CDecorationTaskVO"/>
     <classEntry path="main.model.ModelManager"/>
-    <classEntry path="wallDecorationModule.service.CDecorationService"/>
-    <classEntry path="main.dict.GlobalConstDict"/>
     <classEntry path="main.model.TaskDataModel"/>
     <classEntry path="main.dict.EventTypeDict"/>
     <classEntry path="utils.CDataUtil"/>
+    <classEntry path="wallDecorationModule.model.vo.CDecorationModel"/>
+    <classEntry path="main.model.vo.task.CParam3DTaskVO"/>
+    <classEntry path="wallDecorationModule.dict.CDecorationParamDict"/>
+    <classEntry path="wallDecorationModule.model.vo.CClapboardRectangleCornerVO"/>
+    <classEntry path="utils.CDecorationMeshUtil"/>
+    <classEntry path="main.model.vo.task.CParamRectangle3DTaskVO"/>
+    <classEntry path="wallDecorationModule.CClapboardDecorationModuleImp"/>
+    <classEntry path="wallDecorationModule.interfaces.ICClapboardDecorationModule"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -5,7 +5,6 @@ package kitchenModule.model
 	import cloud.core.collections.IDoubleList;
 	import cloud.core.collections.IDoubleNode;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3DData;
 	
 	import kitchenModule.interfaces.ICFurnitureModel;
 	import kitchenModule.model.vo.CFurnitureVO;
@@ -66,14 +65,11 @@ package kitchenModule.model
 		 * @param vo
 		 * 
 		 */		
-		private function deleteFurnitureVoByValue(vo:ICObject3DData):void
+		private function deleteFurnitureVoByValue(vo:CObject3DVO):void
 		{
-			if(vo is CObject3DVO)
+			if(vo.parentID)
 			{
-				if((vo as CObject3DVO).parentID)
-				{
-					getFurnitureVoListByID((vo as CObject3DVO).parentID).remove(vo);
-				}
+				getFurnitureVoListByID(vo.parentID).remove(vo);
 			}
 			var index:int=_furnitureVos.indexOf(vo);
 			if(index>=0)
@@ -211,7 +207,7 @@ package kitchenModule.model
 				child.unlink();
 				(child as IDoubleList).clear();
 			}
-			for each(var vo:ICObject3DData in _furnitureVos)
+			for each(var vo:CObject3DVO in _furnitureVos)
 			{
 				vo.clear();
 			}

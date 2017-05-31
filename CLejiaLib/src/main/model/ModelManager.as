@@ -3,7 +3,8 @@ package main.model
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 	
-	import cloud.core.interfaces.ICObject3DData;
+	import cloud.core.singleton.CVector3DUtil;
+	import cloud.core.utils.MathUtil;
 	
 	import kitchenModule.model.CabinetModel;
 	import kitchenModule.model.HangingCabinetModel;
@@ -11,6 +12,8 @@ package main.model
 	import main.dict.Object3DDict;
 	import main.model.vo.CObject3DVO;
 	import main.model.vo.CWallVO;
+	
+	import wallDecorationModule.model.vo.CRegionVO;
 
 	/**
 	 * 数据模型管理类
@@ -31,13 +34,16 @@ package main.model
 			_modelDic=new Dictionary();
 		}
 		
-		private function doCreateObject3DData(type:uint):ICObject3DData
+		private function doCreateObject3DData(type:uint):CObject3DVO
 		{
-			var vo:ICObject3DData;
+			var vo:CObject3DVO;
 			switch(type)
 			{
 				case Object3DDict.OBJECT3D_WALL:
 					vo=new CWallVO();
+					break;
+				case Object3DDict.DATA_REGION2D:
+					vo=new CRegionVO();
 					break;
 				default:
 					vo=new CObject3DVO();
@@ -69,8 +75,8 @@ package main.model
 		}
 		/**
 		 * 创建3D对象数据 
-		 * @param uniqueID
 		 * @param type
+		 * @param uniqueID
 		 * @param parentID
 		 * @param length
 		 * @param width
@@ -81,9 +87,9 @@ package main.model
 		 * @param rotation
 		 * 
 		 */		
-		public function createObject3DData(uniqueID:String,type:uint,parentID:String,length:Number,width:Number,height:Number,x:Number,y:Number,z:Number,rotation:Number):ICObject3DData
+		public function createObject3DData(type:uint,uniqueID:String,parentID:String,length:Number,width:Number,height:Number,x:Number,y:Number,z:Number,rotation:Number,isDegree:Boolean=true):CObject3DVO
 		{
-			var vo:ICObject3DData = doCreateObject3DData(type);
+			var vo:CObject3DVO = doCreateObject3DData(type);
 			vo.uniqueID=uniqueID;
 			vo.type=type;
 			vo.parentID=parentID;
@@ -93,8 +99,17 @@ package main.model
 			vo.x=x;
 			vo.y=y;
 			vo.z=z;
-			vo.rotation=rotation;
-			vo.direction=new Vector3D(Math.cos(rotation),Math.sin(rotation),0);
+			if(isDegree)
+			{
+				vo.rotation=rotation;
+				vo.direction=new Vector3D(Math.cos(MathUtil.instance.toRadians(rotation)),Math.sin(MathUtil.instance.toRadians(rotation)),0);
+			}
+			else
+			{
+				vo.rotation=MathUtil.instance.toDegrees(rotation);
+				vo.direction=new Vector3D(Math.cos(rotation),Math.sin(rotation),0);
+			}
+			vo.direction.normalize();
 			return vo;
 		}
 	}

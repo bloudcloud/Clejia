@@ -1,6 +1,7 @@
 package kitchenModule.model.vo
 {
-	import alternativa.engine3d.core.Transform3D;
+	import cloud.core.dataStruct.CTransform3D;
+	
 	import main.model.vo.CObject3DListVO;
 
 	/**
@@ -13,8 +14,8 @@ package kitchenModule.model.vo
 		public var prevLength:Number;
 		public var nextWidth:Number;
 		public var nextLength:Number;
-		public var parentTransform:Transform3D;
-		public var parentInverseTransform:Transform3D;
+		public var parentTransform:CTransform3D;
+		public var parentInverseTransform:CTransform3D;
 		
 		public function CRoomCornerVO()
 		{

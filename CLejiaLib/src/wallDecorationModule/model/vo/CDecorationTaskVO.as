@@ -1,5 +1,7 @@
 package wallDecorationModule.model.vo
 {
+	import flash.geom.Point;
+	
 	import main.model.vo.task.CTaskVO;
 	
 	/**
@@ -8,7 +10,7 @@ package wallDecorationModule.model.vo
 	 */
 	public class CDecorationTaskVO extends CTaskVO
 	{
-		public var regionRoundPoints:Array;
+		public var regionRoundPoints:Vector.<Vector.<Point>>;
 		
 		public function CDecorationTaskVO()
 		{

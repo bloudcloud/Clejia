@@ -9,15 +9,14 @@ package kitchenModule.view
 	import alternativa.engine3d.materials.FillMaterial;
 	import alternativa.engine3d.materials.Material;
 	
-	import cloud.core.interfaces.ICObject3DData;
 	import cloud.core.utils.Geometry3DUtil;
-	import cloud.core.utils.Matrix3DUtil;
-	
-	import main.model.collection.Furniture3DList;
+	import cloud.core.utils.CMatrix3DUtil;
 	
 	import kitchenModule.model.KitchenGlobalModel;
 	import kitchenModule.model.vo.CFurnitureVO;
 	import kitchenModule.model.vo.CRoomCornerVO;
+	
+	import main.model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
 
@@ -42,7 +41,7 @@ package kitchenModule.view
 			var position:Vector3D;
 			if(vo.prevLength>0)
 			{
-				position=Geometry3DUtil.transformVectorByTransform3D(vo.startPos,vo.parentInverseTransform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(vo.startPos,vo.parentInverseTransform);
 				length=vo.length;
 				width=vo.prevWidth;
 				height=KitchenGlobalModel.instance.TABLEBOARD_HEIGHT;
@@ -50,13 +49,13 @@ package kitchenModule.view
 				position.x=position.x+length*.5;
 				position.y=position.y-width*.5;
 				position.z=vo.height+height*.5;
-				position=Geometry3DUtil.transformVectorByTransform3D(position,vo.parentTransform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,vo.parentTransform);
 				doCreateTableBoard(length,width,height,rotation,position);
 			}
 			if(vo.nextLength>0)
 			{
 				
-				position=Geometry3DUtil.transformVectorByTransform3D(vo.endPos,vo.parentInverseTransform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(vo.endPos,vo.parentInverseTransform);
 				if(this.numChildren>0)
 				{
 					length=vo.nextLength;
@@ -71,7 +70,7 @@ package kitchenModule.view
 				position.x=position.x-width*.5;
 				position.y=position.y+length*.5;
 				position.z=vo.height+height*.5;
-				position=Geometry3DUtil.transformVectorByTransform3D(position,vo.parentTransform);
+				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,vo.parentTransform);
 				doCreateTableBoard(length,width,height,rotation,position);
 			}
 		}
@@ -92,7 +91,7 @@ package kitchenModule.view
 			
 			var vertices:Vector.<Number>=mesh.geometry.getAttributeValues(VertexAttributes.POSITION);
 			var newVertices:Vector.<Number>=new Vector.<Number>(vertices.length);
-			var matrix3d:Matrix3D=Matrix3DUtil.MATRIX3D_UNIT;
+			var matrix3d:Matrix3D=CMatrix3DUtil.instance.matrix3D;
 			matrix3d.appendRotation(rotation,Vector3D.Z_AXIS);
 			matrix3d.appendTranslation(position.x*.1,position.y*.1,position.z*.1);
 			matrix3d.transformVectors(vertices,newVertices);
@@ -107,9 +106,9 @@ package kitchenModule.view
 		 * @param vos	一组挡板数据
 		 * 
 		 */
-		public function createTableBoards(vos:Vector.<ICObject3DData>):void
+		public function createTableBoards(vos:Vector.<CObject3DVO>):void
 		{
-			for each(var vo:ICObject3DData in vos)
+			for each(var vo:CObject3DVO in vos)
 			{
 				doCreateTableBoard(vo.length,vo.width,vo.height,vo.rotation,vo.position);
 //				if(vos[i] is CRoomCornerVO)

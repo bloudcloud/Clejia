@@ -5,8 +5,6 @@ package wallDecorationModule.interfaces
 	import cloud.core.interfaces.ICDataModule;
 	import cloud.core.interfaces.ICStatus;
 	
-	import main.model.vo.task.ITaskVO;
-	
 	/**
 	 *  装修模块接口
 	 * @author cloud
@@ -14,11 +12,15 @@ package wallDecorationModule.interfaces
 	public interface ICDecorationModule extends ICStatus,ICDataModule
 	{
 		/**
-		 * 添加装饰任务 
-		 * @param taskVo
-		 * @param stage3d
+		 * 初始化装修模块 
+		 * @param stage3d	装修3D舞台对象
 		 * 
 		 */		
-		function addDecorationTask(taskVo:ITaskVO,stage3d:Stage3D):void;
+		function initDecorationModule(stage3d:Stage3D):void
+		/**
+		 * 执行任务 
+		 * 
+		 */		
+		function excuteTask():Boolean;
 	}
 }

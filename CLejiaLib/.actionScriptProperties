@@ -1,28 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <actionScriptProperties analytics="false" mainApplicationPath="CKitchenLib.as" projectUUID="adec83cd-7916-48ba-bbca-26594bb6268f" version="11">
-  <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::isDecoration,true&#13;&#10;-define=CONFIG::isKitchen,false&#13;&#10;-define=CONFIG::debug,false" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderLocation="C:/Lively3Dlibs" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
+  <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::isClapboardDecoration,true&#13;&#10;-define=CONFIG::isDecoration,true&#13;&#10;-define=CONFIG::isKitchen,false" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderLocation="DOCUMENTS/Lively3Dlibs" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
     <compilerSourcePath/>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
-        <modifiedEntries>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/apache.swc" useDefaultLinkType="false"/>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/authoringsupport.swc" useDefaultLinkType="false"/>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/experimental.swc" useDefaultLinkType="false"/>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/experimental_mobile.swc" useDefaultLinkType="false"/>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flash-integration.swc" useDefaultLinkType="false"/>
-          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flatspark.swc" useDefaultLinkType="false"/>
-        </modifiedEntries>
         <excludedEntries>
           <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
           <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/core.swc" useDefaultLinkType="false"/>
         </excludedEntries>
       </libraryPathEntry>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/bearas.swc" sourcepath="/bearas/src" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/ComponentsLib.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/CWorldLib.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/L3DBuild.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="C:/Lively3Dlibs/Alternativa3D.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/ComponentsLib.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${LIBS_CLOUD}/CWorldLib.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/Alternativa3D.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/bearas.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/L3DBuildGeometry.swc" useDefaultLinkType="true"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
