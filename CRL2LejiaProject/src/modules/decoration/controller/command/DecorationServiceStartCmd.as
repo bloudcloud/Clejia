@@ -1,7 +1,7 @@
 package modules.decoration.controller.command
 {
-	import modules.decoration.service.ClapBoardDecorationRL2Service;
-	import modules.decoration.service.CDecorationDownLoadRL2Service;
+	import modules.decoration.service.CDecorationRL2Service;
+	import modules.main.service.CDownloadRL2Service;
 	
 	import robotlegs.bender.bundles.mvcs.Command;
 	
@@ -12,9 +12,9 @@ package modules.decoration.controller.command
 	public class DecorationServiceStartCmd extends Command
 	{
 		[Inject]
-		public var downloadService:CDecorationDownLoadRL2Service;
+		public var downloadService:CDownloadRL2Service;
 		[Inject]
-		public var clapboardService:ClapBoardDecorationRL2Service;
+		public var clapboardService:CDecorationRL2Service;
 		
 		public function DecorationServiceStartCmd()
 		{

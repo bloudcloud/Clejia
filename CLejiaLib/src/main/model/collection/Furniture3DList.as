@@ -1,17 +1,16 @@
 package main.model.collection
 {
-	import flash.geom.Vector3D;
 	
 	import cloud.core.collections.DoubleListNode;
 	import cloud.core.collections.IDoubleNode;
+	import cloud.core.datas.base.CVector;
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3D;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
 	
 	import kitchenModule.model.KitchenGlobalModel;
-	import kitchenModule.model.vo.CFurnitureVO;
 	
 	import main.model.vo.CObject3DListVO;
-	import main.model.vo.CObject3DVO;
 	
 	import ns.cloudLib;
 	
@@ -45,7 +44,7 @@ package main.model.collection
 		}
 		public function get rotation():int
 		{
-			return listVo.rotation;
+			return listVo.rotationHeight;
 		}
 		public function get width():Number
 		{
@@ -235,9 +234,9 @@ package main.model.collection
 		 * @return Boolean
 		 * 
 		 */		
-		public function judgeFull(sourceVo:CObject3DVO):Boolean
+		public function judgeFull(sourceVo:CBaseObject3DVO):Boolean
 		{
-			return headList.width+endList.width+sourceVo.length+length>=Vector3D.distance(listVo.startPos,listVo.endPos);
+			return headList.width+endList.width+sourceVo.length+length>=CVector.Distance(listVo.startPos,listVo.endPos);
 		}
 		private var updatePosNum:uint;
 		private var clearNum:uint;
@@ -265,9 +264,9 @@ package main.model.collection
 		 * @return Vector.<ICData> 发生变动的所有家具数据集合
 		 * 
 		 */		
-		public function addByMapList(sourceVo:CObject3DVO):Vector.<ICData>
+		public function addByMapList(sourceVo:CBaseObject3DVO):Vector.<ICData>
 		{
-			var isNext:Boolean=Vector3D.distance(this.listVo.endPos,sourceVo.position)<Vector3D.distance(this.listVo.startPos,sourceVo.position);
+			var isNext:Boolean=CVector.Distance(this.listVo.endPos,sourceVo.position)<CVector.Distance(this.listVo.startPos,sourceVo.position);
 			var vos:Vector.<ICData>;
 			for(var list:Furniture3DList=isNext?this.endList:this.headList;list!=this; list=isNext?list.endList:list.headList)
 			{
@@ -304,16 +303,15 @@ package main.model.collection
 		override protected function doAddNode(opreateData:ICData, node:IDoubleNode):Boolean
 		{
 			_invalidPosition=true;
-			var furnitureVo:CFurnitureVO=opreateData as CFurnitureVO;
-			furnitureVo.direction=listVo.direction;
-			furnitureVo.rotation=listVo.rotation;
+			var furnitureVo:CBaseObject3DVO=opreateData as CBaseObject3DVO;
+			furnitureVo.rotationHeight=listVo.rotationHeight;
 			furnitureVo.parentID=listVo.uniqueID;
 			furnitureVo.isLife=true;
 			return super.doAddNode(opreateData,node);
 		}
 		override protected function doRemoveNode(opreateData:ICData):void
 		{
-			(opreateData as CFurnitureVO).parentID=null;
+			(opreateData as CBaseObject3DVO).parentID=null;
 			super.doRemoveNode(opreateData);
 		}
 		override public function clearCalculationData():void

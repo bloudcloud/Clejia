@@ -8,42 +8,64 @@
 			   height = "800"
 			   xmlns:local="*"
 			   backgroundAlpha="0" backgroundColor="0x888888"
-			   addedToStage="application1_creationCompleteHandler(event)" xmlns:core="core.*">
-	<core:CApplication3D id="capplication" width="80%" height="100%" mouseChildren="true"/>
+			   xmlns:core="core.*">
+	<local:CApplication3DExtend id="capplication" width="80%" height="100%" mouseChildren="false" addedToStage="capplication_addedToStageHandler(event)"/>
 	<fx:Script>
 		<![CDATA[
 			import L3DLibrary.L3DLibraryWebService;
+			import L3DLibrary.L3DMaterialInformations;
 			import L3DLibrary.L3DRootNode;
 			
 			import Login.L3DLogin;
+			
+			import cloud.core.event.CDataEvent;
+			import cloud.core.singleton.CUtil;
+			
+			import dict.CommandTypeDict;
+			
+			import itemrenderers.ImageLabelVerticalItemRenderer;
 			
 			import utils.DatasEvent;
 			
 			private var login:L3DLogin = new L3DLogin(); 
 			
-			protected function application1_creationCompleteHandler(event:Event):void {
-				
-				this.systemManager.stage.stageWidth=Capabilities.screenResolutionX;
-				this.systemManager.stage.stageHeight=Capabilities.screenResolutionY - 36;
+			protected function capplication_addedToStageHandler(evt:Event):void {
 				L3DRootNode.instance.addEventListener(Event.COMPLETE, completeHandler);
 				L3DLibraryWebService.SetupWebService();
-				dv.AddItem = capplication.getMaterialInfo;
 				
-			}
-
-			private function completeHandler(e:Event):void {
-//				dv.setupqiangz();
-				//				dv.setupdiz();
-				login.addEventListener(L3DLogin.LOGINCOMPLETE,loginComplete);
-				login.Login("ZHS","000000");
+				rightMenu.addEventListener(ImageLabelVerticalItemRenderer.ImageLabelItemrendererClick, onRightMenuClicked);
 			}
 			
-			private function loginComplete(e:Event):void{
-				dv.findLejiaValue1 = "产品";
-				dv.findLejiaValue2 = "模型";
-				dv.findChengjiaName = "厨房";
-				dv.SetupPage();
-				
+			private function onRightMenuClicked(evt:DatasEvent):void
+			{
+				var materialInfo:L3DMaterialInformations=evt.data as L3DMaterialInformations;
+				switch(materialInfo.family)
+				{
+					case "地柜":
+					case "吊柜":
+					case "中高柜":
+					case "高柜":
+					case "台面":
+						capplication.dispatchEvent(new CDataEvent(CommandTypeDict.CMD_START_LOADPLAN,evt.data));
+						break;
+					case "石材":
+//						capplication.dispatchEvent(new CDataEvent(CommandTypeDict.CMD_START_LOADMATERIAL,evt.data));
+						break;
+					default:
+						//更换模型样式
+//						capplication.dispatchEvent(new CDataEvent(CommandTypeDict.CMD_START_LOADMESH,evt.data));
+						break;
+				}
+			}
+			private function completeHandler(e:Event):void {
+				rightMenu.xmlKeys=["乐家","产品","参数化","橱柜"];
+				rightMenu.setup(false);
+
+				var roundPoints:Array=[new Point(3000,1000),new Point(3000,-3000),new Point(-3000,-3000),new Point(-3000,1000)];
+				//初始化房间数据
+				var roomID:String=CUtil.Instance.createUID();
+				capplication.dispatchEvent(new CDataEvent(CommandTypeDict.CMD_INIT_ROOMDATA,{points:roundPoints,roomID:roomID}));
+				enter3DMode();
 				createTableBoard.left=20;
 				createTableBoard.bottom=20;
 				createTableBoard.visible=true;
@@ -52,20 +74,18 @@
 				createShelter.visible=true;
 				
 			}
-			
+			private function enter3DMode():void
+			{
+				capplication.dispatchEvent(new CDataEvent(CommandTypeDict.CMD_OPEN_SCENE3D));
+				capplication.setView3DVisible(true);
+			}
 			private function createHandler(evt:MouseEvent):void
 			{
 				capplication.dispatchEvent(new DatasEvent((evt.target as Button).id));
 			}
 		]]>
 	</fx:Script>
-	<s:VGroup width="100%"
-			  height="100%"
-			  horizontalAlign="right"
-			  verticalAlign="middle">
-		<local:DecorationView id="dv"/>
-		<!--<local:TileView id="dv" width="100%" height="100%"/>-->
-	</s:VGroup>
+	<local:WeatherBoardingView id="rightMenu" height="100%" right="0" />
 	<s:Button id="createTableBoard" label="台面" visible="false"
 			  click="createHandler(event)"/>
 	<s:Button id="createShelter" label="挡板" visible="false"

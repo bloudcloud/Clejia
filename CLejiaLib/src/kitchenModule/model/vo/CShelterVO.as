@@ -1,6 +1,6 @@
 package kitchenModule.model.vo
 {
-	import main.model.vo.CObject3DVO;
+	import main.model.vo.task.CObject3DVO;
 	
 
 	/**

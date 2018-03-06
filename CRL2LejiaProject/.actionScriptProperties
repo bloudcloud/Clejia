@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <actionScriptProperties analytics="false" mainApplicationPath="CRL2LejiaProject.as" projectUUID="a22692ff-b072-4081-ad0b-36bb01ef2366" version="11">
-  <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::debug,true" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderLocation="DOCUMENTS/lejiaSVN/Lejia3DBuild/cloud/selfLibs" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
+  <compiler additionalCompilerArguments="-locale en_US&#13;&#10;-define=CONFIG::debug,true" autoRSLOrdering="true" copyDependentFiles="false" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderLocation="D:/LejiaCode/Lejia3DBuild/cloud/selfLibs" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="false" verifyDigests="true" warn="true">
     <compilerSourcePath/>
     <libraryPath defaultLinkType="0">
       <libraryPathEntry kind="4" path="">
@@ -19,11 +19,10 @@
       </libraryPathEntry>
       <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/Alternativa3D.swc" useDefaultLinkType="true"/>
       <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/CLejiaLib.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="${LIBS_CLOUD}/CWorldLib.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/ComponentsLib.swc" useDefaultLinkType="true"/>
       <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="true"/>
-      <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/lejiaSVN/Lejia3DBuild/cloud/selfLibs/CRL2Lib.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="${LIBS_CLOUD}/CRL2Lib.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="2" path="${DOCUMENTS}/Lively3Dlibs/L3DBuildGeometry.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="2" path="/CWorldLib/bin-debug/CWorldLib.swc" useDefaultLinkType="true"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>

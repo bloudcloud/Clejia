@@ -4,7 +4,7 @@ package core.view
 	import alternativa.engine3d.primitives.Box;
 	
 	import cloud.core.interfaces.ICData;
-	import cloud.core.utils.MathUtil;
+	import cloud.core.utils.CMathUtil;
 	
 	import main.model.vo.CWallVO;
 
@@ -27,7 +27,7 @@ package core.view
 			for each(var vo:CWallVO in vos)
 			{
 				wall=new Box(vo.length,vo.width,vo.height,1,1,1,false,material);
-				wall.rotationZ=MathUtil.instance.toRadians(vo.rotation);
+				wall.rotationZ=CMathUtil.Instance.toRadians(vo.rotationHeight);
 				wall.x=vo.x;
 				wall.y=vo.y;
 				wall.z=vo.z;

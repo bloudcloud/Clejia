@@ -4,9 +4,15 @@ package utils
 	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 	
+	import cloud.core.datas.base.CVector;
 	import cloud.core.interfaces.ICData;
 	import cloud.core.interfaces.ICObject3D;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
+	import cloud.core.utils.CVectorUtil;
 	
+	import main.dict.CParamDict;
+	import main.extension.CQuotaObject;
+	import main.model.vo.CRegionVO;
 	import main.model.vo.CWallVO;
 
 	/**
@@ -15,11 +21,11 @@ package utils
 	 */
 	public class CDataUtil
 	{
-		private static var _instance:CDataUtil;
+		private static var _Instance:CDataUtil;
 		
-		public static function get instance():CDataUtil
+		public static function get Instance():CDataUtil
 		{
-			return _instance ||= new CDataUtil();
+			return _Instance ||= new CDataUtil();
 		}
 		
 		private var _groupCount:uint;
@@ -91,6 +97,31 @@ package utils
 			return null;
 		}
 		/**
+		 *  解析XML方案
+		 * @param source
+		 * @param parent
+		 * 
+		 */			
+		public function deserizeXML(source:XML, parent:CBaseObject3DVO=null):void
+		{
+			if(source==null) return;
+			var clsName:String;
+			var cls:Class;
+			var xmlList:XMLList=source.children();
+			var len:int=xmlList.length();
+			var vo:CBaseObject3DVO;
+			for(var i:int=0; i<len; i++)
+			{
+				clsName=String(XML(xmlList[i]).name());
+				cls=CParamDict.Instance.getParamDataTypeCls(clsName);
+				vo=new cls(clsName);
+				vo.deserialize(xmlList[i]);
+				if(parent!=null)
+					parent.addChild(vo);
+				deserizeXML(xmlList[i],vo);
+			}
+		}
+		/**
 		 *  根据墙面索引获取墙面数据
 		 * @param wallVos	墙面数据集合
 		 * @param index	墙面索引
@@ -145,7 +176,7 @@ package utils
 			var num:int=wallLength/unitLength;
 			if(value>num)
 			{
-				num++
+				num++;
 				scaleRate=wallLength/num/unitLength;
 			}
 			else
@@ -153,6 +184,156 @@ package utils
 				scaleRate=1;
 			}
 			return scaleRate;
+		}
+//		/**
+//		 * 将报价数据序列化成XML 
+//		 * @param meshes
+//		 * @return XML
+//		 * 
+//		 */		
+//		public function serializeClapboardQuotesToXML(meshes:Vector.<L3DMesh>):XML
+//		{
+//			for each(var mesh:L3DMesh in meshes)
+//			{
+//				if(mesh.userData2!=null)
+//				{
+//					for
+//				}
+//			}
+//		}
+
+		/**
+		 * 将算料请求数据序列化成XML 
+		 * @param source
+		 * @return XML
+		 * 
+		 */		
+		public function serializeNestingXML(source:Array):XML
+		{
+			var xml:XML=<Lejia type="TileCuttingStock"></Lejia>;
+			var elemXml:XML;
+			var elemObj:Object;
+			var listArr:Array;
+			var listObj:Object;
+			for(var i:int=0; i<source.length; i+=2)
+			{
+				elemObj=source[i];
+				elemXml=<Elem W={elemObj.length} L={elemObj.height} TextureNo={elemObj.order}></Elem>;
+				xml.appendChild(elemXml);
+				listArr=source[i+1];
+				for(var j:int=0; j<listArr.length; j++)
+				{
+					listObj=listArr[j];
+					elemXml.appendChild(
+						<list id={j} type="Rect">
+     						<value l={listObj.height} w={listObj.length}/>
+						</list>);
+				}
+			}
+			return xml;
+		}
+		/**
+		 * 保存一个算料请求数据 
+		 * @param texOrder	纹理的顺序编号
+		 * @param length		母版长度
+		 * @param height		母版高度
+		 * @param subLength		子板的长度
+		 * @param subHeight		子板的高度
+		 * @param output	请求数据容器对象
+		 * 
+		 */		
+		public function cacheOneNestingRequestVo(texOrder:int,length:Number,height:Number,subBoards:Array,output:Array):void
+		{
+			output.push({order:texOrder,length:length,height:height});
+			output.push(subBoards);
+		}
+		public function calculationBoardTotalPieces(sourceArr:Vector.<CQuotaObject>,outPutObj:Object):void
+		{
+			var pieces:int;
+			var totalArea:Number=0;
+			for each(var obj:CQuotaObject in sourceArr)
+			{
+				totalArea+=obj.totalLength*obj.totalHeight;
+			}
+			pieces=totalArea/(obj.Length*obj.Height);
+			var rand:int=totalArea%(obj.Length*obj.Height);
+			if(rand>0)
+				pieces++;
+			outPutObj.Piece=pieces;
+			outPutObj.Area=(totalArea*0.000001).toFixed(2);
+		}
+
+		private function sortNestingBoardFunc(objA:CQuotaObject,objB:CQuotaObject):int
+		{
+			if(objA.Length*objA.Height>=objB.Length*objB.Height)
+			{
+				return -1;
+			}
+			return 1;
+		}
+		/**
+		 * 创建3D对象数据 
+		 * @param type
+		 * @param uniqueID
+		 * @param parentID
+		 * @param length
+		 * @param width
+		 * @param height
+		 * @param x
+		 * @param y
+		 * @param z
+		 * @param rotation
+		 * 
+		 */		
+		public function createObject3DData(type:uint,uniqueID:String,parentID:String,length:Number,width:Number,height:Number,x:Number,y:Number,z:Number,rotation:Number,isDegree:Boolean=true):CBaseObject3DVO
+		{
+//			var vo:CObject3DVO = doCreateObject3DData(type);
+			var cls:Class=CParamDict.Instance.getParamDataTypeCls(CParamDict.Instance.getTypeClassName(type));
+			var vo:CBaseObject3DVO = new cls();	
+			vo.uniqueID=uniqueID;
+			vo.type=type;
+			vo.parentID=parentID;
+			vo.length=length;
+			vo.width=width;
+			vo.height=height;
+			vo.x=x;
+			vo.y=y;
+			vo.z=z;
+			CVectorUtil.Instance.calculateDirectionByRotation(rotation,vo.direction,isDegree);
+			CVector.Normalize(vo.direction);
+			return vo;
+		}
+		public function createRegionPlanVO(type:uint,uniqueID:String,parentID:String,length:Number,width:Number,height:Number,x:Number,y:Number,z:Number,rotation:Number,isDegree:Boolean=true):CRegionVO
+		{
+			var vo:CRegionVO = new CRegionVO();
+			vo.uniqueID=uniqueID;
+			vo.type=type;
+			vo.parentID=parentID;
+			vo.length=length;
+			vo.width=width;
+			vo.height=height;
+			vo.x=x;
+			vo.y=y;
+			vo.z=z;
+			CVectorUtil.Instance.calculateDirectionByRotation(rotation,vo.direction,isDegree);
+			CVector.Normalize(vo.direction);
+			return vo;
+		}
+		public function createWall(type:uint,uniqueID:String,parentID:String,length:Number,width:Number,height:Number,x:Number,y:Number,z:Number,rotation:Number,isDegree:Boolean=true):CWallVO
+		{
+			var vo:CWallVO = new CWallVO();	
+			vo.uniqueID=uniqueID;
+			vo.type=type;
+			vo.parentID=parentID;
+			vo.length=length;
+			vo.width=width;
+			vo.height=height;
+			vo.x=x;
+			vo.y=y;
+			vo.z=z;
+			CVectorUtil.Instance.calculateDirectionByRotation(rotation,vo.direction,isDegree);
+			CVector.Normalize(vo.direction);
+			return vo;
 		}
 	}
 }

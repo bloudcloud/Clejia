@@ -71,7 +71,6 @@ package modules.decoration
 		{
 			if(validateView(entity))
 				mediatorMap.mediate(entity);
-			//			else
 			//				throw new Error("Not sure what to do with this view type..");
 		}
 		public function removeView(entity:Object):void

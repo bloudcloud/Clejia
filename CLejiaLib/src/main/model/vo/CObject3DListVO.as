@@ -1,14 +1,10 @@
 package main.model.vo
 {
-	import flash.geom.Vector3D;
-	import flash.utils.getQualifiedClassName;
-	
-	import cloud.core.interfaces.ICData;
-	import cloud.core.interfaces.ICObject3D;
+	import cloud.core.datas.base.CVector;
 	import cloud.core.interfaces.ICObject3DList;
-	import cloud.core.singleton.CVector3DUtil;
 	
-	import kitchenModule.model.KitchenErrorModel;
+	import main.model.vo.task.CBaseTaskObject3DVO;
+	import main.model.vo.task.CObject3DVO;
 	
 	import ns.cloudLib;
 	
@@ -19,93 +15,60 @@ package main.model.vo
 	 */
 	public class CObject3DListVO extends CObject3DVO implements ICObject3DList
 	{
-		private var _startPos:Vector3D;
-		private var _endPos:Vector3D;
+		private var _startPos:CVector;
+		private var _endPos:CVector;
 
-		public function get endPos():Vector3D
+		public function get endPos():CVector
 		{
 			return _endPos;
 		}
 		
-		public function set endPos(value:Vector3D):void
+		public function set endPos(value:CVector):void
 		{
 			if(value!=null)
-				_endPos.copyFrom(value);
+				CVector.Copy(_endPos,value);
 			else
-				_endPos.copyFrom(CVector3DUtil.ZERO);
+				CVector.Copy(_endPos,CVector.ZERO);
 		}
 		
-		public function get startPos():Vector3D
+		public function get startPos():CVector
 		{
 			return _startPos;
 		}
 		
-		public function set startPos(value:Vector3D):void
+		public function set startPos(value:CVector):void
 		{
 			if(value!=null)
-				_startPos.copyFrom(value);
+				CVector.Copy(_startPos,value);
 			else
-				_startPos.copyFrom(CVector3DUtil.ZERO);
+				CVector.Copy(_startPos,CVector.ZERO);
 		}
 
-		public function CObject3DListVO()
+		public function CObject3DListVO(clsName:String="CObject3DListVO")
 		{
-			super();
-			_startPos=new Vector3D();
-			_endPos=new Vector3D();
+			super(clsName);
+			_startPos=CVector.CreateOneInstance();
+			_endPos=CVector.CreateOneInstance();
 		}
-	
-		override public function update(value:*):void
-		{
-			super.update(value);
-			startPos=value.headPos;
-			endPos=value.endPos;
-		}
-		
-		override public function compare(source:ICData):Number
-		{
-			var distance:Number;
-			var vo:ICObject3D=source as ICObject3D;
-			if(vo)
-			{
-				var vec:Vector3D=this.position.subtract(vo.position);
-				distance=vec.dotProduct(vo.direction)>0 ? vec.length : vec.length*-1;
-			}
-			else
-				KitchenErrorModel.instance.throwErrorByMessage("CObject3DListVO","compare"," vo",String(getQualifiedClassName(vo)+" 参数不是双向链表数据类型！"));
-			return distance;
-		}
-		
+
 		override public function toString():String
 		{
 			return super.toString()+"startPos:"+_startPos+" "+"endPos:"+_endPos+"\n";
 		}
 		
-		override public function clone():CObject3DVO
+		override public function clone():CBaseTaskObject3DVO
 		{
-			var vo:CObject3DListVO=new CObject3DListVO();
-			vo.uniqueID=this.uniqueID;
-			vo.type=this.type;
-			vo.direction=this.direction;
-			vo.length=this.length;
-			vo.width=this.width;
-			vo.height=this.height;
-			vo.parentID=this.parentID;
-			vo.isLife=this.isLife;
-			vo.startPos=this.startPos;
-			vo.endPos=this.endPos;
-			
-			vo.rotation=this.rotation;
-			vo.x=this.x;
-			vo.y=this.y;
-			vo.z=this.z;
-			
-			return vo;
+			var clone:CObject3DListVO=super.clone() as CObject3DListVO;
+			clone.startPos=startPos;
+			clone.endPos=endPos;
+			return clone;
 		}
 		
 		override public function clear():void
 		{
 			super.clear();
+			_startPos.back();
+			_endPos.back();
 			_startPos=null;
 			_endPos=null;
 		}

@@ -1,5 +1,6 @@
 package main.a3d.support
 {
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Stage;
 	import flash.display.Stage3D;
@@ -17,8 +18,9 @@ package main.a3d.support
 	import alternativa.engine3d.objects.WireFrame;
 	import alternativa.engine3d.primitives.Box;
 	
+	import cloud.core.datas.base.CRay;
 	import cloud.core.interfaces.IRenderAble;
-	import cloud.core.utils.Ray3D;
+	import cloud.core.utils.CVectorUtil;
 	
 	use namespace alternativa3d;
 	
@@ -37,7 +39,7 @@ package main.a3d.support
 		{
 			return _container;
 		}
-		private var _mouseRay:Ray3D;
+		private var _mouseRay:CRay;
 		private var _zFactor:Number;
 		private var camera:Camera3D;
 		
@@ -54,11 +56,13 @@ package main.a3d.support
 			_container = container;
 			_stage=stage;
 			_stage3D=stage.stage3Ds[0];
-			_mouseRay = new Ray3D();
+			_mouseRay = new CRay();
 			
 			releaseContext3DOnClose = _stage3D!=null ? false:true;
 			
 			view = new View(container.width, container.height, false, 0xfff111, 0, 4);
+			view.hideLogo();
+			
 			camera = new Camera3D(0.1, 50000);
 			camera.debug = isDebug;
 			camera.view = view;
@@ -184,14 +188,14 @@ package main.a3d.support
 		 * @param viewY
 		 * 
 		 */		
-		public function calculateMouseRay(ray:Ray3D,viewX:Number,viewY:Number):void
+		public function calculateMouseRay(ray:CRay,viewX:Number,viewY:Number):void
 		{
-			camera.calculateRay(ray.originPos,ray.direction,viewX,viewY);
+			camera.calculateRay(CVectorUtil.Instance.transformToVector3D(ray.originPos),CVectorUtil.Instance.transformToVector3D(ray.direction),viewX,viewY);
 		}
 		
 		private var tmp:Object3D;
 		public function Render():void{
-			if(_stage3D.visible)
+			if(_stage3D.visible) 
 			{
 				_nowTime=getTimer();
 				controller.update();
@@ -209,6 +213,14 @@ package main.a3d.support
 			}
 			
 		}
-		
+		/**
+		 * 获取当前帧状态显示对象 
+		 * @return DisplayObject
+		 * 
+		 */		
+		public function get diagram():DisplayObject
+		{
+			return camera.diagram;
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package core.view
 {
+	import cloud.core.events.CDataEvent;
+	
 	import core.model.GlobalModel;
 	
 	import dict.CommandTypeDict;
@@ -7,8 +9,6 @@ package core.view
 	import main.a3d.support.CScene3D;
 	
 	import rl2.mvcs.view.BaseMediator;
-	
-	import utils.DatasEvent;
 	
 	/**
 	 *  地面可视对象集合中介类
@@ -30,7 +30,7 @@ package core.view
 		{
 			super("FloorViewSetMediator");
 		}
-		private function onInitFloorData(evt:DatasEvent):void
+		private function onInitFloorData(evt:CDataEvent):void
 		{
 			var arr:Array = evt.data as Array;
 			floorSet.createFloor(arr,global.floorThickness);

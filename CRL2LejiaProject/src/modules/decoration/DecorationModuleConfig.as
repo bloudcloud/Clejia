@@ -7,15 +7,15 @@ package modules.decoration
 	
 	import core.view.FloorViewSet;
 	import core.view.FloorViewSetMediator;
-	import core.view.Scene3DMediator;
+	import core.view.CScene3DMediator;
 	import core.view.WallViewSet;
 	import core.view.WallViewSetMediator;
 	
 	import main.model.WallDataModel;
 	
 	import modules.decoration.controller.command.DecorationServiceStartCmd;
-	import modules.decoration.service.ClapBoardDecorationRL2Service;
-	import modules.decoration.service.CDecorationDownLoadRL2Service;
+	import modules.decoration.service.CDecorationRL2Service;
+	import modules.main.service.CDownloadRL2Service;
 	
 	import robotlegs.bender.extensions.eventCommandMap.api.IEventCommandMap;
 	import robotlegs.bender.extensions.mediatorMap.api.IMediatorMap;
@@ -23,7 +23,7 @@ package modules.decoration
 	import robotlegs.bender.framework.api.IContext;
 	
 	/**
-	 * 
+	 * 装修模块配置类
 	 * @author cloud
 	 */
 	public class DecorationModuleConfig implements IConfig
@@ -46,14 +46,14 @@ package modules.decoration
 			//数据模型
 			context.injector.map(WallDataModel).asSingleton();
 			//视图
-			mediatorMap.map(View).toMediator(Scene3DMediator);
+			mediatorMap.map(View).toMediator(CScene3DMediator);
 			mediatorMap.map(FloorViewSet).toMediator(FloorViewSetMediator);
 			mediatorMap.map(WallViewSet).toMediator(WallViewSetMediator);
 			//控制命令
 			commandMap.map(Event.INIT).toCommand(DecorationServiceStartCmd);
 			//服务
-			context.injector.map(CDecorationDownLoadRL2Service).asSingleton();
-			context.injector.map(ClapBoardDecorationRL2Service).asSingleton();
+			context.injector.map(CDownloadRL2Service).asSingleton();
+			context.injector.map(CDecorationRL2Service).asSingleton();
 			dispatcher.dispatchEvent(new Event(Event.INIT));
 		}
 	}

@@ -5,7 +5,6 @@
     <classEntry path="kitchenModule.model.HangingCabinetModel"/>
     <classEntry path="kitchenModule.model.vo.CShelterVO"/>
     <classEntry path="main.model.vo.CWallVO"/>
-    <classEntry path="kitchenModule.model.vo.CFurnitureVO"/>
     <classEntry path="kitchenModule.model.vo.CRoomCornerVO"/>
     <classEntry path="wallDecorationModule.interfaces.ICDecorationModule"/>
     <classEntry path="main.model.vo.task.ITaskVO"/>
@@ -16,7 +15,6 @@
     <classEntry path="wallDecorationModule.model.vo.CDecorationTaskVO"/>
     <classEntry path="main.model.ModelManager"/>
     <classEntry path="main.model.TaskDataModel"/>
-    <classEntry path="main.dict.EventTypeDict"/>
     <classEntry path="utils.CDataUtil"/>
     <classEntry path="wallDecorationModule.model.vo.CDecorationModel"/>
     <classEntry path="main.model.vo.task.CParam3DTaskVO"/>

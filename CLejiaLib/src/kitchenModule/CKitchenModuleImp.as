@@ -3,12 +3,16 @@ package kitchenModule
 
 	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	import cloud.core.interfaces.ICData;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
+	import cloud.core.utils.CDebugUtil;
 	
 	import kitchenModule.interfaces.ICFurnitureSet;
 	import kitchenModule.interfaces.ICKitchenModule;
+	import kitchenModule.service.CCabinetService;
+	import kitchenModule.view.CBox;
 	import kitchenModule.view.CShelterView;
 	import kitchenModule.view.CTableBoardView;
 	
@@ -21,196 +25,123 @@ package kitchenModule
 	 */
 	public class CKitchenModuleImp extends EventDispatcher implements ICKitchenModule
 	{
-		private var _modelsDict:Dictionary;
+		private var _isRunning:Boolean;
+		private var _cabinetService:CCabinetService;
 		private var _tableBoard:CTableBoardView;
 		private var _shelter:CShelterView;
-		private var _isRunning:Boolean;
 		
 		public function CKitchenModuleImp()
 		{
 		}
 
-		public function hasFloorID(floorID:String):Boolean
-		{
-			CONFIG::isKitchen
-				{
-					return KitchenGlobalModel.instance.hasFloorID(floorID);
-				}
-			return false;
-		}
-		public function importWallPosition(poses:Vector.<Vector3D>,floorID:String):void
-		{
-			CONFIG::isKitchen
-				{
-					KitchenGlobalModel.instance.parseWalls(poses,floorID);
-				}
-		}
 		public function createKitchenFurniture(furnitureID:String,furnitureDirection:int,furnitureType:uint,furnitureLength:uint,furnitureWidth:uint,furnitureHeight:uint):void
 		{
-			CONFIG::isKitchen
-				{
-					KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).createFurnitureVo(furnitureID,furnitureDirection,furnitureType,furnitureLength,furnitureWidth,furnitureHeight);
-				}
+			_cabinetService.createFurnitureVo(furnitureID,furnitureDirection,furnitureType,furnitureLength,furnitureWidth,furnitureHeight);
 		}
 		public function deleteKitchenFurniture(furnitureID:String,furnitureDirection:int,furnitureType:uint):void
 		{
-			CONFIG::isKitchen
-				{
-					KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).deleteFurnitureVo(furnitureID);
-				}
+			_cabinetService.deleteFurnitureVo(furnitureID);
 		}
 		public function excuteMove(furnitureDir:int,furnitureType:uint,position:Vector3D):Boolean
 		{
-			CONFIG::isKitchen
-				{
-					return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMove(furnitureDir,position);
-				}
-			return false;
+			return _cabinetService.excuteMove(furnitureDir,position);
 		}
 		public function excuteMouseDown(furnitureID:String,furnitureDir:int,furnitureType:uint):Boolean
 		{
-			CONFIG::isKitchen
-				{
-					return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMouseDown(furnitureID,furnitureDir);
-				}
-			return true;
+			return _cabinetService.excuteMouseDown(furnitureID,furnitureDir);
 		}
 		public function excuteMouseUp(furnitureType:uint):Vector.<ICData>
 		{
-			CONFIG::isKitchen
-				{
-					return KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteMouseUp();
-				}
-			return null;
+			return _cabinetService.excuteMouseUp();
 		}
 		public function excuteEnd(furnitureType:uint):void
 		{
-			CONFIG::isKitchen
-				{
-					KitchenGlobalModel.instance.getModerByDic(furnitureType,_modelsDict).excuteEnd();
-				}
+			_cabinetService.excuteEnd();
 		}
 		public function createTableBoard():ICFurnitureSet
 		{		
-			CONFIG::isKitchen
+			var vos:Vector.<CBaseObject3DVO>=_cabinetService.createTableBoards();
+			if(vos)
+			{
+				_tableBoard=new CTableBoardView();
+				_tableBoard.createTableBoards(vos);
+				var furniturevos:Vector.<CBaseObject3DVO>=_cabinetService.getFurnituresInList();
+				if(furniturevos)
+					_tableBoard.createTableBoards(furniturevos);
+				var child:CBox;
+				for(var i:int=0; i<_tableBoard.numChildren; i++)
 				{
-					var cabinetModel:CabinetModel=(KitchenGlobalModel.instance.getModerByDic(Object3DDict.OBJECT3D_CABINET,_modelsDict) as CabinetModel)
-					var vos:Vector.<ICObject3DData>=cabinetModel.createTableBoards();
-					if(vos)
-					{
-						_tableBoard=new CTableBoardView();
-						_tableBoard.createTableBoards(vos);
-						var furniturevos:Vector.<ICObject3DData>=cabinetModel.getFurnituresInList();
-						if(furniturevos)
-							_tableBoard.createTableBoards(furniturevos);
-						var child:CBox;
-						for(var i:int=0; i<_tableBoard.numChildren; i++)
-						{
-							child=_tableBoard.getChildAt(i) as CBox;
-							child.scaleX=10;
-							child.scaleY=10;
-							child.scaleZ=10;
-						}
-					}
-					return _tableBoard;	
+					child=_tableBoard.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
 				}
-				return null;
+			}
+			return _tableBoard;	
 		}
 		public function createShelter():ICFurnitureSet
 		{
-			CONFIG::isKitchen
+			var vos:Vector.<CBaseObject3DVO>=_cabinetService.createShelterVos();
+			if(vos)
+			{
+				_shelter=new CShelterView();
+				_shelter.createShelters(vos);
+				var child:CBox;
+				for(var i:int=0; i<_shelter.numChildren; i++)
 				{
-					var vos:Vector.<ICObject3DData>=(KitchenGlobalModel.instance.getModerByDic(Object3DDict.OBJECT3D_CABINET,_modelsDict) as CabinetModel).createShelterVos();
-					if(vos)
-					{
-						_shelter=new CShelterView();
-						_shelter.createShelters(vos);
-						var child:CBox;
-						for(var i:int=0; i<_shelter.numChildren; i++)
-						{
-							child=_shelter.getChildAt(i) as CBox;
-							child.scaleX=10;
-							child.scaleY=10;
-							child.scaleZ=10;
-						}
-					}
-					return _shelter;
+					child=_shelter.getChildAt(i) as CBox;
+					child.scaleX=10;
+					child.scaleY=10;
+					child.scaleZ=10;
 				}
-				return null;
+			}
+			return _shelter;
 		}
 		public function clear():void
 		{
-			CONFIG::isKitchen
-				{
-					var cabinetModel:CabinetModel=KitchenGlobalModel.instance.getModerByDic(Object3DDict.OBJECT3D_CABINET,_modelsDict) as CabinetModel;
-					if(_tableBoard)
-					{
-						_tableBoard.dispose();
-						_tableBoard=null;
-						cabinetModel.deleteTableBoards();
-					}
-					if(_shelter)
-					{
-						_shelter.dispose();
-						_shelter=null;
-						cabinetModel.deleteShelters();
-					}
-					cabinetModel.deleteRoomCorners();
-				}
+			if(_tableBoard)
+			{
+				_tableBoard.dispose();
+				_tableBoard=null;
+				_cabinetService.deleteTableBoards();
+			}
+			if(_shelter)
+			{
+				_shelter.dispose();
+				_shelter=null;
+				_cabinetService.deleteShelters();
+			}
+			_cabinetService.deleteRoomCorners();
 		}
 		public function getQuotes():void
 		{
-			CONFIG::isKitchen
-				{
-					CDebug.instance.traceStr("CKithenModuleImp->getQuotes()");
-				}
+			CDebugUtil.Instance.traceStr("CKithenModuleImp->getQuotes()");
 		}
 		public function get isRunning():Boolean
 		{
-			CONFIG::isKitchen
-				{
-					return _isRunning;
-				}
-			return false;
+			return _isRunning;
 		}
 		public function start():void
 		{
-			CONFIG::isKitchen
-				{
-					if(!_isRunning)
-					{
-						_isRunning=true;
-						_modelsDict=new Dictionary();
-					}
-				}
+			if(!_isRunning)
+			{
+				_isRunning=true;
+			}
 		}
 		public function stop():void
 		{
-			CONFIG::isKitchen
-				{
-					if(_isRunning)
-					{
-						_isRunning=false;
-						clear();
-						for(var key:String in _modelsDict)
-						{
-							var furnitureModel:ICFurnitureModel=_modelsDict[key] as ICFurnitureModel;
-							furnitureModel.clear();
-							delete _modelsDict[key];
-						}
-						_modelsDict=null;
-					}
-				}
+			if(_isRunning)
+			{
+				_isRunning=false;
+				clear();
+			}
 		}
 		public function updateByFrame(startTime:Number=0,frameTime:Number=0):void
 		{
-			CONFIG::isKitchen
-				{
-					if(getTimer()-startTime<frameTime)
-					{
-						//TODO:
-					}
-				}
+			if(getTimer()-startTime<frameTime)
+			{
+				//TODO:
+			}
 		}
 	}
 }

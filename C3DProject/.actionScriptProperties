@@ -27,12 +27,12 @@
       <libraryPathEntry kind="3" linkType="1" path="${DOCUMENTS}/Lively3Dlibs/L3DBuildGeometry.swc" useDefaultLinkType="true"/>
       <libraryPathEntry kind="3" linkType="1" path="${DOCUMENTS}/Lively3Dlibs/L3DLibrary.swc" useDefaultLinkType="true"/>
       <libraryPathEntry kind="3" linkType="1" path="${DOCUMENTS}/Lively3Dlibs/bearas.swc" useDefaultLinkType="true"/>
+      <libraryPathEntry kind="3" linkType="1" path="${DOCUMENTS}/Lively3Dlibs/L3DWeatherboardingView.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
   <applications>
     <application path="C3DProject.mxml"/>
-    <application path="TestClapboard.mxml"/>
   </applications>
   <modules/>
   <workers/>

@@ -9,14 +9,14 @@ package kitchenModule.view
 	import alternativa.engine3d.materials.FillMaterial;
 	import alternativa.engine3d.materials.Material;
 	
-	import cloud.core.utils.Geometry3DUtil;
-	import cloud.core.utils.CMatrix3DUtil;
+	import cloud.core.datas.base.CVector;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
+	import cloud.core.utils.CGeometry3DUtil;
 	
 	import kitchenModule.model.KitchenGlobalModel;
-	import kitchenModule.model.vo.CFurnitureVO;
 	import kitchenModule.model.vo.CRoomCornerVO;
 	
-	import main.model.vo.CObject3DVO;
+	import main.model.vo.task.CObject3DVO;
 	
 	import ns.cloudLib;
 
@@ -38,24 +38,24 @@ package kitchenModule.view
 		private function createTableBoardByCornerVo(vo:CRoomCornerVO):void
 		{
 			var length:Number,width:Number,height:Number,rotation:Number;
-			var position:Vector3D;
+			var position:CVector;
 			if(vo.prevLength>0)
 			{
-				position=Geometry3DUtil.instance.transformVectorByCTransform3D(vo.startPos,vo.parentInverseTransform);
+				position=CGeometry3DUtil.Instance.transformVectorByCTransform3D(vo.startPos,vo.parentInverseTransform);
 				length=vo.length;
 				width=vo.prevWidth;
 				height=KitchenGlobalModel.instance.TABLEBOARD_HEIGHT;
-				rotation=vo.rotation;
+				rotation=vo.rotationHeight;
 				position.x=position.x+length*.5;
 				position.y=position.y-width*.5;
 				position.z=vo.height+height*.5;
-				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,vo.parentTransform);
-				doCreateTableBoard(length,width,height,rotation,position);
+				CGeometry3DUtil.Instance.transformVectorByCTransform3D(position,vo.parentTransform,false);
+				doCreateTableBoard(length,width,height,rotation,position.x,position.y,position.z);
+				position.back();
 			}
 			if(vo.nextLength>0)
 			{
-				
-				position=Geometry3DUtil.instance.transformVectorByCTransform3D(vo.endPos,vo.parentInverseTransform);
+				position=CGeometry3DUtil.Instance.transformVectorByCTransform3D(vo.endPos,vo.parentInverseTransform);
 				if(this.numChildren>0)
 				{
 					length=vo.nextLength;
@@ -66,23 +66,23 @@ package kitchenModule.view
 				}
 				width=vo.nextWidth;
 				height=KitchenGlobalModel.instance.TABLEBOARD_HEIGHT;
-				rotation=vo.rotation-90;
+				rotation=vo.rotationHeight-90;
 				position.x=position.x-width*.5;
 				position.y=position.y+length*.5;
 				position.z=vo.height+height*.5;
-				position=Geometry3DUtil.instance.transformVectorByCTransform3D(position,vo.parentTransform);
-				doCreateTableBoard(length,width,height,rotation,position);
+				CGeometry3DUtil.Instance.transformVectorByCTransform3D(position,vo.parentTransform,false);
+				doCreateTableBoard(length,width,height,rotation,position.x,position.y,position.z);
+				
 			}
 		}
 		
-		private function createTableBoardByFurnitureVo(vo:CFurnitureVO):void
+		private function createTableBoardByFurnitureVo(vo:CBaseObject3DVO):void
 		{
 			var height:Number=KitchenGlobalModel.instance.TABLEBOARD_HEIGHT;
-			var position:Vector3D=vo.position.clone();
-			position.z+=vo.height+height*.5;
-			doCreateTableBoard(vo.length,vo.width,height,vo.rotation,position);
+			vo.position.z+=vo.height+height*.5;
+			doCreateTableBoard(vo.length,vo.width,height,vo.rotationHeight,vo.position.x,vo.position.y,vo.position.z);
 		}
-		private function doCreateTableBoard(length:Number,width:Number,height:Number,rotation:Number,position:Vector3D):void
+		private function doCreateTableBoard(length:Number,width:Number,height:Number,rotation:Number,posX:Number,posY:Number,posZ:Number):void
 		{
 			var mesh:CBox=new CBox(length*.1,width*.1,height*.1);
 			mesh.uniqueID=UIDUtil.createUID();
@@ -91,9 +91,9 @@ package kitchenModule.view
 			
 			var vertices:Vector.<Number>=mesh.geometry.getAttributeValues(VertexAttributes.POSITION);
 			var newVertices:Vector.<Number>=new Vector.<Number>(vertices.length);
-			var matrix3d:Matrix3D=CMatrix3DUtil.instance.matrix3D;
+			var matrix3d:Matrix3D=new Matrix3D();
 			matrix3d.appendRotation(rotation,Vector3D.Z_AXIS);
-			matrix3d.appendTranslation(position.x*.1,position.y*.1,position.z*.1);
+			matrix3d.appendTranslation(posX*.1,posY*.1,posZ*.1);
 			matrix3d.transformVectors(vertices,newVertices);
 			matrix3d.identity();
 			
@@ -106,15 +106,11 @@ package kitchenModule.view
 		 * @param vos	一组挡板数据
 		 * 
 		 */
-		public function createTableBoards(vos:Vector.<CObject3DVO>):void
+		public function createTableBoards(vos:Vector.<CBaseObject3DVO>):void
 		{
 			for each(var vo:CObject3DVO in vos)
 			{
-				doCreateTableBoard(vo.length,vo.width,vo.height,vo.rotation,vo.position);
-//				if(vos[i] is CRoomCornerVO)
-//					createTableBoardByCornerVo(vos[i] as CRoomCornerVO);
-//				else if(vos[i] is CFurnitureVO)
-//					createTableBoardByFurnitureVo(vos[i] as CFurnitureVO);
+				doCreateTableBoard(vo.length,vo.width,vo.height,vo.rotationHeight,vo.position.x,vo.position.y,vo.position.z);
 			}
 		}
 		override public function dispose():void

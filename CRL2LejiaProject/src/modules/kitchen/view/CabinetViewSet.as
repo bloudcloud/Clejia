@@ -1,10 +1,9 @@
 package modules.kitchen.view
 {
-	import flash.geom.Vector3D;
-	
 	import alternativa.engine3d.objects.Mesh;
 	
-	import cloud.core.utils.MathUtil;
+	import cloud.core.datas.base.CVector;
+	import cloud.core.utils.CMathUtil;
 	
 	import core.view.BaseFurnitureViewSet;
 	
@@ -78,9 +77,9 @@ package modules.kitchen.view
 		 * @param pos
 		 * 
 		 */		
-		public function updateCurrent(direction:int,pos:Vector3D):void
+		public function updateCurrent(direction:int,pos:CVector):void
 		{
-			_currentMesh.rotationZ=MathUtil.instance.toRadians(direction);
+			_currentMesh.rotationZ=CMathUtil.Instance.toRadians(direction);
 			_currentMesh.x=pos.x;
 			_currentMesh.y=pos.y;
 			_currentMesh.z=pos.z;
@@ -93,29 +92,29 @@ package modules.kitchen.view
 		 * @param roomHeight
 		 * 
 		 */		
-		public function fixPos(pos:Vector3D,roomLength:uint,roomWidth:uint,roomHeight:uint):void
+		public function fixPos(pos:CVector,roomLength:uint,roomWidth:uint,roomHeight:uint):void
 		{
 			var disX:uint = (roomLength-_currentMesh.Length)*.5;
 			var disY:uint = (roomWidth-_currentMesh.Length)*.5;
 			var disZ:uint = roomHeight-_currentMesh.Height*.5;
 			if(pos.x>disX)
 			{
-				_currentMesh.rotationZ=MathUtil.instance.toRadians(-90);
+				_currentMesh.rotationZ=CMathUtil.Instance.toRadians(-90);
 				pos.x=disX;
 			}
 			else if(pos.x<-disX)
 			{
-				_currentMesh.rotationZ=MathUtil.instance.toRadians(90);
+				_currentMesh.rotationZ=CMathUtil.Instance.toRadians(90);
 				pos.x=-disX;
 			}
 			if(pos.y>disY)
 			{
-				_currentMesh.rotationZ=MathUtil.instance.toRadians(0);
+				_currentMesh.rotationZ=CMathUtil.Instance.toRadians(0);
 				pos.y=disY;
 			}
 			else if(pos.y<-disY)
 			{
-				_currentMesh.rotationZ=MathUtil.instance.toRadians(180);
+				_currentMesh.rotationZ=CMathUtil.Instance.toRadians(180);
 				pos.y=-disY;
 			}
 			if(pos.z>disZ)
@@ -125,7 +124,7 @@ package modules.kitchen.view
 		}
 		public function get currentRotation():Number
 		{
-			return MathUtil.instance.toDegrees(_currentMesh.rotationZ);
+			return CMathUtil.Instance.toDegrees(_currentMesh.rotationZ);
 		}
 		/**
 		 * 获取当前家具模型的唯一id 

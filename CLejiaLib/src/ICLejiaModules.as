@@ -2,8 +2,7 @@ package
 {
 	import kitchenModule.interfaces.ICKitchenModule;
 	
-	import wallDecorationModule.interfaces.ICClapboardDecorationModule;
-	import wallDecorationModule.interfaces.ICWaistDecorationModule;
+	import wallDecorationModule.interfaces.ICDecorationModule;
 	
 	/**
 	 *  应用接口
@@ -21,12 +20,24 @@ package
 		 * @return ICDecorationModule
 		 * 
 		 */		
-		function get waistDecorationModule():ICWaistDecorationModule;
+		function get waistDecorationModule():ICDecorationModule;
 		/**
 		 * 获取护墙板模块的实例 
-		 * @return ICClapboardDecorationModule
+		 * @return ICDecorationModule
 		 * 
 		 */		
-		function get clapboardDecorationModule():ICClapboardDecorationModule;
+		function get clapboardDecorationModule():ICDecorationModule;
+		/**
+		 * 获取背景墙功能模块的实例 
+		 * @return ICDecorationModule
+		 * 
+		 */		
+		function get backgroundWallModule():ICDecorationModule;
+		/**
+		 * 获取参数化门功能模块的实例 
+		 * @return ICDecorationModule
+		 * 
+		 */		
+		function get doorModule():ICDecorationModule;
 	}
 }

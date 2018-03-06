@@ -5,12 +5,13 @@
     <classEntry path="rl2.extension.IKitchenModule"/>
     <classEntry path="rl2.extension.IDecorationModule"/>
     <classEntry path="modules.decoration.DecorationModuleConfig"/>
-    <classEntry path="modules.decoration.service.CDecorationDownLoadRL2Service"/>
     <classEntry path="rl2.mvcs.view.BaseMediator"/>
     <classEntry path="rl2.mvcs.service.ICService"/>
-    <classEntry path="rl2.mvcs.model.Idata3D"/>
     <classEntry path="modules.decoration.controller.command.DecorationServiceStartCmd"/>
-    <classEntry path="modules.decoration.service.ClapBoardDecorationRL2Service"/>
+    <classEntry path="modules.decoration.service.CDecorationRL2Service"/>
+    <classEntry path="dict.StateTypeDict"/>
+    <classEntry path="modules.main.service.CDownloadRL2Service"/>
+    <classEntry path="modules.kitchen.service.CCabinetRL2Service"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

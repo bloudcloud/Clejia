@@ -4,7 +4,7 @@ package kitchenModule.view
 	
 	import kitchenModule.interfaces.ICFurnitureSet;
 	
-	import main.model.vo.CObject3DVO;
+	import main.model.vo.task.CObject3DVO;
 	
 	/**
 	 *  

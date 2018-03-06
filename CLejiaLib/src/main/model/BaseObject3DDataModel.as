@@ -1,6 +1,6 @@
 package main.model
 {
-	import cloud.core.model.BaseDataModel;
+	import cloud.core.mvcs.model.BaseDataModel;
 	
 	/**
 	 * 基础3D对象数据模型类

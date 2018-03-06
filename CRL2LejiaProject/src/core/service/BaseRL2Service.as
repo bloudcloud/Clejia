@@ -1,16 +1,16 @@
 package core.service
 {
 	/**
-	 *	
+	 *	基础服务类
 	 * @author cloud
 	 */
 	import flash.events.IEventDispatcher;
 	
+	import cloud.core.events.CDataEvent;
+	
 	import rl2.mvcs.service.ICService;
 	
 	import robotlegs.bender.framework.api.ILogger;
-	
-	import utils.DatasEvent;
 	
 	public class BaseRL2Service implements ICService
 	{
@@ -19,16 +19,16 @@ package core.service
 		[Inject]
 		public var dispatcher:IEventDispatcher;
 		
-		protected var _type:String;
+		protected var _className:String;
 
-		public function get type():String
+		public function get className():String
 		{
-			return _type;
+			return _className;
 		}
 				
-		public function BaseRL2Service(type:String="")
+		public function BaseRL2Service(clsName:String="BaseRL2Service")
 		{
-			_type=type
+			_className=clsName;
 		}
 		
 		protected function addListener():void
@@ -41,21 +41,21 @@ package core.service
 			
 		}
 		
-		protected function dispatchDatasEvent(type:String,data:*=null):void
+		protected function dispatchDataEvent(type:String,data:*=null):void
 		{
 			if(dispatcher.hasEventListener(type))
-				dispatcher.dispatchEvent(new DatasEvent(type,data));
+				dispatcher.dispatchEvent(new CDataEvent(type,data));
 		}
 		public function start():void
 		{
 			addListener();
-			logger.info((_type+"->start()"));
+			logger.info((_className+"->start()"));
 		}
 		
 		public function stop():void
 		{
 			removeListener();
-			logger.info((_type+"->stop()"));
+			logger.info((_className+"->stop()"));
 		}
 	}
 }

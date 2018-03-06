@@ -1,8 +1,10 @@
 package kitchenModule.interfaces
 {
+
 	import flash.geom.Vector3D;
 	
 	import cloud.core.interfaces.ICData;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
 
 	/**
 	 *  家具数据模型接口
@@ -20,7 +22,7 @@ package kitchenModule.interfaces
 		 * @param height
 		 * 
 		 */	
-		function createFurnitureVo(furnitureID:String,furnitureDirection:int,furnitureType:uint,length:uint,width:uint,height:uint):void;
+		function createFurnitureVo(furnitureID:String,furnitureDirection:int,furnitureType:uint,length:uint,width:uint,height:uint):CBaseObject3DVO;
 		/**
 		 * 删除家具数据 
 		 * @param furnitureID

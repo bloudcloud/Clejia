@@ -1,6 +1,6 @@
 package kitchenModule.interfaces
 {
-	import main.model.vo.CObject3DVO;
+	import main.model.vo.task.CObject3DVO;
 
 	/**
 	 *  家具集合接口

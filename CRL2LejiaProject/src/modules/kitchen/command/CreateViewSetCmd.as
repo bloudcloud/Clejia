@@ -1,10 +1,10 @@
 package modules.kitchen.command
 {
+	import cloud.core.events.CDataEvent;
+	
 	import main.a3d.support.CScene3D;
 	
 	import robotlegs.bender.bundles.mvcs.Command;
-	
-	import utils.DatasEvent;
 	
 	/**
 	 *  创建可视对象集合命令
@@ -13,7 +13,7 @@ package modules.kitchen.command
 	public class CreateViewSetCmd extends Command
 	{
 		[Inject]
-		public var evt:DatasEvent;
+		public var evt:CDataEvent;
 		[Inject]
 		public var scene:CScene3D;
 		

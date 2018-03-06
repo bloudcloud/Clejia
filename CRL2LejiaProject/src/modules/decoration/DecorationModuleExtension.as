@@ -9,7 +9,7 @@ package modules.decoration
 	import robotlegs.bender.framework.api.IExtension;
 	
 	/**
-	 * 
+	 * 装修模块扩展
 	 * @author cloud
 	 */
 	public class DecorationModuleExtension implements IExtension

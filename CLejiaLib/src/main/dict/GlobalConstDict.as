@@ -6,8 +6,10 @@ package main.dict
 	 */
 	public class GlobalConstDict
 	{
+		public static const ROOM_HEIGHT:uint = 2800;
 		public static const DOOR3D_OFFSET:int=120;
-		public static const SCENE3D_SCALERATIO:Number=.1;
+		
+		public static var Scene3DScaleRatio:Number=1;
 		
 		public function GlobalConstDict()
 		{

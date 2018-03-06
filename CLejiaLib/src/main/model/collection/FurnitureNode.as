@@ -2,8 +2,7 @@ package main.model.collection
 {
 	import cloud.core.collections.DoubleNode;
 	import cloud.core.interfaces.ICData;
-	
-	import kitchenModule.model.vo.CFurnitureVO;
+	import cloud.core.mvcs.model.paramVos.CBaseObject3DVO;
 	
 	/**
 	 *  家具节点
@@ -21,9 +20,9 @@ package main.model.collection
 			return _prev as FurnitureNode;
 		}
 		
-		final public function get furnitureVo():CFurnitureVO
+		final public function get furnitureVo():CBaseObject3DVO
 		{
-			return nodeData as CFurnitureVO;
+			return nodeData as CBaseObject3DVO;
 		}
 		
 		public function FurnitureNode(source:ICData)

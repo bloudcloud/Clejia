@@ -1,10 +1,10 @@
 package core
 {
+	import cloud.core.events.CDataEvent;
+	
 	import dict.CommandTypeDict;
 	
 	import rl2.mvcs.view.BaseMediator;
-	
-	import utils.DatasEvent;
 	
 	/**
 	 *	
@@ -20,7 +20,7 @@ package core
 		{
 			super("CApplication3DMediator");
 		}
-		private function onDatasEventHandler(evt:DatasEvent):void
+		private function onDatasEventHandler(evt:CDataEvent):void
 		{
 			dispatchDatasEvent(evt.type,evt.data);
 		}

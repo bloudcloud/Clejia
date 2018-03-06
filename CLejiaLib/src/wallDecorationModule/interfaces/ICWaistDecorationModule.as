@@ -1,15 +1,14 @@
 package wallDecorationModule.interfaces
 {
 	import main.model.vo.task.ITaskVO;
-	
-	public interface ICWaistDecorationModule extends ICDecorationModule
+
+	public interface ICWaistDecorationModule
 	{
 		/**
-		 * 添加装饰任务 
-		 * @param taskVo		
-		 * @param stage3d
+		 * 添加3D腰线任务数据 
+		 * @param vo
 		 * 
 		 */		
-		function addDecorationTask(taskVo:ITaskVO):void;
+		function addWaist3DTask(vo:ITaskVO):void
 	}
 }

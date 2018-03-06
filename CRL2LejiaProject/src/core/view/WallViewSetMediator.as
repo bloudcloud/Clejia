@@ -1,11 +1,8 @@
 package core.view
 {
-	import flash.geom.Vector3D;
-	
-	import mx.utils.UIDUtil;
-	
-	import cloud.core.singleton.CUtil;
-	import cloud.core.singleton.CVector3DUtil;
+	import cloud.core.datas.containers.CVectorContainer;
+	import cloud.core.events.CDataEvent;
+	import cloud.core.utils.CVectorUtil;
 	
 	import core.model.GlobalModel;
 	
@@ -17,10 +14,6 @@ package core.view
 	import ns.cloudLib;
 	
 	import rl2.mvcs.view.BaseMediator;
-	
-	import utils.DatasEvent;
-	
-	import wallDecorationModule.CClapboardDecorationModuleImp;
 	
 	use namespace cloudLib;
 	/**
@@ -35,8 +28,6 @@ package core.view
 		public var scene:CScene3D;
 		[Inject]
 		public var wallModel:WallDataModel;
-		[Inject]
-		public var decorationModule:CClapboardDecorationModuleImp;
 		
 		public function get wallSet():WallViewSet
 		{
@@ -47,14 +38,15 @@ package core.view
 		{
 			super("WallViewSetMediator");
 		}
-		private function onInitRoomData(evt:DatasEvent):void
+		private function onInitRoomData(evt:CDataEvent):void
 		{
-			var roundPoints:Array=evt.data as Array;
-			var points:Vector.<Vector3D>=CVector3DUtil.instance.transformPointsToVector3Ds(roundPoints);
-			var roomID:String=CUtil.instance.createUID();
+			var roundPoints:Array=evt.data.points;
+			var pointContainer:CVectorContainer=CVectorUtil.Instance.transformPointsToVector3Ds(roundPoints);
+			var roomID:String=evt.data.roomID;
 			wallModel.createRoomVo(roomID);
-			wallModel.createWallVOs(global.wallThickness,global.wallHeight,roomID,points);
+			wallModel.createWallVOs(global.wallThickness,global.wallHeight,roomID,pointContainer);
 			wallSet.createWallViews(wallModel.walls);
+			pointContainer.back();
 			dispatchDatasEvent(CommandTypeDict.CMD_INIT_DOUBLELIST);
 		}
 		override protected function addListener():void

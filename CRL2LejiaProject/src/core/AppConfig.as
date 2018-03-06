@@ -4,16 +4,12 @@ package core
 	
 	import core.model.GlobalModel;
 	
-	import dict.CommandTypeDict;
-	
 	import robotlegs.bender.extensions.contextView.ContextView;
 	import robotlegs.bender.extensions.eventCommandMap.api.IEventCommandMap;
 	import robotlegs.bender.extensions.mediatorMap.api.IMediatorMap;
 	import robotlegs.bender.framework.api.IConfig;
 	import robotlegs.bender.framework.api.IContext;
 	import robotlegs.bender.framework.api.LogLevel;
-	
-	import wallDecorationModule.CClapboardDecorationModuleImp;
 	
 	public class AppConfig implements IConfig
 	{
@@ -38,7 +34,7 @@ package core
 			context.logLevel=CONFIG::debug ? LogLevel.DEBUG : LogLevel.FATAL;
 			//数据模型
 			context.injector.map(GlobalModel).asSingleton();
-			context.injector.map(CClapboardDecorationModuleImp).asSingleton();
+//			context.injector.map(CClapboardDecorationModuleImp).asSingleton();
 			//视图
 			mediatorMap.map(CApplication3D).toMediator(CApplication3DMediator);
 			//控制命令

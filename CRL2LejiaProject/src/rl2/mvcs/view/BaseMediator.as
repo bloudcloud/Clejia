@@ -6,12 +6,12 @@ package rl2.mvcs.view
 	 */
 	import flash.events.IEventDispatcher;
 	
+	import cloud.core.events.CDataEvent;
+	
 	import robotlegs.bender.extensions.localEventMap.api.IEventMap;
 	import robotlegs.bender.extensions.mediatorMap.api.IMediator;
 	import robotlegs.bender.framework.api.IContext;
 	import robotlegs.bender.framework.api.ILogger;
-	
-	import utils.DatasEvent;
 	
 	public class BaseMediator implements IMediator
 	{
@@ -31,7 +31,6 @@ package rl2.mvcs.view
 		{
 			return _type;
 		}
-
 		
 		public function BaseMediator(type:String="")
 		{
@@ -79,7 +78,7 @@ package rl2.mvcs.view
 		protected function dispatchDatasEvent(type:String,data:*=null):void
 		{
 			if (dispatcher.hasEventListener(type))
-				dispatcher.dispatchEvent(new DatasEvent(type,data));
+				dispatcher.dispatchEvent(new CDataEvent(type,data));
 		}
 	}
 }

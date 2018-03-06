@@ -1,13 +1,14 @@
 package main.model
 {
-	import flash.geom.Vector3D;
 	
+	import cloud.core.datas.base.CVector;
+	import cloud.core.datas.containers.CVectorContainer;
 	import cloud.core.interfaces.ICData;
-	import cloud.core.singleton.CUtil;
-	import cloud.core.singleton.CVector3DUtil;
-	import cloud.core.utils.CDebug;
+	import cloud.core.utils.CDebugUtil;
+	import cloud.core.utils.CUtil;
+	import cloud.core.utils.CVectorUtil;
 	
-	import main.dict.Object3DDict;
+	import main.dict.CDataTypeDict;
 	import main.model.vo.CRoom3DVO;
 	import main.model.vo.CWallVO;
 	
@@ -18,7 +19,12 @@ package main.model
 	public class WallDataModel extends BaseObject3DDataModel
 	{
 		private var _walls:Vector.<ICData>;
+		private var _curRoomID:String;
 
+		public function get curRoomID():String
+		{
+			return _curRoomID;
+		}
 		public function get walls():Vector.<ICData>
 		{
 			return _walls;
@@ -36,52 +42,54 @@ package main.model
 		{
 			var roomVo:CRoom3DVO=new CRoom3DVO();
 			roomVo.uniqueID=uniqueID;
-			roomVo.type=Object3DDict.OBJECT3D_ROOM;
-			addData(roomVo);
+			roomVo.type=CDataTypeDict.OBJECT3D_ROOM;
+			addShareData(roomVo);
+			_curRoomID=uniqueID;
 		}
+		
 		/**
 		 *	根据地面围点，创建房间内的墙体数据集合 
 		 * @param wallPoses
 		 * @param parentID
 		 * 
 		 */		
-		public function createWallVOs(wallThickness:uint,wallHeight:uint,parentID:String,wallPoses:Vector.<Vector3D>):void
+		public function createWallVOs(wallThickness:uint,wallHeight:uint,parentID:String,dataContainer:CVectorContainer):void
 		{
 			if(_walls==null)
 			{
 				_walls=new Vector.<ICData>();
 				var wallVo:CWallVO;
-				var len:int=wallPoses.length;
+				var len:int=dataContainer.size;
 				var next:int;
-				var caculationVec:Vector3D;
-				var startPos:Vector
+				var caculationVec:CVector=CVector.CreateOneInstance();
 				for(var i:int=0; i<len; i++)
 				{
 					next=i+1==len?0:i+1;
 					wallVo=new CWallVO();
-					wallVo.parentID=parentID;  
-					wallVo.uniqueID=CUtil.instance.createUID();
-					wallVo.type=Object3DDict.OBJECT3D_WALL;
+					wallVo.parentID=parentID;
+					wallVo.roomID=parentID;
+					wallVo.uniqueID=CUtil.Instance.createUID();
+					wallVo.type=CDataTypeDict.OBJECT3D_WALL;
 					wallVo.indexIn2DMode=i;
-					wallVo.startPos=new Vector3D(wallPoses[i].x,wallPoses[i].y,0);
-					wallVo.endPos=new Vector3D(wallPoses[next].x,wallPoses[next].y,0);
-					caculationVec=wallVo.endPos.subtract(wallVo.startPos);
+					dataContainer.getByIndex(i,wallVo.startPos);
+					dataContainer.getByIndex(next,wallVo.endPos);
+					caculationVec=CVector.Substract(wallVo.endPos,wallVo.startPos);
 					wallVo.length=caculationVec.length;
 					wallVo.width=1;
 					wallVo.height=wallHeight;
-					wallVo.direction=caculationVec;
-					wallVo.rotation=CVector3DUtil.instance.calculateRotationByAxis(caculationVec,Vector3D.X_AXIS);
-					caculationVec.scaleBy(.5);
-					caculationVec.incrementBy(wallVo.startPos);
+					wallVo.rotationHeight=CVectorUtil.Instance.calculateRotationByAxis(caculationVec,CVector.X_AXIS);
+					CVectorUtil.Instance.calculateDirectionByRotation(wallVo.rotationHeight,wallVo.direction);
+					CVector.Scale(caculationVec,.5);
+					CVector.Increase(caculationVec,wallVo.startPos);
 					wallVo.x=caculationVec.x;
 					wallVo.y=caculationVec.y;
 					wallVo.z=caculationVec.z+wallVo.height*.5;
-					wallVo.direction.normalize();
 					wallVo.isLife=true;
-					addData(wallVo);
+					addShareData(wallVo);
 					_walls.push(wallVo);
-					CDebug.instance.traceStr("rotation:",wallVo.rotation);
+					CDebugUtil.Instance.traceStr("rotation:",wallVo.rotationHeight);
 				}
+				caculationVec.back();
 			}
 		}
 		/**
@@ -110,6 +118,7 @@ package main.model
 			super.clearAll();
 			_walls.length=0;
 			_walls=null;
+			_curRoomID=null;
 		}
 	}
 }

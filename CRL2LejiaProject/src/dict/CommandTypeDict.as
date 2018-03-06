@@ -23,8 +23,11 @@ package dict
 		public static const MOUSE_MOVE:String = "mouseMove";
 		
 		public static const CMD_START_LOADPLAN:String = "startLoadPlan";
+		public static const CMD_LOADPLAN_SUCCESS:String = "loadPlanSuccess";
 		public static const CMD_START_LOADMATERIAL:String = "startLoadMaterial";
+		public static const CMD_LOADMATERIAL_SUCCESS:String = "loadMaterialSuccess";
 		public static const CMD_START_LOADMESH:String = "startLoadMesh";
+		public static const CMD_LOADMESH_SUCCESS:String = "loadMeshSuccess";
 		public static const CMD_DECORATION_SELECTWALL:String = "selectDecorationWall";
 		public static const CMD_USE_DECORATIONPLAN:String = "useDecorationPlan";
 		public static const CMD_RENDERMESH:String = "renderMesh";

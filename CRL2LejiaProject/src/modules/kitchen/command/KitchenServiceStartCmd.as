@@ -4,18 +4,17 @@ package modules.kitchen.command
 	 *	厨房模块服务启动命令类
 	 * @author cloud
 	 */
-	import main.a3d.support.CScene3D;
-	
-	import modules.kitchen.service.Command2DService;
+	import modules.kitchen.service.CCabinetRL2Service;
+	import modules.main.service.CDownloadRL2Service;
 	
 	import robotlegs.bender.extensions.commandCenter.api.ICommand;
 	
 	public class KitchenServiceStartCmd implements ICommand
 	{
 		[Inject]
-		public var scene:CScene3D;
+		public var downloadRL2Service:CDownloadRL2Service;
 		[Inject]
-		public var command2DService:Command2DService;
+		public var cabinetRL2Service:CCabinetRL2Service;
 		
 		public function KitchenServiceStartCmd()
 		{
@@ -23,8 +22,8 @@ package modules.kitchen.command
 		
 		public function execute():void
 		{
-			command2DService.start();
-			
+			downloadRL2Service.start();
+			cabinetRL2Service.start();
 		}
 	}
 }
